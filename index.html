@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 Operational Service</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ============================= S1 · Current CCP6 Jobs ============================= -->
+      <section class="screen" id="screen-current">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Current CCP6 Jobs</h1>
+            <p class="page-sub">Jobs needing operational attention</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="navigate('create')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="12" y1="18" x2="12" y2="12" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+            Create CCP6 Job
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <div class="filter-fields" id="current-filters"></div>
+        </div>
+
+        <div class="sicc-selector">
+          <button type="button" class="sicc-btn active" data-sicc="SICC1" onclick="filterBySICC('SICC1')">SICC1</button>
+          <button type="button" class="sicc-btn" data-sicc="SICC2" onclick="filterBySICC('SICC2')">SICC2</button>
+        </div>
+
+        <div class="card-grid" id="current-grid"></div>
+      </section>
+
+      <!-- ============================= S2 · All CCP6 Jobs ============================= -->
+      <section class="screen hidden" id="screen-all">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">All CCP6 Jobs</h1>
+            <p class="page-sub">Every job regardless of status</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="exportExcel()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Export Excel
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <input type="text" id="all-search" class="form-input" placeholder="Search Job ID, flight, airline, group, meal service…"
+            oninput="filterAll()" />
+          <button type="button" class="btn-secondary" onclick="toggleAllFilters()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
+              <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+              <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+              <line x1="17" y1="16" x2="23" y2="16" />
+            </svg>
+            Filters
+          </button>
+        </div>
+
+        <div class="filter-panel hidden" id="all-filter-panel"></div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="all-table">
+            <thead id="all-thead"></thead>
+            <tbody id="all-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================= S3 · Create CCP6 Job ============================= -->
+      <section class="screen hidden" id="screen-create">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Create CCP6 Job — SICC1</h1>
+          </div>
+          <button type="button" class="btn-back" onclick="navigate('current')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <div class="form-card">
+          <form id="create-form" onsubmit="submitCreateJob(event)">
+            <div class="form-section">
+              <div class="create-header-row">
+                <div class="form-group create-flight-group">
+                  <label class="form-label required" for="create-flight">Flight Number</label>
+                  <div class="searchable-dropdown" id="create-flight-wrap">
+                    <input type="text" id="create-flight" class="form-input" placeholder="Search flight…" autocomplete="off" required />
+                    <div class="dropdown-arrow">▾</div>
+                    <div class="dropdown-list hidden" id="create-flight-list"></div>
+                  </div>
+                </div>
+
+                <div class="form-group create-etd-group">
+                  <label class="form-label required" for="create-etd">ETD (24h)</label>
+                  <input type="time" id="create-etd" class="form-input" required />
+                </div>
+
+                <div class="form-group create-group-group">
+                  <label class="form-label required">Group</label>
+                  <div class="segmented-buttons" id="create-group-buttons">
+                    <button type="button" class="segment-btn" data-value="A">A</button>
+                    <button type="button" class="segment-btn" data-value="B">B</button>
+                    <button type="button" class="segment-btn" data-value="C">C</button>
+                    <button type="button" class="segment-btn" data-value="D">D</button>
+                  </div>
+                  <input type="hidden" id="create-group" required />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="navigate('current')">Cancel</button>
+                <button type="submit" class="btn-primary">Create job</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============================= S4 · Job Detail ============================= -->
+      <section class="screen hidden" id="screen-detail">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title" id="detail-title">CCP6 Job</h1>
+            <p class="page-sub" id="detail-flight-sub"></p>
+          </div>
+          <button type="button" class="btn-back" onclick="navigate('current')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <!-- Persistent shared header -->
+        <div class="job-header" id="detail-header"></div>
+
+        <!-- Stage tabs -->
+        <div class="tab-bar" id="detail-tabs"></div>
+
+        <div class="tab-body" id="detail-body"></div>
+      </section>
+
+      <!-- ============================= S5 · Web Report ============================= -->
+      <section class="screen hidden" id="screen-report">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">CCP6 Web Report</h1>
+            <p class="page-sub" id="report-sub"></p>
+          </div>
+          <div class="page-actions">
+            <button type="button" class="btn-secondary" onclick="exportJob('pdf')">PDF</button>
+            <button type="button" class="btn-secondary" onclick="exportJob('excel')">Excel</button>
+            <button type="button" class="btn-back" onclick="navigate('current')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          </div>
+        </div>
+
+        <div class="report-body" id="report-body"></div>
+      </section>
+    </div>
+
+    <!-- Sign-off modal -->
+    <div id="signoff-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 class="modal-title">Sign Off — <span id="signoff-stage"></span></h2>
+        <p class="modal-sub">Confirm your identity to submit this stage</p>
+
+        <div id="signoff-error" class="badge-error hidden"></div>
+
+        <div class="modal-tabs" id="signoff-methods"></div>
+
+        <div class="form-group">
+          <label class="form-label" id="signoff-input-label" for="signoff-input">Staff ID</label>
+          <input type="text" id="signoff-input" class="form-input" autocomplete="off" />
+        </div>
+
+        <button type="button" class="btn-primary modal-verify" onclick="resolveIdentity()">
+          Verify &amp; Confirm
+        </button>
+
+        <div class="modal-identity hidden" id="signoff-confirm">
+          <p class="identity-name" id="signoff-name"></p>
+          <p class="identity-meta" id="signoff-role"></p>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="confirmSignoff(true)">Confirm Submit</button>
+            <button type="button" class="btn-secondary" onclick="confirmSignoff(false)">Change</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-ghost" id="signoff-cancel" onclick="closeSignoff()">Cancel</button>
+      </div>
+    </div>
+  </body>
+  <script type="module" src="./script.js"></script>
+</html>
