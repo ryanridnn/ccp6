@@ -790,6 +790,7 @@ function renderDetail() {
   const body = document.getElementById("detail-body");
   if (state.activeTab === "preset") renderPreset(body, job);
   else if (state.activeTab === "foodchecker") renderFoodChecker(body, job);
+  else if (state.activeTab === "dispatch") renderDispatch(body, job);
 }
 
 // Reusable per-field wrapper (used by both read-only detail header and editable create header)
@@ -836,6 +837,12 @@ function renderTabs(job) {
       title: "Food Checker",
       subtitle: "Timer per item · mandatory for every job",
       status: fcLiveState(job),
+    },
+    {
+      id: "dispatch",
+      title: "Dispatch",
+      subtitle: "CTS · timer toward a minimum",
+      status: dispatchLiveState(job),
     },
   ];
   el.innerHTML = tabs
@@ -955,6 +962,12 @@ function fcLiveState(job) {
   }
   if (started > 0) return { label: `${started}/${items.length} started`, cls: "in-progress", el: null };
   return { label: "No items started", cls: "not-started", el: null };
+}
+
+function dispatchLiveState(job) {
+  const live = dispatchLive(job);
+  if (!live) return { label: "Locked", cls: "locked", el: null };
+  return live;
 }
 
 function renderServicePanel(svc, index, submitted, limits, job) {
@@ -1174,43 +1187,53 @@ function renderPresetSICC2Row(item, i, submitted, job) {
   `;
 
   if (state.presetSICC2Expanded === item.linkId) {
+    const limits = hmLimits(job);
     rowHtml += `
-      <tr>
+      <tr class="expanded-row">
         <td colspan="9">
-          <div style="padding:16px;background:var(--bg-surface-hover);border-radius:8px;margin:8px 0">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
-              <div>
-                <label class="form-label">Start time</label>
-                <div class="form-input-static">${item.startTime ? new Date(item.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : '—'}</div>
+          <div class="fc-expanded-panel">
+            <div class="fc-expanded-grid">
+              <div class="fc-expanded-field">
+                <label class="required">Start temp (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" />
               </div>
-              <div>
-                <label class="form-label">Finish temp (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ''}" ${submitted ? 'disabled' : ''} />
+              <div class="fc-expanded-field">
+                <label>Start time</label>
+                <input type="text" class="form-input" readonly value="${item.startTime ? new Date(item.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : ''}" />
               </div>
-              <div>
-                <label class="form-label">Finish time</label>
-                <div class="form-input-static">${item.finishTime ? new Date(item.finishTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : '—'}</div>
+              <div class="fc-expanded-field">
+                <label class="required">Finish temp (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" />
               </div>
-              <div>
-                <label class="form-label">Duration</label>
-                <div class="form-input-static">${item.durationMin != null ? item.durationMin + ' min' : '—'}</div>
+              <div class="fc-expanded-field">
+                <label>Finish time</label>
+                <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : ''}" />
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-              <div class="fc-metric-card">
-                <div class="fc-metric-label">ITEM EXPOSURE</div>
-                <div class="fc-metric-value">${item.durationMin != null ? item.durationMin + ' min' : '—'}</div>
-                <div class="fc-metric-sub">${item.durationMin <= 30 ? '✓ Within 30 min' : '✗ Exceeds 30 min'}</div>
+
+            <div class="fc-timer-bar">
+              <div class="fc-timer-display">
+                <div class="fc-timer-label">TIMER</div>
+                <div class="fc-timer-value">${st.el != null ? fmtElapsed(st.el) : '—'} <span>/ ${limits.exposureMax} min</span></div>
               </div>
+              <div class="fc-timer-buttons">
+                ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ''}
+                ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ''}
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
               <div class="fc-metric-card">
                 <div class="fc-metric-label">MAX TEMPERATURE</div>
                 <div class="fc-metric-value">${item.finishTemp != null ? item.finishTemp + ' °C' : '—'}</div>
                 <div class="fc-metric-sub">${item.finishTemp <= 15 ? '✓ Within 15 °C' : '✗ Exceeds 15 °C'}</div>
               </div>
-              <div class="fc-metric-card">
+              <div class="fc-metric-card ${item.complianceResult === 'Compliant' ? 'compliant' : item.complianceResult === 'Non-Compliant' ? 'nc' : ''}">
                 <div class="fc-metric-label">ITEM RESULT</div>
                 <div class="fc-metric-value">${item.complianceResult || '—'}</div>
-                <div class="fc-metric-sub">${item.complianceResult === 'Compliant' ? '✓ Meets the rule set' : '✗ Does not meet'}</div>
+                ${item.complianceResult === 'Compliant' ? `<div class="fc-metric-status"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ''}
+                ${item.complianceResult === 'Non-Compliant' ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ''}
+                ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ''}
               </div>
             </div>
           </div>
@@ -1882,11 +1905,16 @@ function updateStartTime(linkId) {
 
 function startItem(linkId) {
   const job = currentJob();
-  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId);
+  // Search in both food checker and preset items
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId)
+    || (job.preset.items || []).find((it) => it.linkId === linkId);
   if (!item) return;
   
-  // Try to read from DOM input first
-  const inputEl = document.getElementById("fc-st-temp-" + linkId);
+  const isPresetItem = (job.preset.items || []).includes(item);
+  
+  // Try to read from DOM input first (check both fc- and preset- prefixes)
+  const inputEl = document.getElementById("fc-st-temp-" + linkId)
+    || document.getElementById("preset-st-temp-" + linkId);
   const st = inputEl?.value;
   
   // Fallback to item.startTemp if DOM input is empty
@@ -1899,16 +1927,31 @@ function startItem(linkId) {
   
   item.startTemp = startTemp;
   item.startTime = new Date().toISOString();
-  job.history.push({ at: item.startTime, actor: "Food Checker", field: "fc.item", from: "NotStarted", to: "InProgress", stage: "foodchecker", version: 1 });
+  job.history.push({ 
+    at: item.startTime, 
+    actor: isPresetItem ? "FAA" : "Food Checker", 
+    field: isPresetItem ? "preset.item" : "fc.item", 
+    from: "NotStarted", 
+    to: "InProgress", 
+    stage: isPresetItem ? "preset" : "foodchecker", 
+    version: 1 
+  });
   renderDetail();
-  checkAndStartFCTimer();
+  if (isPresetItem) startPresetTimer();
+  else checkAndStartFCTimer();
 }
 
 function finishItem(linkId) {
   const job = currentJob();
-  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId);
+  // Search in both food checker and preset items
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId)
+    || (job.preset.items || []).find((it) => it.linkId === linkId);
   if (!item) return;
-  const ft = document.getElementById("fc-ft-temp-" + linkId)?.value;
+  
+  const isPresetItem = (job.preset.items || []).includes(item);
+  
+  const ft = document.getElementById("fc-ft-temp-" + linkId)?.value
+    || document.getElementById("preset-ft-temp-" + linkId)?.value;
   if (ft === "" || ft == null) {
     showErr(`fc-error-${linkId}`, "Finish temperature is required before completing this item.");
     return;
@@ -1920,10 +1963,100 @@ function finishItem(linkId) {
   const maxTemp = Math.max(item.startTemp, item.finishTemp);
   item.complianceResult =
     item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
-  job.history.push({ at: item.finishTime, actor: "Food Checker", field: "fc.item", from: "InProgress", to: item.complianceResult, stage: "foodchecker", version: 1 });
+  job.history.push({ 
+    at: item.finishTime, 
+    actor: isPresetItem ? "FAA" : "Food Checker", 
+    field: isPresetItem ? "preset.item" : "fc.item", 
+    from: "InProgress", 
+    to: item.complianceResult, 
+    stage: isPresetItem ? "preset" : "foodchecker", 
+    version: 1 
+  });
   renderDetail();
-  checkAndStartFCTimer();
+  if (isPresetItem) checkPresetTimerStop();
+  else checkAndStartFCTimer();
 }
+
+// ── Preset Timer (SICC2) ───────────────────────────────────────────
+let presetTimerInterval = null;
+
+function startPresetTimer() {
+  if (presetTimerInterval) return;
+  presetTimerInterval = setInterval(() => {
+    const job = currentJob();
+    if (!job) return;
+    const items = job.preset.items || [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.startTime && !item.finishTime) {
+        const elapsed = elapsedMin(item.startTime);
+        // Update elapsed in table row
+        const rowEl = document.getElementById(`preset-elapsed-${i}`);
+        if (rowEl) rowEl.textContent = fmtElapsed(elapsed);
+        // Update expanded panel timer if this item is expanded
+        if (state.presetSICC2Expanded === item.linkId) {
+          const timerVal = document.querySelector('.fc-timer-value');
+          if (timerVal) {
+            const limits = hmLimits(job);
+            timerVal.innerHTML = `${fmtElapsed(elapsed)} <span>/ ${limits.exposureMax} min</span>`;
+          }
+        }
+      }
+    }
+    // Auto-stop if no running items
+    const hasRunning = items.some(it => it.startTime && !it.finishTime);
+    if (!hasRunning) stopPresetTimer();
+  }, 1000);
+}
+
+function stopPresetTimer() {
+  if (presetTimerInterval) {
+    clearInterval(presetTimerInterval);
+    presetTimerInterval = null;
+  }
+}
+
+function checkPresetTimerStop() {
+  const job = currentJob();
+  if (!job) return;
+  const items = job.preset.items || [];
+  const hasRunning = items.some(it => it.startTime && !it.finishTime);
+  if (!hasRunning) stopPresetTimer();
+}
+
+function updatePresetItemField(linkId, field, value) {
+  const job = currentJob();
+  const item = (job.preset.items || []).find((it) => it.linkId === linkId);
+  if (!item) return;
+  item[field] = value === "" || value == null ? null : parseFloat(value);
+}
+window.updatePresetItemField = updatePresetItemField;
+
+function fmtDuration(min) {
+  if (min == null) return "—";
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+}
+
+function setDispatchNow() {
+  const now = new Date();
+  const timeStr = now.toTimeString().slice(0, 5);
+  const el = document.getElementById("d-exit-time");
+  if (el) el.value = timeStr;
+  const job = currentJob();
+  if (job?.dispatch) job.dispatch.beforeExitTime = timeStr;
+}
+window.setDispatchNow = setDispatchNow;
+
+function updateDispatchItemTemp(linkId, value) {
+  const job = currentJob();
+  if (!job?.dispatch) return;
+  if (!job.dispatch.beforeExitTemps) job.dispatch.beforeExitTemps = {};
+  job.dispatch.beforeExitTemps[linkId] = value === "" || value == null ? null : parseFloat(value);
+  renderDetail();
+}
+window.updateDispatchItemTemp = updateDispatchItemTemp;
 
 // ── Dispatch tab ────────────────────────────────────────────────────
 function dispatchLive(job) {
@@ -1947,35 +2080,126 @@ function renderDispatch(body, job) {
   }
   const d = job.dispatch;
   const submitted = d?.status === "Submitted";
-  if (!d || job.preset.status !== "Submitted") {
-    body.innerHTML = `<div class="empty-state">Locked — Preset must be submitted first.</div>`;
+  if (!d) {
+    body.innerHTML = `<div class="empty-state">Dispatch data not available.</div>`;
     return;
   }
   const live = dispatchLive(job);
-  const min = hmLimits(job).coldSoakMin;
-  const eligibleAt = d.coldSoakStart ? new Date(new Date(d.coldSoakStart).getTime() + min * 60000).toLocaleTimeString() : "—";
+  const limits = hmLimits(job);
+  const min = limits.coldSoakMin;
+  const el = live.el;
+  const progress = el != null ? Math.min((el / min) * 100, 100) : 0;
+  const isEligible = el != null && el >= min;
+  const coldSoakStartStr = d.coldSoakStart ? new Date(d.coldSoakStart).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : "—";
+  const duration = d.coldSoakDurationMin ?? (el != null ? el : null);
+  const items = job.preset.items || [];
+  const maxTemp = d.beforeExitTemps ? Math.max(...Object.values(d.beforeExitTemps).filter(v => v != null)) : (d.beforeExitTemp ?? null);
   const dis = submitted ? "disabled" : "";
+  
   body.innerHTML = `
-    <div class="panel">
-      <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>Cold Soak Progress</span>
-        <span id="disp-pill">${pill(live.label, live.cls, live.el)}</span>
+    <div class="fc-timer-bar" style="margin-bottom:16px">
+      <div class="fc-timer-display">
+        <div class="fc-timer-value" style="font-size:48px;font-weight:700">${el != null ? fmtElapsed(el) : "—"}</div>
+        <div style="margin-top:8px">
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${progress}%;background:var(--success);transition:width 1s"></div>
+          </div>
+        </div>
       </div>
-      <p style="font-size:13px;margin-bottom:6px">Elapsed: <b id="disp-elapsed">${live.el != null ? fmtElapsed(live.el) : "—"}</b> · Minimum: ${min} min · Eligible at: <b>${esc(eligibleAt)}</b></p>
+      <div style="flex:1;padding:0 24px">
+        <div style="font-size:14px;color:var(--text-secondary)">Cold soak minimum <b>${fmtDuration(min)}</b> · from ${coldSoakStartStr} (last item finish)</div>
+        <div style="font-size:14px;font-weight:600;margin-top:4px">${isEligible ? "Minimum already met — eligible for dispatch" : "Cold soak in progress..."}</div>
+      </div>
+      <div>${pill(live.label, live.cls, live.el)}</div>
     </div>
+    
+    ${isEligible ? `<div class="info-banner" style="margin-bottom:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 6.5l-4 4a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06L7 8.94l3.44-3.44a.75.75 0 011.06 1.06z" fill="currentColor"/></svg><span>Cold soak has met the minimum. CTS may record the time and temperature before the trolleys exit.</span></div>` : ""}
+    
     <div class="panel">
-      <div class="panel-title">Before-Exit Capture</div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label required">Time Before Exiting Holding Room</label>
-          <input type="time" class="form-input" id="d-exit-time" value="${d.beforeExitTime ?? ""}" ${dis} /></div>
-        <div class="form-group"><label class="form-label required">Surface Temp Before Exiting (°C)</label>
-          <input type="number" step="0.1" class="form-input" id="d-exit-temp" value="${d.beforeExitTemp ?? ""}" ${dis} /></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div>
+          <div class="panel-title" style="margin-bottom:2px">Dispatch — before exiting the holding room</div>
+          <div style="font-size:13px;color:var(--text-secondary)">One time for the stage, temperature per item row · Annexure 5.3 / 5.4</div>
+        </div>
+        <span class="status-pill submitted">Owner: CTS Team</span>
       </div>
+      
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label class="form-label">Cold soak start</label>
+          <input type="text" class="form-input" readonly value="${coldSoakStartStr}" style="background:var(--bg-surface)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Before-exit time (24h)</label>
+          <div style="display:flex;gap:8px">
+            <input type="time" class="form-input" id="d-exit-time" value="${d.beforeExitTime ?? ""}" ${dis} style="flex:1" />
+            ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow()" style="padding:8px 16px">Now</button>` : ""}
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">One time for the whole stage</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cold soak duration</label>
+          <input type="text" class="form-input" readonly value="${fmtDuration(duration)}" style="background:var(--bg-surface)" />
+        </div>
+      </div>
+      
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="fc-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th style="width:80px">CLASS</th>
+              <th>ITEM DESCRIPTION</th>
+              <th style="width:100px">SKU</th>
+              <th style="width:140px">BEFORE-EXIT TEMP °C *</th>
+              <th style="width:120px">ITEM RESULT</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item, i) => {
+              const itemTemp = d.beforeExitTemps?.[item.linkId] ?? "";
+              const itemResult = itemTemp !== "" && itemTemp != null ? (parseFloat(itemTemp) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant") : null;
+              return `<tr>
+                <td>${i + 1}</td>
+                <td>${esc(item.cls)}</td>
+                <td>${esc(item.desc)}</td>
+                <td>${esc(item.sku)}</td>
+                <td><input type="number" step="0.1" class="form-input" value="${itemTemp}" ${dis} onchange="updateDispatchItemTemp('${item.linkId}', this.value)" style="width:100px" /></td>
+                <td>${itemResult ? `<span class="status-pill ${itemResult === 'Compliant' ? 'compliant' : 'nc'}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>'}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="fc-metric-cards" style="margin-top:20px">
+        <div class="fc-metric-card">
+          <div class="fc-metric-label">COLD SOAK</div>
+          <div class="fc-metric-value">${fmtDuration(duration)}</div>
+          <div class="fc-metric-sub">Minimum ${fmtDuration(min)}</div>
+        </div>
+        <div class="fc-metric-card">
+          <div class="fc-metric-label">MAX DISPATCH TEMP</div>
+          <div class="fc-metric-value">${maxTemp != null ? maxTemp + " °C" : "—"}</div>
+          <div class="fc-metric-sub">${maxTemp != null ? (maxTemp <= limits.dispatchTempMax ? "Within limit" : "Exceeds limit") : "No data yet"}</div>
+        </div>
+        <div class="fc-metric-card">
+          <div class="fc-metric-label">DISPATCH RESULT</div>
+          <div class="fc-metric-value">${d.complianceResult ?? "—"}</div>
+          <div class="fc-metric-sub">Calculated on submit</div>
+        </div>
+      </div>
+      
       <div id="dispatch-error" class="badge-error hidden" style="margin-top:12px"></div>
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text-secondary)">Enter a temperature for every item row.</div>
+        ${submitted ? renderSubmittedPanel(job, "dispatch") : `<button type="button" class="btn-primary" onclick="submitStage('dispatch')" ${dis}>Submit Dispatch</button>`}
+      </div>
     </div>
-    ${renderDispatchCompliance(job)}
+    
     ${d.complianceResult === "Non-Compliant" ? renderExceptionPanel("dispatch") : ""}
-    ${submitted ? renderSubmittedPanel(job, "dispatch") : submitButton("dispatch", "")}`;
+  `;
 }
 
 function renderDispatchCompliance(job) {
