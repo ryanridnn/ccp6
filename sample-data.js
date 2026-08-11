@@ -17,9 +17,10 @@ function mkItems(list) {
   }));
 }
 
+let _linkIdCounter = 0;
 function mkFCItem(item, opts = {}) {
   return {
-    linkId: "LINK-" + item.sku,
+    linkId: "LINK-" + item.sku + "-" + (opts.index ?? _linkIdCounter++),
     sku: item.sku,
     item_description: item.desc,
     class: item.cls,
@@ -457,6 +458,7 @@ const JOB_6 = {
 };
 
 const STAFF = [
+  { staffId: "ryan22", staffName: "Ryan", role: "FAA" },
   { staffId: "faa11", staffName: "Noor Aisyah", role: "FAA" },
   { staffId: "faa04", staffName: "Maya Tan", role: "FAA" },
   { staffId: "fc07", staffName: "Ravi Kumar", role: "Food Checker" },
