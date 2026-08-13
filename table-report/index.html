@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 Operational Service</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Top bar -->
+      <div class="top-bar">
+        <button type="button" class="menu-btn" aria-label="Menu" onclick="toggleSavedFilters()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div class="date-filter">
+          <button type="button" class="date-filter-trigger" onclick="toggleDateFilter()">
+            <span id="date-filter-label">Last 3 Months</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div id="date-filter-panel" class="date-filter-panel hidden">
+            <div class="date-filter-presets">
+              <button type="button" class="preset-option" onclick="applyPresetRange('mtd')">Month to Date</button>
+              <button type="button" class="preset-option" onclick="applyPresetRange('30')">Last 30 Days</button>
+              <button type="button" class="preset-option active" onclick="applyPresetRange('3')">Last 3 Months</button>
+              <button type="button" class="preset-option" onclick="applyPresetRange('6')">Last 6 Months</button>
+              <button type="button" class="preset-option" onclick="applyPresetRange('12')">Last 1 Year</button>
+              <button type="button" class="preset-option" onclick="applyPresetRange('36')">Last 3 Years</button>
+              <button type="button" class="preset-option" onclick="applyPresetRange('60')">Last 5 Year</button>
+            </div>
+            <div class="date-filter-calendar">
+              <div class="calendar-header">
+                <button type="button" class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                <select id="calendar-month" onchange="renderCalendar()"></select>
+                <select id="calendar-year" onchange="renderCalendar()"></select>
+                <button type="button" class="calendar-nav" onclick="changeMonth(1)">›</button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+              <div id="calendar-days" class="calendar-days"></div>
+            </div>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <button type="button" class="export-btn" onclick="exportExcel()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Export
+        </button>
+      </div>
+
+      <!-- Table panel -->
+      <div class="table-panel">
+        <div class="table-wrap">
+          <table class="data-table" id="job-table">
+            <thead>
+              <tr class="header-labels">
+                <th data-col="job_id">JOB ID</th>
+                <th data-col="flight_number">FLIGHT</th>
+                <th data-col="flight_date">DATE</th>
+                <th data-col="etd">ETD</th>
+                <th data-col="meal_service">MEAL</th>
+                <th data-col="ta_group">GROUP</th>
+                <th data-col="airline">AIRLINE</th>
+                <th data-col="site">SITE</th>
+                <th data-col="preset">PRESET</th>
+                <th data-col="foodchecker">FOOD CHECKER</th>
+                <th data-col="dispatch">DISPATCH</th>
+                <th data-col="overall">OVERALL</th>
+                <th data-col="status">STATUS</th>
+                <th data-col="closedAt">CLOSED AT</th>
+                <th></th>
+              </tr>
+              <tr class="header-filters">
+                <th><input type="text" class="col-filter" data-col="job_id" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="flight_number" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="flight_date" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="etd" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="meal_service" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="ta_group" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="airline" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="site" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="preset" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="foodchecker" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="dispatch" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="overall" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th><input type="text" class="col-filter" data-col="closedAt" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="job-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vertical sticky Columns button -->
+    <button type="button" class="columns-btn-vertical" onclick="toggleColumns()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+      <span>Columns</span>
+    </button>
+
+    <!-- Column visibility panel -->
+    <div id="columns-panel" class="columns-panel hidden">
+      <div class="columns-panel-title">Columns</div>
+      <div id="columns-list" class="columns-list"></div>
+    </div>
+
+    <!-- Saved Filters panel -->
+    <div id="saved-filters-panel" class="saved-filters-panel hidden">
+      <div class="saved-filters-header">
+        <h3>Saved Filters</h3>
+        <button type="button" class="saved-filters-close" onclick="toggleSavedFilters()" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <button type="button" class="save-filter-btn" onclick="openSaveFilterModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Save Filter
+      </button>
+      <div id="saved-filters-list" class="saved-filters-list"></div>
+    </div>
+
+    <!-- Save Filter modal -->
+    <div id="save-filter-modal" class="modal-overlay hidden">
+      <div class="save-filter-modal">
+        <div class="save-filter-modal-header">
+          <h3>Save Filter</h3>
+          <button type="button" class="modal-close" onclick="closeSaveFilterModal()" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="save-filter-modal-body">
+          <label class="form-label" for="save-filter-name">Filter Name</label>
+          <input type="text" id="save-filter-name" class="form-input" placeholder="Enter filter name..." />
+        </div>
+        <div class="save-filter-modal-footer">
+          <button type="button" class="btn-primary" onclick="saveFilter()">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
