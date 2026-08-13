@@ -107,6 +107,7 @@
                   <label class="form-label required" for="create-flight">Flight Number</label>
                   <div class="searchable-dropdown" id="create-flight-wrap">
                     <input type="text" id="create-flight" class="form-input" placeholder="Search flight…" autocomplete="off" required />
+                    <button type="button" class="dropdown-clear hidden" id="create-flight-clear" onclick="clearCreateFlight()">×</button>
                     <div class="dropdown-arrow">▾</div>
                     <div class="dropdown-list hidden" id="create-flight-list"></div>
                   </div>
@@ -129,7 +130,30 @@
                 </div>
               </div>
 
-              <div class="form-actions">
+              <div id="create-items-container" class="hidden">
+                <div class="create-items-header">
+                  <h3 class="create-items-title">Linked Items</h3>
+                  <span class="create-items-count" id="create-items-count">0 items selected</span>
+                </div>
+                <div class="create-items-list" id="create-items-list"></div>
+              </div>
+
+              <div id="ad-hoc-toggle" class="ad-hoc-toggle hidden" style="margin-top: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="ad-hoc-checkbox" onchange="toggleAdHocMode()" />
+                  <span>Add Ad Hoc items manually</span>
+                </label>
+              </div>
+
+              <div id="ad-hoc-container" class="hidden" style="margin-top: 16px;">
+                <div class="create-items-header">
+                  <h3 class="create-items-title">Ad Hoc Items</h3>
+                  <button type="button" class="btn-secondary" onclick="addAdHocItem()" style="padding: 6px 12px; font-size: 12px;">+ Add Item</button>
+                </div>
+                <div id="ad-hoc-list"></div>
+              </div>
+
+              <div class="form-actions" style="margin-top: 24px;">
                 <button type="button" class="btn-secondary" onclick="navigate('current')">Cancel</button>
                 <button type="submit" class="btn-primary">Create job</button>
               </div>

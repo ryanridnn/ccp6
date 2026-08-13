@@ -228,6 +228,11 @@ const state = {
   activeTab: "preset",
   currentScreen: "current",
   siccFilter: "SICC1",
+  presetMethod: null,
+  createItems: [],
+  serviceExpanded: null,
+  adHocEnabled: false,
+  adHocItems: [],
   signoff: {
     open: false,
     stage: null,
@@ -282,10 +287,10 @@ function initCreateFlightDropdown() {
   const input = document.getElementById("create-flight");
   const list = document.getElementById("create-flight-list");
   if (!input || !list) return;
-  const flights = seedFlights();
+  const getFilteredFlights = () => seedFlights().filter(f => f.site === state.siccFilter);
   const render = () => {
     const q = input.value.trim().toLowerCase();
-    const matches = flights.filter(
+    const matches = getFilteredFlights().filter(
       (f) =>
         !q ||
         f.flight_number.toLowerCase().includes(q) ||
@@ -295,7 +300,7 @@ function initCreateFlightDropdown() {
       ? matches
           .map(
             (f) =>
-              `<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc(f.airline)} · ${esc(f.meal_service)} · ETD ${esc(f.etd)}</span></div>`,
+              `<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc(f.airline)} · ${esc(f.meal_service)} · ETD ${esc(f.etd)} · ${esc(f.site)}</span></div>`,
           )
           .join("")
       : `<div class="dropdown-empty">No matching flights</div>`;
@@ -305,6 +310,7 @@ function initCreateFlightDropdown() {
     createInitDone = true;
     input.addEventListener("input", () => {
       selectedCreateFlight = null;
+      document.getElementById("create-flight-clear").classList.add("hidden");
       render();
     });
     input.addEventListener("focus", render);
@@ -314,12 +320,15 @@ function initCreateFlightDropdown() {
     list.addEventListener("click", (e) => {
       const item = e.target.closest(".dropdown-item");
       if (!item) return;
-      selectCreateFlight(flights.find((f) => f.flight_number === item.dataset.flight));
+      selectCreateFlight(getFilteredFlights().find((f) => f.flight_number === item.dataset.flight));
       list.classList.add("hidden");
     });
   } else {
     input.value = "";
     selectedCreateFlight = null;
+    document.getElementById("create-flight-clear").classList.add("hidden");
+    state.createItems = [];
+    document.getElementById("create-items-container").classList.add("hidden");
     list.classList.add("hidden");
   }
 }
@@ -329,9 +338,213 @@ function selectCreateFlight(f) {
   selectedCreateFlight = f;
   document.getElementById("create-flight").value = f.flight_number;
   if (f.etd) document.getElementById("create-etd").value = f.etd;
+  document.getElementById("create-flight-clear").classList.remove("hidden");
+  renderCreateItems();
 }
 
+function clearCreateFlight() {
+  selectedCreateFlight = null;
+  document.getElementById("create-flight").value = "";
+  document.getElementById("create-etd").value = "";
+  document.getElementById("create-flight-clear").classList.add("hidden");
+  state.createItems = [];
+  document.getElementById("create-items-container").classList.add("hidden");
+}
 
+window.clearCreateFlight = clearCreateFlight;
+
+function renderCreateItems() {
+  const flight = selectedCreateFlight;
+  const site = flight?.site || 'SICC1';
+  const container = document.getElementById('create-items-container');
+  const list = document.getElementById('create-items-list');
+  const countEl = document.getElementById('create-items-count');
+
+  if (!flight) {
+    container.classList.add('hidden');
+    document.getElementById('ad-hoc-toggle').classList.add('hidden');
+    document.getElementById('ad-hoc-container').classList.add('hidden');
+    return;
+  }
+
+  // Show ad hoc section when flight is selected
+  document.getElementById('ad-hoc-toggle').classList.remove('hidden');
+
+  const classes = ["Economy", "Premium Economy", "Business"];
+  const n = flight.count || 1;
+  const existingItems = state.createItems;
+  const items = [];
+  for (let i = 0; i < n; i++) {
+    const existing = existingItems.find(item => item.index === i);
+    items.push({
+      index: i,
+      sku: String(100000 + i),
+      item_description: "CCP5 linked item " + (i + 1),
+      class: classes[i % classes.length],
+      quantity: 24 + i * 12,
+      checked: existing ? existing.checked : true,
+      destination: existing ? existing.destination : 'foodchecker',
+    });
+  }
+  state.createItems = items;
+  container.classList.remove('hidden');
+
+  const isSICC2 = site === 'SICC2';
+  let html = `
+    <table class="create-items-table">
+      <thead>
+        <tr>
+          <th style="width:40px"></th>
+          <th>SKU</th>
+          <th>Description</th>
+          <th>Class</th>
+          <th>Qty</th>
+          <th>Destination</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  items.forEach((item, idx) => {
+    html += `
+      <tr>
+        <td>
+          <input type="checkbox" class="create-item-checkbox"
+            ${item.checked ? 'checked' : ''}
+            onchange="toggleCreateItem(${idx})" />
+        </td>
+        <td>${esc(item.sku)}</td>
+        <td>${esc(item.item_description)}</td>
+        <td>${esc(item.class)}</td>
+        <td>${item.quantity}</td>
+        <td>
+          <div class="create-item-destination">
+            <button type="button" class="create-dest-btn ${item.destination === 'preset' ? 'active' : ''}"
+              onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
+            <button type="button" class="create-dest-btn ${item.destination === 'foodchecker' ? 'active' : ''}"
+              onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  list.innerHTML = html;
+
+  const checkedCount = items.filter(i => i.checked).length;
+  countEl.textContent = `${checkedCount} item${checkedCount !== 1 ? 's' : ''} selected`;
+}
+
+function toggleCreateItem(index) {
+  state.createItems[index].checked = !state.createItems[index].checked;
+  const checkedCount = state.createItems.filter(i => i.checked).length;
+  document.getElementById('create-items-count').textContent =
+    `${checkedCount} item${checkedCount !== 1 ? 's' : ''} selected`;
+}
+
+function setCreateItemDestination(index, destination) {
+  state.createItems[index].destination = destination;
+  renderCreateItems();
+}
+
+window.toggleCreateItem = toggleCreateItem;
+window.setCreateItemDestination = setCreateItemDestination;
+
+function toggleAdHocMode() {
+  state.adHocEnabled = document.getElementById('ad-hoc-checkbox').checked;
+  const container = document.getElementById('ad-hoc-container');
+  if (state.adHocEnabled) {
+    container.classList.remove('hidden');
+    if (state.adHocItems.length === 0) {
+      state.adHocItems.push({
+        description: '',
+        class: 'Economy',
+        quantity: 1,
+        destination: 'foodchecker'
+      });
+    }
+    renderAdHocItems();
+  } else {
+    container.classList.add('hidden');
+    state.adHocItems = [];
+  }
+}
+
+function renderAdHocItems() {
+  const flight = selectedCreateFlight;
+  const site = flight?.site || 'SICC1';
+  const isSICC2 = site === 'SICC2';
+  const list = document.getElementById('ad-hoc-list');
+
+  let html = `
+    <table class="create-items-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Class</th>
+          <th style="width: 80px;">Qty</th>
+          <th>Destination</th>
+          <th style="width: 60px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  state.adHocItems.forEach((item, idx) => {
+    html += `
+      <tr>
+        <td><input type="text" class="form-input" value="${esc(item.description)}" oninput="updateAdHocItem(${idx}, 'description', this.value)" placeholder="Item description" /></td>
+        <td>
+          <select class="form-input" onchange="updateAdHocItem(${idx}, 'class', this.value)">
+            <option value="Economy" ${item.class === 'Economy' ? 'selected' : ''}>Economy</option>
+            <option value="Premium Economy" ${item.class === 'Premium Economy' ? 'selected' : ''}>Premium Economy</option>
+            <option value="Business" ${item.class === 'Business' ? 'selected' : ''}>Business</option>
+          </select>
+        </td>
+        <td><input type="number" class="form-input" value="${item.quantity}" oninput="updateAdHocItem(${idx}, 'quantity', parseInt(this.value) || 0)" min="1" /></td>
+        <td>
+          <div class="create-item-destination">
+            <button type="button" class="create-dest-btn ${item.destination === 'preset' ? 'active' : ''}" onclick="updateAdHocItem(${idx}, 'destination', 'preset')">Preset</button>
+            <button type="button" class="create-dest-btn ${item.destination === 'foodchecker' ? 'active' : ''}" onclick="updateAdHocItem(${idx}, 'destination', 'foodchecker')">Food Check</button>
+          </div>
+        </td>
+        <td><button type="button" class="btn-ghost" onclick="removeAdHocItem(${idx})" style="padding: 4px 8px;">✕</button></td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  list.innerHTML = html;
+}
+
+function addAdHocItem() {
+  state.adHocItems.push({
+    description: '',
+    class: 'Economy',
+    quantity: 1,
+    destination: 'foodchecker'
+  });
+  renderAdHocItems();
+}
+
+function removeAdHocItem(index) {
+  state.adHocItems.splice(index, 1);
+  renderAdHocItems();
+}
+
+function updateAdHocItem(index, field, value) {
+  state.adHocItems[index][field] = value;
+  if (field === 'destination') {
+    renderAdHocItems();
+  }
+}
+
+window.toggleAdHocMode = toggleAdHocMode;
+window.renderAdHocItems = renderAdHocItems;
+window.addAdHocItem = addAdHocItem;
+window.removeAdHocItem = removeAdHocItem;
+window.updateAdHocItem = updateAdHocItem;
 
 function nextJobId(flightDate) {
   const stamp = flightDate.replace(/-/g, "").slice(2); // YYMMDD
@@ -379,6 +592,19 @@ function navigate(screen, opts) {
     }
   }
   if (screen === "report") state.activeJobId = opts?.jobId || state.activeJobId;
+  
+  // Reset Ad Hoc state when navigating to create screen
+  if (screen === "create") {
+    state.adHocEnabled = false;
+    state.adHocItems = [];
+    const checkbox = document.getElementById('ad-hoc-checkbox');
+    if (checkbox) checkbox.checked = false;
+    const toggle = document.getElementById('ad-hoc-toggle');
+    if (toggle) toggle.classList.add('hidden');
+    const container = document.getElementById('ad-hoc-container');
+    if (container) container.classList.add('hidden');
+  }
+  
   if (window.__renderHooks?.[screen]) window.__renderHooks[screen]();
   window.scrollTo({ top: 0 });
 }
@@ -414,6 +640,83 @@ function submitCreateJob(event) {
   const flightDate = flight.flight_date;
   const jobId = nextJobId(flightDate);
   const now = new Date().toISOString();
+
+  // Build linked items from selected items
+  const selectedItems = state.createItems.filter(i => i.checked);
+  const linkedItems = selectedItems.map((item, i) => ({
+    link_id: "LINK-" + jobId + "-" + (i + 1),
+    ccp5_record_id: "CP5-" + flight.flight_number + "-" + (item.index + 1),
+    sku: item.sku,
+    item_description: item.item_description,
+    class: item.class,
+    quantity: item.quantity,
+  }));
+
+  // Build preset and foodChecker items based on destination
+  const presetItems = [];
+  const foodCheckerItems = [];
+
+  selectedItems.forEach(item => {
+    const fcItem = {
+      linkId: "LINK-" + item.sku,
+      sku: item.sku,
+      item_description: item.item_description,
+      class: item.class,
+      quantity: item.quantity,
+      startTemp: null,
+      finishTemp: null,
+      startTime: null,
+      finishTime: null,
+      durationMin: null,
+      status: "NotStarted",
+      complianceResult: null,
+      exceptionId: null,
+    };
+
+    if (item.destination === 'preset') {
+      presetItems.push(fcItem);
+    } else {
+      foodCheckerItems.push(fcItem);
+    }
+  });
+
+  // Add ad hoc items
+  if (state.adHocEnabled && state.adHocItems.length > 0) {
+    state.adHocItems.forEach((item, i) => {
+      const adHocItem = {
+        link_id: "LINK-" + jobId + "-adhoc-" + (i + 1),
+        ccp5_record_id: "ADHOC-" + jobId + "-" + (i + 1),
+        sku: "AD HOC",
+        item_description: item.description || 'Ad Hoc Item',
+        class: item.class,
+        quantity: item.quantity,
+      };
+      linkedItems.push(adHocItem);
+
+      const fcItem = {
+        linkId: "LINK-ADHOC-" + jobId + "-" + (i + 1),
+        sku: "AD HOC",
+        item_description: item.description || 'Ad Hoc Item',
+        class: item.class,
+        quantity: item.quantity,
+        startTemp: null,
+        finishTemp: null,
+        startTime: null,
+        finishTime: null,
+        durationMin: null,
+        status: "NotStarted",
+        complianceResult: null,
+        exceptionId: null,
+      };
+
+      if (item.destination === 'preset') {
+        presetItems.push(fcItem);
+      } else {
+        foodCheckerItems.push(fcItem);
+      }
+    });
+  }
+
   const job = {
     job_id: jobId,
     flight_number: flight.flight_number,
@@ -425,16 +728,33 @@ function submitCreateJob(event) {
     job_status: "Open",
     closed: false,
     createdAt: now,
-    linkedItems: buildLinkedItems(flight, jobId),
-    preset: {
-      status: "NotStarted", startTime: null, finishTime: null,
-      startTempHorsDoeuvre: null, finishTempHorsDoeuvre: null,
-      startTempDessert: null, finishTempDessert: null,
-      traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
-      services: [{}],
-    },
-    foodChecker: { status: "NotStarted", items: [] },
-    dispatch: null,
+    linkedItems,
+    preset: site === 'SICC2'
+      ? { status: "NotStarted", items: presetItems, traysHandled: 0, staffCount: 0, services: [{}], note: '' }
+      : {
+          status: "NotStarted", startTime: null, finishTime: null,
+          startTempHorsDoeuvre: null, finishTempHorsDoeuvre: null,
+          startTempDessert: null, finishTempDessert: null,
+          traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
+          services: [{}], items: presetItems, note: '',
+        },
+    foodChecker: { status: "NotStarted", items: foodCheckerItems },
+    dispatchPreset: site === 'SICC2' ? {
+      status: "NotStarted",
+      coldSoakStart: null,
+      beforeExitTime: null,
+      beforeExitTemps: {},
+      coldSoakDurationMin: null,
+      complianceResult: null
+    } : null,
+    dispatchFC: site === 'SICC2' ? {
+      status: "NotStarted",
+      coldSoakStart: null,
+      beforeExitTime: null,
+      beforeExitTemps: {},
+      coldSoakDurationMin: null,
+      complianceResult: null
+    } : null,
     signoffs: [],
     exceptions: [],
     history: [{ at: now, actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }],
@@ -581,9 +901,21 @@ function elapsedMin(ts) {
 
 function fmtElapsed(min) {
   if (min == null) return "—";
-  const m = Math.floor(min);
-  const s = Math.round((min - m) * 60);
-  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  min = Math.max(0, min);
+  const totalSeconds = Math.floor(min * 60);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+function fmtElapsedShort(min) {
+  if (min == null) return "—";
+  min = Math.max(0, min);
+  const totalSeconds = Math.floor(min * 60);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
 }
 
 function formatTime(timestamp) {
@@ -681,13 +1013,7 @@ function renderCurrent() {
   const grid = document.getElementById("current-grid");
   const jobs = state.jobs.filter((j) => j.closed !== true && j.job_status !== "Voided" && j.site === state.siccFilter);
   
-  // Set 3 columns for SICC2, auto-fill for SICC1
-  if (state.siccFilter === "SICC2") {
-    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
-  } else {
-    grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(320px, 1fr))";
-  }
-  
+
   if (!jobs.length) {
     grid.innerHTML = `<div class="empty-state">No active CCP6 jobs. Create a job to get started.</div>`;
     return;
@@ -804,8 +1130,16 @@ function renderDetail() {
   renderHeader(job);
   renderTabs(job);
   const body = document.getElementById("detail-body");
-  if (state.activeTab === "preset") renderPreset(body, job);
-  else if (state.activeTab === "foodchecker") renderFoodChecker(body, job);
+  if (state.activeTab === "preset") {
+    renderPreset(body, job);
+    stopDispatchTimerUpdates('preset');
+    stopDispatchTimerUpdates('fc');
+  }
+  else if (state.activeTab === "foodchecker") {
+    renderFoodChecker(body, job);
+    stopDispatchTimerUpdates('preset');
+    stopDispatchTimerUpdates('fc');
+  }
   else if (state.activeTab === "dispatch") renderDispatch(body, job);
 }
 
@@ -992,147 +1326,322 @@ function dispatchLiveState(job) {
   return live;
 }
 
-function renderServicePanel(svc, index, submitted, limits, job) {
+function renderServiceRow(svc, index, submitted, limits, job) {
   const prefix = `p-s${index}`;
-  const dis = submitted ? "disabled" : "";
+  const isExpanded = state.serviceExpanded === index;
   const elapsed = svc.startTime ? fmtElapsed(elapsedMin(svc.startTime)) : "00:00";
   const showStart = !submitted && !svc.startTime;
   const showFinish = !submitted && svc.startTime && !svc.finishTime;
   const canRemove = !svc.startTime && index > 0;
   
+  // Temperature fields: input when collapsed, read-only when expanded
+  const htStartField = isExpanded
+    ? `<div class="form-input-static">${svc.startTempHorsDoeuvre != null ? svc.startTempHorsDoeuvre + ' °C' : '—'}</div>`
+    : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-hts" value="${svc.startTempHorsDoeuvre ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" />`;
+  
+  const htFinishField = isExpanded
+    ? `<div class="form-input-static">${svc.finishTempHorsDoeuvre != null ? svc.finishTempHorsDoeuvre + ' °C' : '—'}</div>`
+    : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-htf" value="${svc.finishTempHorsDoeuvre ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" />`;
+  
+  const dtStartField = isExpanded
+    ? `<div class="form-input-static">${svc.startTempDessert != null ? svc.startTempDessert + ' °C' : '—'}</div>`
+    : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dts" value="${svc.startTempDessert ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" />`;
+  
+  const dtFinishField = isExpanded
+    ? `<div class="form-input-static">${svc.finishTempDessert != null ? svc.finishTempDessert + ' °C' : '—'}</div>`
+    : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dtf" value="${svc.finishTempDessert ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" />`;
+  
+  // Action button: Start/Finish/Remove/View toggle
+  let actionBtn;
+  if (showStart) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startService(${index})">Start</button>`;
+  } else if (showFinish) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish</button>`;
+  } else if (canRemove) {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); removeService(${index})">Remove</button>`;
+  } else {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); toggleServiceExpand(${index})">${isExpanded ? 'Close' : 'View'}</button>`;
+  }
+  
+  let rowHtml = `
+    <tr class="${isExpanded ? 'selected' : ''}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
+      <td>${index + 1}</td>
+      <td><span id="${prefix}-timer-display">${elapsed}</span> <span style="color:var(--text-secondary);font-size:12px">/ ${limits.exposureMax} min</span></td>
+      <td>${htStartField}</td>
+      <td>${htFinishField}</td>
+      <td>${dtStartField}</td>
+      <td>${dtFinishField}</td>
+      <td>${actionBtn}</td>
+    </tr>
+  `;
+  
+  // Expanded row with all fields and metric cards
+  if (isExpanded) {
+    rowHtml += `
+      <tr class="expanded-row">
+        <td colspan="7">
+          <div class="fc-expanded-panel">
+            <div class="preset-grid" style="margin-bottom: 16px;">
+              <div class="form-group"><label class="form-label">Start Time</label>
+                <input type="time" class="form-input" id="${prefix}-startTime-expanded" value="${formatTime(svc.startTime)}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'startTime', this.value)" /></div>
+              <div class="form-group"><label class="form-label">Finish Time</label>
+                <input type="time" class="form-input" id="${prefix}-finishTime-expanded" value="${formatTime(svc.finishTime)}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'finishTime', this.value)" /></div>
+              <div class="timer-cell">
+                <div class="timer-info">
+                  <div class="timer-label">Timer</div>
+                  <div class="timer-display" id="${prefix}-timer-display-expanded">${elapsed} <span>/ ${limits.exposureMax} min</span></div>
+                </div>
+              </div>
+              <div class="form-group field-hts"><label class="form-label required">Hors d'oeuvre Start (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-hts-expanded" value="${svc.startTempHorsDoeuvre ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" /></div>
+              <div class="form-group field-htf"><label class="form-label required">Hors d'oeuvre Finish (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-htf-expanded" value="${svc.finishTempHorsDoeuvre ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" /></div>
+              <div class="form-group field-dts"><label class="form-label required">Dessert Start (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-dts-expanded" value="${svc.startTempDessert ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" /></div>
+              <div class="form-group field-dtf"><label class="form-label required">Dessert Finish (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-dtf-expanded" value="${svc.finishTempDessert ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" /></div>
+            </div>
+
+            <div class="metric-cards">
+              <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''}">
+                <div class="metric-label">Exposure</div>
+                <div class="metric-value">${svc.exposureDurationMin ?? '—'} min</div>
+                ${svc.exposureDurationMin != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.exposureMax} min</div>` : ''}
+              </div>
+              <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''}">
+                <div class="metric-label">Max Temperature</div>
+                <div class="metric-value">${svc.maxSurfaceTemp ?? '—'} °C</div>
+                ${svc.maxSurfaceTemp != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.presetTempMax} °C</div>` : ''}
+              </div>
+              <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''} ${svc.complianceResult === 'NonCompliant' ? 'nc' : ''}">
+                <div class="metric-label">SERVICE SET RESULT</div>
+                <div class="metric-value">${svc.complianceResult ?? '—'}</div>
+                ${svc.complianceResult === 'Compliant' ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ''}
+                ${svc.complianceResult === 'NonCompliant' ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ''}
+                ${svc.complianceResult == null ? `<div class="metric-hint">Calculated on finish</div>` : ''}
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">TPMH</div>
+                <div class="metric-value">${calcTPMH(svc)}</div>
+                <div class="metric-hint">Hours-worked basis — OQ-10</div>
+              </div>
+            </div>
+            <div id="${prefix}-error" class="badge-error hidden" style="margin-top:12px"></div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+  
+  return rowHtml;
+}
+
+function toggleServiceExpand(index) {
+  state.serviceExpanded = state.serviceExpanded === index ? null : index;
+  renderPreset(document.getElementById('detail-body'), currentJob());
+}
+
+function updateServiceField(index, field, value) {
+  const job = currentJob();
+  if (job && job.preset.services[index]) {
+    job.preset.services[index][field] = value === '' ? null : parseFloat(value);
+    persistJob(job);
+  }
+}
+
+function updatePresetField(field, value) {
+  const job = currentJob();
+  job.preset[field] = value ? parseInt(value) : 0;
+  persistJob(job);
+}
+window.updatePresetField = updatePresetField;
+
+function updateServiceTimeField(index, field, value) {
+  const job = currentJob();
+  if (job && job.preset.services[index]) {
+    if (value) {
+      const [h, m] = value.split(':').map(Number);
+      const d = new Date();
+      d.setHours(h, m, 0, 0);
+      job.preset.services[index][field] = d.getTime();
+    } else {
+      job.preset.services[index][field] = null;
+    }
+    persistJob(job);
+  }
+}
+
+window.toggleServiceExpand = toggleServiceExpand;
+window.updateServiceField = updateServiceField;
+window.updateServiceTimeField = updateServiceTimeField;
+
+function getServiceField(prefix, field) {
+  const expandedValue = num(`${prefix}-${field}-expanded`);
+  if (expandedValue != null) return expandedValue;
+  return num(`${prefix}-${field}`);
+}
+
+window.getServiceField = getServiceField;
+
+function updatePresetRemarks(value) {
+  const job = currentJob();
+  if (job) {
+    job.preset.remarks = value;
+    persistJob(job);
+  }
+}
+
+window.updatePresetRemarks = updatePresetRemarks;
+
+function updatePresetNote(value) {
+  const job = currentJob();
+  if (job) {
+    job.preset.note = value;
+    persistJob(job);
+  }
+}
+
+window.updatePresetNote = updatePresetNote;
+
+let serviceTimerInterval = null;
+
+function startServiceTimerUpdates() {
+  if (serviceTimerInterval) return;
+  serviceTimerInterval = setInterval(() => {
+    const job = currentJob();
+    if (!job || !job.preset.services) return;
+    job.preset.services.forEach((svc, i) => {
+      if (svc.startTime && !svc.finishTime) {
+        const elapsed = fmtElapsed(elapsedMin(svc.startTime));
+        const prefix = `p-s${i}`;
+        const limits = hmLimits(job);
+        const timerEl = document.getElementById(`${prefix}-timer-display`);
+        const timerElExpanded = document.getElementById(`${prefix}-timer-display-expanded`);
+        if (timerEl) timerEl.textContent = elapsed;
+        if (timerElExpanded) timerElExpanded.textContent = elapsed + ` / ${limits.exposureMax} min`;
+      }
+    });
+  }, 1000);
+}
+
+function stopServiceTimerUpdates() {
+  if (serviceTimerInterval) {
+    clearInterval(serviceTimerInterval);
+    serviceTimerInterval = null;
+  }
+}
+
+window.startServiceTimerUpdates = startServiceTimerUpdates;
+window.stopServiceTimerUpdates = stopServiceTimerUpdates;
+
+function renderPresetTabs(activeMethod) {
   return `
-    <div class="service-panel">
-      <div class="service-panel-header">
-        <div>
-          <span class="service-panel-title">${ordinal(index + 1)} service</span>
-        </div>
-        ${canRemove ? `<button type="button" class="remove-service-btn" onclick="removeService(${index})" title="Remove service">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>` : ''}
-      </div>
-
-      <div class="service-panel-body">
-        <div class="preset-grid">
-          <div class="form-group"><label class="form-label">Start Time</label>
-            <input type="time" class="form-input" id="${prefix}-startTime" value="${formatTime(svc.startTime)}" disabled /></div>
-          <div class="form-group"><label class="form-label">Finish Time</label>
-            <input type="time" class="form-input" id="${prefix}-finishTime" value="${formatTime(svc.finishTime)}" disabled /></div>
-          <div class="timer-cell">
-            <div class="timer-info">
-              <div class="timer-label">Timer</div>
-              <div class="timer-display" id="${prefix}-timer-display">${elapsed} <span>/ ${limits.exposureMax} min</span></div>
-            </div>
-            <div class="timer-controls">
-              ${showStart ? `<button type="button" class="timer-btn" id="${prefix}-start" onclick="startService(${index})" ${dis}>
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                Start
-              </button>` : ""}
-              ${showFinish ? `<button type="button" class="timer-btn" id="${prefix}-finish" onclick="finishService(${index})" ${dis}>
-                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-                Finish
-              </button>` : ""}
-            </div>
-          </div>
-          <div class="form-group field-hts"><label class="form-label required">Hors d'oeuvre Start (°C)</label>
-            <input type="number" step="0.1" class="form-input" id="${prefix}-hts" value="${svc.startTempHorsDoeuvre ?? ""}" ${dis} /></div>
-          <div class="form-group field-htf"><label class="form-label required">Hors d'oeuvre Finish (°C)</label>
-            <input type="number" step="0.1" class="form-input" id="${prefix}-htf" value="${svc.finishTempHorsDoeuvre ?? ""}" ${dis} /></div>
-          <div class="form-group field-trays"><label class="form-label">Trays Handled</label>
-            <input type="number" class="form-input" id="${prefix}-trays" value="${svc.traysHandled ?? ""}" ${dis} /></div>
-          <div class="form-group field-dts"><label class="form-label required">Dessert Start (°C)</label>
-            <input type="number" step="0.1" class="form-input" id="${prefix}-dts" value="${svc.startTempDessert ?? ""}" ${dis} /></div>
-          <div class="form-group field-dtf"><label class="form-label required">Dessert Finish (°C)</label>
-            <input type="number" step="0.1" class="form-input" id="${prefix}-dtf" value="${svc.finishTempDessert ?? ""}" ${dis} /></div>
-          <div class="form-group field-staff"><label class="form-label">Staff Count</label>
-            <input type="number" class="form-input" id="${prefix}-staff" value="${svc.staffCount ?? ""}" ${dis} /></div>
-        </div>
-
-        <div class="metric-cards">
-          <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''}">
-            <div class="metric-label">Exposure</div>
-            <div class="metric-value">${svc.exposureDurationMin ?? '—'} min</div>
-            ${svc.exposureDurationMin != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.exposureMax} min</div>` : ''}
-          </div>
-          <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''}">
-            <div class="metric-label">Max Temperature</div>
-            <div class="metric-value">${svc.maxSurfaceTemp ?? '—'} °C</div>
-            ${svc.maxSurfaceTemp != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.presetTempMax} °C</div>` : ''}
-          </div>
-          <div class="metric-card ${svc.complianceResult === 'Compliant' ? 'compliant' : ''} ${svc.complianceResult === 'NonCompliant' ? 'nc' : ''}">
-            <div class="metric-label">SERVICE SET RESULT</div>
-            <div class="metric-value">${svc.complianceResult ?? '—'}</div>
-            ${svc.complianceResult === 'Compliant' ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ''}
-            ${svc.complianceResult === 'NonCompliant' ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ''}
-            ${svc.complianceResult == null ? `<div class="metric-hint">Calculated on finish</div>` : ''}
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">TPMH</div>
-            <div class="metric-value">${calcTPMH(svc)}</div>
-            <div class="metric-hint">Hours-worked basis — OQ-10</div>
-          </div>
-        </div>
-        <div id="${prefix}-error" class="badge-error hidden" style="margin-top:12px"></div>
-      </div>
-
-
+    <div class="preset-tabs">
+      <button type="button" class="preset-tab ${activeMethod === 'services' ? 'active' : ''}" onclick="togglePresetMethod('services')">Services</button>
+      <button type="button" class="preset-tab ${activeMethod === 'items' ? 'active' : ''}" onclick="togglePresetMethod('items')">Items</button>
     </div>
   `;
 }
+
+function togglePresetMethod(method) {
+  state.presetMethod = method;
+  const job = currentJob();
+  if (method === 'items') {
+    console.log('[preset items tab] items:', job.preset?.items);
+  }
+  renderPreset(document.getElementById('detail-body'), job);
+}
+window.togglePresetMethod = togglePresetMethod;
 
 function renderPreset(body, job) {
   const p = job.preset;
   const submitted = p.status === "Submitted";
   const site = job.site || "SICC2";
-  
-  if (site === 'SICC1') {
-    renderPresetSICC1(body, job, p, submitted);
+  state.presetMethod = state.presetMethod || (site === 'SICC2' ? 'items' : 'services');
+  const tabs = renderPresetTabs(state.presetMethod);
+
+  if (state.presetMethod === 'services') {
+    renderPresetServices(body, job, p, submitted, tabs);
   } else {
-    renderPresetSICC2(body, job, p, submitted);
+    renderPresetItems(body, job, p, submitted, tabs);
   }
 }
 
-function renderPresetSICC1(body, job, p, submitted) {
+function renderPresetServices(body, job, p, submitted, tabs) {
   if (!p.services) p.services = [{}];
   const services = p.services;
   const limits = hmLimits(job);
   
   body.innerHTML = `
-    <div class="info-banner">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-      <div><strong>SICC1 Preset is measured per service.</strong> Each service set has its own timer, Hors d'oeuvre and Dessert streams, and its own compliance result. One sign-off covers the whole stage, because every service on a flight is performed by the same person.</div>
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="form-group">
+        <label class="form-label">Trays / meals handled</label>
+        <input type="number" class="form-input" id="preset-trays" value="${job.preset.traysHandled || ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetField('traysHandled', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">No of Staff</label>
+        <input type="number" class="form-input" id="preset-staff" value="${job.preset.staffCount || ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetField('staffCount', this.value)" />
+      </div>
     </div>
 
-    <div class="preset-wrapper">
-      <div class="service-panel-header">
-        <div>
-          <div class="service-panel-title">Preset recording — FAA</div>
-          <div class="section-subtitle">Flight-level · service set · Annexure 5.1</div>
-        </div>
-        <div class="section-badge">${services.length} service set(s)</div>
-      </div>
+    ${tabs}
 
-      <div class="preset-wrapper-content">
-        ${services.map((svc, i) => renderServicePanel(svc, i, submitted, limits, job)).join("")}
-      </div>
+    <div class="table-wrap">
+      <table class="fc-table">
+        <thead><tr>
+          <th style="width:40px">#</th>
+          <th>TIMER</th>
+          <th>HORS D'OEUVRE START °C *</th>
+          <th>HORS D'OEUVRE FINISH °C *</th>
+          <th>DESSERT START °C *</th>
+          <th>DESSERT FINISH °C *</th>
+          <th>ACTION</th>
+        </tr></thead>
+        <tbody>
+          ${services.map((svc, i) => renderServiceRow(svc, i, submitted, limits, job)).join("")}
+        </tbody>
+      </table>
     </div>
 
     <button type="button" class="add-service-btn" onclick="addService()">+ Add service (${ordinal(services.length + 1)} service)</button>
 
     <div class="form-group" style="margin-top:16px">
       <label class="form-label">Remarks</label>
-      <textarea class="form-input" id="preset-remarks" placeholder="Remarks" rows="3"></textarea>
+      <textarea class="form-input" id="preset-remarks" placeholder="Remarks" rows="3" oninput="updatePresetRemarks(this.value)">${job.preset.remarks || ''}</textarea>
     </div>
 
-    ${submitted ? renderSubmittedPanel(job, "preset") : `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px"><div class="service-panel-footer-text">Submit is enabled once every started service is finished and any exception is complete.</div><button type="button" class="btn-primary" onclick="submitStage('preset')" ${!services.every(s => s.finishTime) ? 'disabled' : ''}>Submit</button></div>`}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+      <div class="service-panel-footer-text">
+        ${submitted ? '<span style="color:var(--accent)">Already submitted</span> · ' : ''}Submit is enabled once at least one service is started and every started service is finished.
+      </div>
+      <button type="button" class="btn-primary" onclick="submitStage('preset')" ${services.length > 0 && services.some(s => s.startTime) && services.every(s => !s.startTime || s.finishTime) ? '' : 'disabled'}>${submitted ? 'Re-submit' : 'Submit'}</button>
+    </div>
   `;
 }
 
-function renderPresetSICC2(body, job, p, submitted) {
+function renderPresetItems(body, job, p, submitted, tabs) {
   const items = p.items || [];
   const notStartedCount = items.filter(it => !it.startTime).length;
   const activeCount = items.filter(it => it.startTime && !it.finishTime).length;
   
   body.innerHTML = `
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="form-group">
+        <label class="form-label">Trays / meals handled</label>
+        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled || ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetField('traysHandled', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">No of Staff</label>
+        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount || ''}" ${submitted ? 'disabled' : ''} oninput="updatePresetField('staffCount', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note</label>
+        <textarea class="form-input" id="preset-note" placeholder="Note" rows="3" oninput="updatePresetNote(this.value)">${job.preset.note || ''}</textarea>
+      </div>
+    </div>
+
+    ${tabs}
+
     <div class="fc-header">
       <div>
         <h2 class="fc-header-title">Preset recording — FAA</h2>
@@ -1150,6 +1659,7 @@ function renderPresetSICC2(body, job, p, submitted) {
           <th>SKU</th>
           <th>QTY</th>
           <th>START °C *</th>
+          <th>FINISH °C</th>
           <th>ELAPSED</th>
           <th>ITEM STATUS</th>
           <th>ACTION</th>
@@ -1160,22 +1670,7 @@ function renderPresetSICC2(body, job, p, submitted) {
       </table>
     </div>
 
-    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-      <div class="form-group">
-        <label class="form-label">Trays / meals handled</label>
-        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled || ''}" ${submitted ? 'disabled' : ''} />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Staff count on line</label>
-        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount || ''}" ${submitted ? 'disabled' : ''} />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Note</label>
-        <div class="form-input-static" style="padding:10px 12px;color:var(--text-secondary)">Productivity is recorded once for the stage, not per item</div>
-      </div>
-    </div>
-
-    ${submitted ? renderSubmittedPanel(job, "preset") : `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px"><div class="service-panel-footer-text">Submit is enabled once every started item is finished.</div><button type="button" class="btn-primary" onclick="submitStage('preset')" ${!items.every(it => it.finishTime) ? 'disabled' : ''}>Submit</button></div>`}
+    ${submitted ? renderSubmittedPanel(job, "preset") : `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px"><div class="service-panel-footer-text">Submit is enabled once at least one item is started and every started item is finished.</div><button type="button" class="btn-primary" onclick="submitStage('preset')" ${items.length > 0 && items.some(it => it.startTime) && items.every(it => !it.startTime || it.finishTime) ? '' : 'disabled'}>Submit</button></div>`}
   `;
 }
 
@@ -1183,6 +1678,7 @@ function renderPresetSICC2Row(item, i, submitted, job) {
   const st = itemStatus(item, job);
   const isInProgress = st.cls === "in-progress";
   const isFinished = !!item.complianceResult;
+  const isExpanded = state.presetSICC2Expanded === item.linkId;
   
   const statusBadge = isInProgress
     ? `<span class="fc-status-badge in-progress"><span class="fc-status-dot"></span>In Progress</span>`
@@ -1190,29 +1686,50 @@ function renderPresetSICC2Row(item, i, submitted, job) {
       ? `<span class="fc-status-badge ${item.complianceResult === 'Compliant' ? 'compliant' : 'non-compliant'}"><span class="fc-status-dot"></span>${item.complianceResult}</span>`
       : `<span class="fc-status-badge not-started"><span class="fc-status-dot"></span>Not started</span>`;
 
-  const actionBtn = isFinished
-    ? `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">Close</button>`
-    : `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
+  // START °C field: input when collapsed, read-only when expanded (same as FC table)
+  const startTempField = isExpanded
+    ? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + ' °C' : '—'}</div>`
+    : `<input type="number" step="0.1" class="form-input" style="width:90px" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updatePresetItemField('${item.linkId}', 'startTemp')" />`;
+
+  // FINISH °C field: input when collapsed, read-only when expanded (same as FC table)
+  const finishTempField = item.startTime
+    ? (isExpanded
+      ? `<div class="form-input-static">${item.finishTemp != null ? item.finishTemp + ' °C' : '—'}</div>`
+      : `<input type="number" step="0.1" class="form-input" style="width:90px" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ''}" ${submitted ? 'disabled' : ''} onclick="event.stopPropagation()" oninput="updatePresetItemField('${item.linkId}', 'finishTemp')" />`)
+    : '—';
+
+  // ACTION button: toggle between Start Timer / Finish Timer (same as FC table)
+  let actionBtn;
+  if (isFinished) {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">Close</button>`;
+  } else if (!item.startTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+  } else if (item.startTime && !item.finishTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+  } else {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
+  }
 
   let rowHtml = `
-    <tr class="${state.presetSICC2Expanded === item.linkId ? 'selected' : ''}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
+    <tr class="${isExpanded ? 'selected' : ''}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
       <td>${i + 1}</td>
       <td>${esc(item.class)}</td>
       <td>${esc(item.item_description)}</td>
       <td>${esc(item.sku)}</td>
       <td>${esc(item.quantity)}</td>
-      <td>${item.startTemp != null ? item.startTemp + ' °C' : '—'}</td>
+      <td>${startTempField}</td>
+      <td>${finishTempField}</td>
       <td><span id="preset-elapsed-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
       <td>${statusBadge}</td>
       <td>${actionBtn}</td>
     </tr>
   `;
 
-  if (state.presetSICC2Expanded === item.linkId) {
+  if (isExpanded) {
     const limits = hmLimits(job);
     rowHtml += `
       <tr class="expanded-row">
-        <td colspan="9">
+        <td colspan="10">
           <div class="fc-expanded-panel">
             <div class="fc-expanded-grid">
               <div class="fc-expanded-field">
@@ -1402,20 +1919,21 @@ function startService(index) {
   const svc = job.preset.services[index];
   const prefix = `p-s${index}`;
   if (svc.startTime) return;
-  const hts = num(`${prefix}-hts`);
-  const dts = num(`${prefix}-dts`);
-  if (hts == null || dts == null) {
-    showErr(`${prefix}-error`, "Both start temperatures are required before starting the timer.");
+  const hts = getServiceField(prefix, 'hts');
+  const dts = getServiceField(prefix, 'dts');
+  if (hts == null && dts == null) {
+    showErr(`${prefix}-error`, "At least one start temperature is required before starting the timer.");
     return;
   }
   svc.startTempHorsDoeuvre = hts;
   svc.startTempDessert = dts;
-  svc.traysHandled = num(`${prefix}-trays`) ?? 0;
-  svc.staffCount = num(`${prefix}-staff`) ?? 0;
+  svc.traysHandled = getServiceField(prefix, 'trays') ?? 0;
+  svc.staffCount = getServiceField(prefix, 'staff') ?? 0;
   svc.startTime = new Date().toISOString();
   job.history = job.history || [];
   job.history.push({ at: svc.startTime, actor: "FAA", field: "preset", from: "NotStarted", to: "InProgress", stage: "preset", version: 1 });
   renderDetail();
+  startServiceTimerUpdates();
 }
 
 function finishService(index) {
@@ -1423,10 +1941,15 @@ function finishService(index) {
   const svc = job.preset.services[index];
   const prefix = `p-s${index}`;
   if (!svc.startTime || svc.finishTime) return;
-  const htf = num(`${prefix}-htf`);
-  const dtf = num(`${prefix}-dtf`);
-  if (htf == null || dtf == null) {
-    showErr(`${prefix}-error`, "Both finish temperatures are required before finishing.");
+  const htf = getServiceField(prefix, 'htf');
+  const dtf = getServiceField(prefix, 'dtf');
+  // Finish temperature must match the type of start temperature that was filled
+  if (svc.startTempHorsDoeuvre != null && htf == null) {
+    showErr(`${prefix}-error`, "Hors d'oeuvre finish temperature is required to finish the timer.");
+    return;
+  }
+  if (svc.startTempDessert != null && dtf == null) {
+    showErr(`${prefix}-error`, "Dessert finish temperature is required to finish the timer.");
     return;
   }
   svc.finishTempHorsDoeuvre = htf;
@@ -1440,7 +1963,12 @@ function finishService(index) {
     svc.exposureDurationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
   job.history.push({ at: svc.finishTime, actor: "FAA", field: "preset", from: "Started", to: svc.complianceResult, stage: "preset", version: 1 });
   renderDetail();
+  const stillRunning = job.preset.services.some(s => s.startTime && !s.finishTime);
+  if (!stillRunning) stopServiceTimerUpdates();
 }
+
+window.startService = startService;
+window.finishService = finishService;
 
 function startPreset() {
   const job = currentJob();
@@ -1567,6 +2095,7 @@ function renderFoodChecker(body, job) {
             <th>SKU</th>
             <th>QTY</th>
             <th>START °C *</th>
+            <th>FINISH °C</th>
             <th>ELAPSED</th>
             <th>ITEM STATUS</th>
             <th>ACTION</th>
@@ -1589,22 +2118,7 @@ function renderFoodChecker(body, job) {
       </table>
     </div>
 
-    ${site === 'SICC1' ? `
-      <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-        <div class="form-group">
-          <label class="form-label">Trays / meals handled</label>
-          <input type="number" class="form-input" id="fc-trays" value="${job.foodChecker.traysHandled || ''}" ${submitted ? 'disabled' : ''} />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Staff count on line</label>
-          <input type="number" class="form-input" id="fc-staff" value="${job.foodChecker.staffCount || ''}" ${submitted ? 'disabled' : ''} />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Note</label>
-          <div class="form-input-static" style="padding:10px 12px;color:var(--text-secondary)">Productivity is recorded once for the stage, not per item</div>
-        </div>
-      </div>
-    ` : ''}
+
 
     <div class="fc-footer">
       <div class="fc-footer-text">${notCheckedCount} of ${items.length} items not yet checked (OQ-08).</div>
@@ -1623,7 +2137,13 @@ function renderFCRow(job, item, i, submitted) {
   
   let actionBtn = '';
   if (site === 'SICC1') {
-    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); toggleFCExpand('${item.linkId}')">View</button>`;
+    if (!item.startTime && !submitted) {
+      actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+    } else if (item.startTime && !item.finishTime && !submitted) {
+      actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+    } else if (isFinished && item.complianceResult === "Non-Compliant") {
+      actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
+    }
   } else if (!item.startTime && !submitted) {
     actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
   } else if (item.startTime && !item.finishTime && !submitted) {
@@ -1649,12 +2169,12 @@ function renderFCRow(job, item, i, submitted) {
         ? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + ' °C' : '—'}</div>` 
         : `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ''}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'startTemp'); updateItemGate('${item.linkId}')" />`
       }</td>
-      ${site !== 'SICC1' ? `<td>${item.startTime 
+      <td>${item.startTime 
         ? (state.fcExpanded === item.linkId 
           ? `<div class="form-input-static">${item.finishTemp != null ? item.finishTemp + ' °C' : '—'}</div>` 
-          : `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ''}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'finishTemp')" />`)
+          : `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ''}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" />`)
         : '—'
-      }</td>` : ''}
+      }</td>
       <td><span id="fc-elapsed-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
       <td>${statusBadge}</td>
       <td>${actionBtn}</td>
@@ -1678,7 +2198,7 @@ function renderFCExpandedPanel(job, item, submitted) {
   
   return `
     <tr class="expanded-row">
-      <td colspan="9">
+      <td colspan="10">
         <div class="fc-expanded-panel">
           <div class="fc-expanded-grid">
             <div class="fc-expanded-field">
@@ -2107,10 +2627,20 @@ function checkPresetTimerStop() {
   if (!hasRunning) stopPresetTimer();
 }
 
+
+
 function updatePresetItemField(linkId, field, value) {
   const job = currentJob();
   const item = (job.preset.items || []).find((it) => it.linkId === linkId);
   if (!item) return;
+  
+  // If value not provided, read from DOM (same as updateItemField)
+  if (value === undefined) {
+    const inputEl = document.getElementById(`preset-${field === 'startTemp' ? 'st' : 'ft'}-temp-${linkId}`);
+    if (!inputEl) return;
+    value = inputEl.value;
+  }
+  
   item[field] = value === "" || value == null ? null : parseFloat(value);
 }
 window.updatePresetItemField = updatePresetItemField;
@@ -2122,99 +2652,283 @@ function fmtDuration(min) {
   return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
 }
 
-function setDispatchNow() {
+function setDispatchNow(type) {
   const now = new Date();
   const timeStr = now.toTimeString().slice(0, 5);
-  const el = document.getElementById("d-exit-time");
+  const el = document.getElementById(`d-${type}-exit-time`);
   if (el) el.value = timeStr;
-  const job = currentJob();
-  if (job?.dispatch) job.dispatch.beforeExitTime = timeStr;
+  updateDispatchBeforeExitTime(type, timeStr);
 }
 window.setDispatchNow = setDispatchNow;
 
-function updateDispatchItemTemp(linkId, value) {
+function updateDispatchItemTemp(type, linkId, value) {
   const job = currentJob();
-  if (!job?.dispatch) return;
-  if (!job.dispatch.beforeExitTemps) job.dispatch.beforeExitTemps = {};
-  job.dispatch.beforeExitTemps[linkId] = value === "" || value == null ? null : parseFloat(value);
+  const dispatch = type === 'preset' ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch) return;
+  if (!dispatch.beforeExitTemps) dispatch.beforeExitTemps = {};
+  dispatch.beforeExitTemps[linkId] = value === "" || value == null ? null : parseFloat(value);
+  persistJob(job);
   
-  // Update only the item result cell for this row instead of re-rendering everything
-  const items = job.preset.items || [];
-  const item = items.find(it => it.linkId === linkId);
-  if (item) {
-    const limits = hmLimits(job);
-    const itemResult = value !== "" && value != null ? (parseFloat(value) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant") : null;
-    const row = document.querySelector(`tr:has(input[onchange*="${linkId}"])`);
-    if (row) {
-      const resultCell = row.lastElementChild;
-      if (resultCell) {
-        resultCell.innerHTML = itemResult 
-          ? `<span class="status-pill ${itemResult === 'Compliant' ? 'compliant' : 'nc'}">${itemResult}</span>` 
-          : '<span class="status-pill not-started">Awaiting</span>';
-      }
+  // Targeted update: only update the specific row's result
+  const limits = hmLimits(job);
+  const itemTemp = dispatch.beforeExitTemps[linkId];
+  const itemResult = itemTemp != null ? (itemTemp <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant") : null;
+  
+  // Find the row containing this input and update its result cell
+  const inputEl = document.querySelector(`input[onchange*="updateDispatchItemTemp('${type}', '${linkId}'"]`);
+  if (inputEl) {
+    const row = inputEl.closest('tr');
+    const resultCell = row?.querySelector('td:last-child');
+    if (resultCell) {
+      resultCell.innerHTML = itemResult 
+        ? `<span class="status-pill ${itemResult === 'Compliant' ? 'compliant' : 'nc'}">${itemResult}</span>`
+        : '<span class="status-pill not-started">Awaiting</span>';
     }
   }
   
-  // Recalculate overall dispatch compliance
-  const compliance = calculateDispatchCompliance(job);
-  if (compliance) {
-    job.dispatch.complianceResult = compliance.complianceResult;
+  // Check if all temps are now entered → enable/disable before-exit time field
+  const items = type === 'preset' ? job.preset.items : job.foodChecker.items;
+  const allTempsEntered = items.length > 0 && items.every(item => dispatch.beforeExitTemps?.[item.linkId] != null);
+  const exitTimeInput = document.getElementById(`d-${type}-exit-time`);
+  const nowBtn = exitTimeInput?.nextElementSibling;
+  if (exitTimeInput) {
+    if (allTempsEntered) {
+      exitTimeInput.removeAttribute('disabled');
+      exitTimeInput.placeholder = '';
+    } else {
+      exitTimeInput.setAttribute('disabled', '');
+      exitTimeInput.placeholder = 'Enter all temps first';
+    }
+  }
+  if (nowBtn && nowBtn.tagName === 'BUTTON') {
+    nowBtn.style.display = allTempsEntered ? '' : 'none';
   }
 }
 window.updateDispatchItemTemp = updateDispatchItemTemp;
 
-// ── Dispatch compliance calculation ─────────────────────────────
-function calculateDispatchCompliance(job) {
-  const d = job.dispatch;
-  const limits = hmLimits(job);
-  if (!d.beforeExitTime || !job.preset.finishTime) return null;
-  
-  const coldSoakDuration = Math.round((new Date(d.beforeExitTime) - new Date(job.preset.finishTime)) / 60000);
-  const temps = Object.values(d.beforeExitTemps || {}).filter(v => v != null && v !== "");
-  const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
-  
-  const durationOk = coldSoakDuration >= limits.coldSoakMin;
-  const tempOk = maxTemp == null || maxTemp <= limits.dispatchTempMax;
-  
-  return {
-    coldSoakDuration,
-    maxTemp,
-    complianceResult: durationOk && tempOk ? "Compliant" : "Non-Compliant"
-  };
-}
-window.calculateDispatchCompliance = calculateDispatchCompliance;
-
-function updateDispatchBeforeExitTime(value) {
+function updateDispatchBeforeExitTime(type, value) {
   const job = currentJob();
-  if (!job?.dispatch) return;
-  job.dispatch.beforeExitTime = value || null;
+  const dispatch = type === 'preset' ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch) return;
+  dispatch.beforeExitTime = value || null;
   
-  const compliance = calculateDispatchCompliance(job);
-  if (compliance) {
-    job.dispatch.coldSoakDurationMin = compliance.coldSoakDuration;
-    job.dispatch.complianceResult = compliance.complianceResult;
+  if (dispatch.coldSoakStart && value) {
+    const [h, m] = value.split(':').map(Number);
+    const exitTimeMinutes = h * 60 + m;
+    const startDate = new Date(dispatch.coldSoakStart);
+    const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
+    let durationMin = exitTimeMinutes - startMinutes;
+    if (durationMin < 0) durationMin += 24 * 60;
+    dispatch.coldSoakDurationMin = durationMin;
   }
   
-  renderDispatch(document.getElementById("detail-body"), job);
+  persistJob(job);
+  
+  // Targeted update: stop timer, update timer display to short format
+  stopDispatchTimerUpdates(type);
+  
+  const coldSoakStart = dispatch.coldSoakStart;
+  if (coldSoakStart) {
+    const el = dispatch.coldSoakDurationMin;
+    const valueEl = document.getElementById(`dispatch-timer-value-${type}`);
+    if (valueEl) valueEl.textContent = fmtElapsedShort(el);
+  }
+  
+  // Hide Now button since time is now set (keep input enabled for editing)
+  const exitTimeInput = document.getElementById(`d-${type}-exit-time`);
+  const nowBtn = exitTimeInput?.nextElementSibling;
+  if (nowBtn && nowBtn.tagName === 'BUTTON') nowBtn.style.display = 'none';
 }
 window.updateDispatchBeforeExitTime = updateDispatchBeforeExitTime;
 
+function submitDispatch(type) {
+  const job = currentJob();
+  const dispatch = type === 'preset' ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch) return;
+  
+  const items = type === 'preset' 
+    ? job.preset.items || []
+    : job.foodChecker.items || [];
+  
+  const temps = Object.values(dispatch.beforeExitTemps || {}).filter(v => v != null && v !== "");
+  if (temps.length < items.length) {
+    alert("Please enter temperatures for all items before submitting.");
+    return;
+  }
+  
+  dispatch.status = "Submitted";
+  dispatch.submittedAt = new Date().toISOString();
+  
+  const limits = hmLimits(job);
+  const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
+  dispatch.complianceResult = maxTemp != null && maxTemp <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant";
+  
+  persistJob(job);
+  renderDispatch(document.getElementById("detail-body"), job);
+}
+window.submitDispatch = submitDispatch;
+
 // ── Dispatch tab ────────────────────────────────────────────────────
 function dispatchLive(job) {
-  const d = job.dispatch;
   if (job.site !== "SICC2") return null;
-  if (!d) return { label: "Locked", cls: "locked", el: null };
-  if (d.status === "Submitted") {
-    return { label: d.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant", cls: d.complianceResult === "Compliant" ? "compliant" : "nc", el: null };
-  }
-  // Cold soak starts from Preset finish time
-  if (job.preset.status !== "Submitted" || !job.preset.finishTime) {
+  
+  const presetDispatch = job.dispatchPreset;
+  const fcDispatch = job.dispatchFC;
+  
+  // Check if either dispatch exists
+  if (!presetDispatch && !fcDispatch) {
     return { label: "Locked", cls: "locked", el: null };
   }
-  const el = elapsedMin(job.preset.finishTime);
-  const min = hmLimits(job).coldSoakMin;
-  if (el >= min) return { label: "Eligible for dispatch", cls: "eligible", el };
-  return { label: "Cold Soak", cls: "cold-soak", el };
+  
+  // Check if both are submitted
+  if (presetDispatch?.status === "Submitted" && fcDispatch?.status === "Submitted") {
+    const presetCompliant = presetDispatch.complianceResult === "Compliant";
+    const fcCompliant = fcDispatch.complianceResult === "Compliant";
+    const overallCompliant = presetCompliant && fcCompliant;
+    return { 
+      label: overallCompliant ? "Compliant" : "Non-Compliant", 
+      cls: overallCompliant ? "compliant" : "nc", 
+      el: null 
+    };
+  }
+  
+  // Check if either has cold soak started
+  const presetColdSoakStart = presetDispatch?.coldSoakStart;
+  const fcColdSoakStart = fcDispatch?.coldSoakStart;
+  
+  if (presetColdSoakStart || fcColdSoakStart) {
+    // Use the earliest cold soak start
+    const coldSoakStart = presetColdSoakStart && fcColdSoakStart 
+      ? Math.min(presetColdSoakStart, fcColdSoakStart)
+      : (presetColdSoakStart || fcColdSoakStart);
+    
+    const el = elapsedMin(coldSoakStart);
+    const min = hmLimits(job).coldSoakMin;
+    
+    if (el >= min) return { label: "Eligible for dispatch", cls: "eligible", el };
+    return { label: "Cold Soak", cls: "cold-soak", el };
+  }
+  
+  return { label: "Locked", cls: "locked", el: null };
+}
+
+function renderDispatchPanel(dispatch, items, type) {
+  const submitted = dispatch?.status === "Submitted";
+  const limits = hmLimits(currentJob());
+  const min = limits.coldSoakMin;
+  // Fallback: if coldSoakStart is null but status is ColdSoak, use current time
+  const coldSoakStart = dispatch?.coldSoakStart || (dispatch?.status === "ColdSoak" ? Date.now() : null);
+  // Calculate duration: before-exit time minus preset finish time
+  const el = dispatch?.coldSoakDurationMin ?? (coldSoakStart ? elapsedMin(coldSoakStart) : null);
+  const progress = el != null ? Math.min((el / min) * 100, 100) : 0;
+  const isEligible = el != null && el >= min;
+  const coldSoakStartStr = coldSoakStart
+    ? new Date(coldSoakStart).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})
+    : "—";
+  const dis = submitted ? "disabled" : "";
+  const hasExitTime = !!dispatch?.beforeExitTime;
+  const allTempsEntered = items.length > 0 && items.every(item => dispatch?.beforeExitTemps?.[item.linkId] != null);
+  const tempDisabled = dis;
+  const exitTimeDisabled = dis || (!allTempsEntered ? "disabled" : "");
+  
+  return `
+    <div class="fc-timer-bar" style="margin-bottom:16px">
+      <div class="fc-timer-display">
+        <div class="fc-timer-value" id="dispatch-timer-value-${type}" style="font-size:48px;font-weight:700">${el != null ? (dispatch?.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el)) : "—"}</div>
+        <div style="margin-top:8px">
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div id="dispatch-timer-progress-${type}" style="height:100%;width:${progress}%;background:var(--success);transition:width 1s"></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;padding:0 24px">
+        <div style="font-size:14px;color:var(--text-secondary)">Cold soak minimum <b>${fmtDuration(min)}</b> · from ${coldSoakStartStr}</div>
+        <div style="font-size:14px;font-weight:600;margin-top:4px">${isEligible ? "Minimum already met — eligible for dispatch" : "Cold soak in progress..."}</div>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top:16px">
+      <div class="form-group">
+        <label class="form-label">Cold soak start</label>
+        <input type="text" class="form-input" readonly value="${coldSoakStartStr}" style="background:var(--bg-surface)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label required">Before-exit time (24h)</label>
+        <div style="display:flex;gap:8px">
+          <input type="time" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? 'Enter all temps first' : ''}" />
+          ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? '' : 'none'}">Now</button>` : ""}
+        </div>
+      </div>
+    </div>
+    
+    <div class="table-wrap" style="margin-top:20px">
+      <table class="fc-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="width:80px">CLASS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th style="width:100px">SKU</th>
+            <th style="width:140px">BEFORE-EXIT TEMP °C *</th>
+            <th style="width:120px">ITEM RESULT</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map((item, i) => {
+            const itemTemp = dispatch?.beforeExitTemps?.[item.linkId] ?? "";
+            const itemResult = itemTemp !== "" && itemTemp != null ? (parseFloat(itemTemp) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant") : null;
+            return `<tr>
+              <td>${i + 1}</td>
+              <td>${esc(item.class)}</td>
+              <td>${esc(item.item_description)}</td>
+              <td>${esc(item.sku)}</td>
+              <td><input type="number" step="0.1" class="form-input" value="${itemTemp}" ${tempDisabled} onchange="updateDispatchItemTemp('${type}', '${item.linkId}', this.value)" onclick="event.stopPropagation()" style="width:100px" /></td>
+              <td>${itemResult ? `<span class="status-pill ${itemResult === 'Compliant' ? 'compliant' : 'nc'}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>'}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+    
+    ${!submitted ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
+  `;
+}
+
+// ── Dispatch timer updates (lightweight, only updates timer elements) ──
+let dispatchTimerIntervals = {};
+
+function startDispatchTimerUpdates(type) {
+  stopDispatchTimerUpdates(type);
+  dispatchTimerIntervals[type] = setInterval(() => {
+    const job = currentJob();
+    if (!job) return;
+    const dispatch = type === 'preset' ? job.dispatchPreset : job.dispatchFC;
+    if (!dispatch || !dispatch.coldSoakStart) return;
+    
+    // Always show elapsed time (ticking)
+    const el = elapsedMin(dispatch.coldSoakStart);
+    const min = hmLimits(job).coldSoakMin;
+    const progress = Math.min((el / min) * 100, 100);
+    
+    const valueEl = document.getElementById(`dispatch-timer-value-${type}`);
+    const progressEl = document.getElementById(`dispatch-timer-progress-${type}`);
+    
+    const displayValue = dispatch.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el);
+    if (valueEl) valueEl.textContent = displayValue;
+    if (progressEl) progressEl.style.width = `${progress}%`;
+    
+    // Stop ticking when before-exit time is entered
+    if (dispatch.beforeExitTime) {
+      stopDispatchTimerUpdates(type);
+    }
+  }, 1000);
+}
+
+function stopDispatchTimerUpdates(type) {
+  if (dispatchTimerIntervals[type]) {
+    clearInterval(dispatchTimerIntervals[type]);
+    delete dispatchTimerIntervals[type];
+  }
 }
 
 function renderDispatch(body, job) {
@@ -2222,133 +2936,46 @@ function renderDispatch(body, job) {
     body.innerHTML = `<div class="empty-state">Dispatch is not available at ${esc(job.site)}.</div>`;
     return;
   }
-  const d = job.dispatch;
-  const submitted = d?.status === "Submitted";
-  if (!d) {
-    body.innerHTML = `<div class="empty-state">Dispatch data not available.</div>`;
-    return;
-  }
-  const live = dispatchLive(job);
-  const limits = hmLimits(job);
-  const min = limits.coldSoakMin;
-  const el = live.el;
-  const progress = el != null ? Math.min((el / min) * 100, 100) : 0;
-  const isEligible = el != null && el >= min;
-  const coldSoakStartStr = job.preset.finishTime 
-    ? new Date(job.preset.finishTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) 
-    : "—";
-  const duration = d.beforeExitTime && job.preset.finishTime
-    ? Math.round((new Date(d.beforeExitTime) - new Date(job.preset.finishTime)) / 60000)
-    : (d.coldSoakDurationMin ?? (el != null ? el : null));
-  const items = job.preset.items || [];
-  const temps = d.beforeExitTemps ? Object.values(d.beforeExitTemps).filter(v => v != null && v !== "") : [];
-  const maxTemp = temps.length > 0 ? Math.max(...temps) : (d.beforeExitTemp ?? null);
-  const dis = submitted ? "disabled" : "";
+  
+  const presetItems = job.preset.items || [];
+  const fcItems = job.foodChecker.items || [];
   
   body.innerHTML = `
-    <div class="fc-timer-bar" style="margin-bottom:16px">
-      <div class="fc-timer-display">
-        <div class="fc-timer-value" style="font-size:48px;font-weight:700">${el != null ? fmtElapsed(el) : "—"}</div>
-        <div style="margin-top:8px">
-          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${progress}%;background:var(--success);transition:width 1s"></div>
-          </div>
-        </div>
+    <div class="dispatch-panels">
+      <div class="dispatch-panel">
+        <h3 class="panel-title">Preset Dispatch</h3>
+        ${renderDispatchPanel(job.dispatchPreset, presetItems, 'preset')}
       </div>
-      <div style="flex:1;padding:0 24px">
-        <div style="font-size:14px;color:var(--text-secondary)">Cold soak minimum <b>${fmtDuration(min)}</b> · from ${coldSoakStartStr} (last item finish)</div>
-        <div style="font-size:14px;font-weight:600;margin-top:4px">${isEligible ? "Minimum already met — eligible for dispatch" : "Cold soak in progress..."}</div>
-      </div>
-      <div>${pill(live.label, live.cls, live.el)}</div>
-    </div>
-    
-    ${isEligible ? `<div class="info-banner" style="margin-bottom:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.5 6.5l-4 4a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06L7 8.94l3.44-3.44a.75.75 0 011.06 1.06z" fill="currentColor"/></svg><span>Cold soak has met the minimum. CTS may record the time and temperature before the trolleys exit.</span></div>` : ""}
-    
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-        <div>
-          <div class="panel-title" style="margin-bottom:2px">Dispatch — before exiting the holding room</div>
-          <div style="font-size:13px;color:var(--text-secondary)">One time for the stage, temperature per item row · Annexure 5.3 / 5.4</div>
-        </div>
-        <span class="status-pill submitted">Owner: CTS Team</span>
-      </div>
-      
-      <div class="form-grid" style="margin-top:16px">
-        <div class="form-group">
-          <label class="form-label">Cold soak start</label>
-          <input type="text" class="form-input" readonly value="${coldSoakStartStr}" style="background:var(--bg-surface)" />
-        </div>
-        <div class="form-group">
-          <label class="form-label required">Before-exit time (24h)</label>
-          <div style="display:flex;gap:8px">
-            <input type="time" class="form-input" id="d-exit-time" value="${d.beforeExitTime ?? ""}" ${dis} style="flex:1" onchange="updateDispatchBeforeExitTime(this.value)" />
-            ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow()" style="padding:8px 16px">Now</button>` : ""}
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">One time for the whole stage</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cold soak duration</label>
-          <input type="text" class="form-input" readonly value="${fmtDuration(duration)}" style="background:var(--bg-surface)" />
-        </div>
-      </div>
-      
-      <div class="table-wrap" style="margin-top:20px">
-        <table class="fc-table">
-          <thead>
-            <tr>
-              <th style="width:40px">#</th>
-              <th style="width:80px">CLASS</th>
-              <th>ITEM DESCRIPTION</th>
-              <th style="width:100px">SKU</th>
-              <th style="width:140px">BEFORE-EXIT TEMP °C *</th>
-              <th style="width:120px">ITEM RESULT</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map((item, i) => {
-              const itemTemp = d.beforeExitTemps?.[item.linkId] ?? "";
-              const itemResult = itemTemp !== "" && itemTemp != null ? (parseFloat(itemTemp) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant") : null;
-              return `<tr>
-                <td>${i + 1}</td>
-                <td>${esc(item.class)}</td>
-                <td>${esc(item.item_description)}</td>
-                <td>${esc(item.sku)}</td>
-                <td><input type="number" step="0.1" class="form-input" value="${itemTemp}" ${dis} onchange="updateDispatchItemTemp('${item.linkId}', this.value)" onclick="event.stopPropagation()" style="width:100px" /></td>
-                <td>${itemResult ? `<span class="status-pill ${itemResult === 'Compliant' ? 'compliant' : 'nc'}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>'}</td>
-              </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="fc-metric-cards" style="margin-top:20px">
-        <div class="fc-metric-card">
-          <div class="fc-metric-label">COLD SOAK</div>
-          <div class="fc-metric-value">${fmtDuration(duration)}</div>
-          <div class="fc-metric-sub">Minimum ${fmtDuration(min)}</div>
-        </div>
-        <div class="fc-metric-card">
-          <div class="fc-metric-label">MAX DISPATCH TEMP</div>
-          <div class="fc-metric-value">${maxTemp != null ? maxTemp + " °C" : "—"}</div>
-          <div class="fc-metric-sub">${maxTemp != null ? (maxTemp <= limits.dispatchTempMax ? "Within limit" : "Exceeds limit") : "No data yet"}</div>
-        </div>
-        <div class="fc-metric-card">
-          <div class="fc-metric-label">DISPATCH RESULT</div>
-          <div class="fc-metric-value">${d.complianceResult ?? "—"}</div>
-          <div class="fc-metric-sub">Calculated on submit</div>
-        </div>
-      </div>
-      
-      <div id="dispatch-error" class="badge-error hidden" style="margin-top:12px"></div>
-      
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-        <div style="font-size:13px;color:var(--text-secondary)">Enter a temperature for every item row.</div>
-        ${submitted ? renderSubmittedPanel(job, "dispatch") : `<button type="button" class="btn-primary" onclick="submitStage('dispatch')" ${dis}>Submit</button>`}
+      <div class="dispatch-panel">
+        <h3 class="panel-title">Food Checker Dispatch</h3>
+        ${renderDispatchPanel(job.dispatchFC, fcItems, 'fc')}
       </div>
     </div>
-    
-    ${d.complianceResult === "Non-Compliant" ? renderExceptionPanel("dispatch") : ""}
   `;
+  
+  // Start timer updates for each dispatch type if before-exit time is not entered
+  const presetDispatch = job.dispatchPreset;
+  const fcDispatch = job.dispatchFC;
+  
+  if (presetDispatch && presetDispatch.coldSoakStart && presetDispatch.status !== 'Submitted') {
+    if (!presetDispatch.beforeExitTime) {
+      startDispatchTimerUpdates('preset');
+    } else {
+      stopDispatchTimerUpdates('preset');
+    }
+  } else {
+    stopDispatchTimerUpdates('preset');
+  }
+  
+  if (fcDispatch && fcDispatch.coldSoakStart && fcDispatch.status !== 'Submitted') {
+    if (!fcDispatch.beforeExitTime) {
+      startDispatchTimerUpdates('fc');
+    } else {
+      stopDispatchTimerUpdates('fc');
+    }
+  } else {
+    stopDispatchTimerUpdates('fc');
+  }
 }
 
 function renderDispatchCompliance(job) {
@@ -2374,9 +3001,28 @@ function submitStage(stage) {
   const errId = stage === "preset" ? "preset-error" : stage === "foodchecker" ? "fc-error" : "dispatch-error";
 
   if (stage === "preset") {
-    const services = job.preset.services || [{}];
-    if (!services.every(s => s.finishTime)) return showErr(errId, "All services must be finished before submitting.");
-    const hasNonCompliant = services.some(s => s.complianceResult === "Non-Compliant");
+    const presetMethod = state.presetMethod || (job.site === "SICC2" ? 'items' : 'services');
+    const itemsToCheck = presetMethod === 'items'
+      ? (job.preset.items || [])
+      : (job.preset.services || [{}]);
+    if (itemsToCheck.length === 0) return showErr(errId, presetMethod === 'items' ? "No preset items to submit." : "No preset services to submit.");
+
+    const startedItems = itemsToCheck.filter(s => s.startTime);
+    if (startedItems.length === 0) return showErr(errId, presetMethod === 'items' ? "At least one preset item must be started." : "At least one preset service must be started.");
+    if (!startedItems.every(s => s.finishTime)) return showErr(errId, presetMethod === 'items' ? "All started items must be finished before submitting." : "All started services must be finished before submitting.");
+
+    const finishedItems = startedItems.filter(s => s.finishTime);
+    // Calculate overall preset compliance based on individual results
+    const allCompliant = finishedItems.every(s => s.complianceResult === "Compliant");
+    job.preset.complianceResult = allCompliant ? "Compliant" : "Non-Compliant";
+    
+    // Set aggregate values for display
+    const maxExposure = Math.max(...finishedItems.map(s => s.exposureDurationMin || 0));
+    const maxTemp = Math.max(...finishedItems.map(s => s.maxSurfaceTemp || 0));
+    job.preset.exposureDurationMin = maxExposure;
+    job.preset.maxSurfaceTemp = maxTemp;
+    
+    const hasNonCompliant = finishedItems.some(s => s.complianceResult === "Non-Compliant");
     if (hasNonCompliant) {
       const exErr = validateException("preset");
       if (exErr) return showErr(errId, exErr);
@@ -2446,8 +3092,14 @@ function commitStage(stage, resolved, method) {
     job.signoffs.push(signoff);
     job.history.push({ at: now, actor: resolved.staffId, field: "preset", from: "Started", to: "Submitted", stage: "preset", version: 1 });
     if (job.site === "SICC2") {
-      job.dispatch = job.dispatch || { status: "ColdSoak" };
-      job.dispatch.coldSoakStart = job.preset.finishTime;
+      // Set preset dispatch cold soak start
+      const presetItems = job.preset?.items || [];
+      const lastPresetFinish = presetItems
+        .filter(i => i.finishTime)
+        .reduce((max, i) => Math.max(max, new Date(i.finishTime).getTime()), 0);
+      if (!job.dispatchPreset) job.dispatchPreset = {};
+      job.dispatchPreset.status = "ColdSoak";
+      job.dispatchPreset.coldSoakStart = lastPresetFinish || job.preset?.finishTime || Date.now();
     }
   }
 
@@ -2464,6 +3116,16 @@ function commitStage(stage, resolved, method) {
     }
     job.signoffs.push(signoff);
     job.history.push({ at: now, actor: resolved.staffId, field: "foodchecker", from: "InProgress", to: "Submitted", stage: "foodchecker", version: 1 });
+    if (job.site === "SICC2") {
+      // Set FC dispatch cold soak start
+      const fcItems = job.foodChecker?.items || [];
+      const lastFCFinish = fcItems
+        .filter(i => i.finishTime)
+        .reduce((max, i) => Math.max(max, new Date(i.finishTime).getTime()), 0);
+      if (!job.dispatchFC) job.dispatchFC = {};
+      job.dispatchFC.status = "ColdSoak";
+      job.dispatchFC.coldSoakStart = lastFCFinish || Date.now();
+    }
   }
 
   if (stage === "dispatch") {
@@ -2481,6 +3143,11 @@ function commitStage(stage, resolved, method) {
 
   maybeCloseJob(job);
   persistJob(job);
+  
+  // Re-render dispatch panel if on dispatch tab
+  if (state.activeTab === "dispatch") {
+    renderDispatch(document.getElementById("detail-body"), job);
+  }
 }
 
 // ── Live tick for detail ────────────────────────────────────────────
