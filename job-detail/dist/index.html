@@ -1,0 +1,5835 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 — Job Detail</title>
+    
+  <style>/* style.css */
+:root {
+  --bg-page: #f5f7fa;
+  --bg-surface: #fff;
+  --bg-surface-hover: #f8fafc;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-contrast: #fff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #0ea5e9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+.app {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.screen {
+  display: block;
+  padding: 24px 24px 72px;
+}
+
+#screen-current {
+  display: block;
+}
+
+#screen-current .screen-body {
+  padding: 24px 24px 72px;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items:  center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.page-sub {
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items:  center;
+  gap: 8px;
+}
+
+.btn-primary, .btn-secondary, .btn-back, .btn-ghost {
+  display: inline-flex;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid #0000;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 8px;
+  padding: 9px 16px;
+  transition: background .15s, border-color .15s, color .15s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+}
+
+.btn-back {
+  border-color: var(--border);
+  color: var(--text-secondary);
+  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, #6366f10a 0%, #818cf805 100%);
+  box-shadow: 0 2px 8px #0000000f;
+}
+
+.btn-back svg {
+  transition: transform .2s;
+}
+
+.btn-back:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: linear-gradient(135deg, #6366f114 0%, #818cf80a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #6366f11a;
+}
+
+.btn-back:hover svg {
+  transform: translateX(-3px);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px #6366f114;
+}
+
+.btn-ghost {
+  color: var(--text-secondary);
+  background: none;
+  border-color: #0000;
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled, .btn-back:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items:  center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.filter-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  border-radius: 10px;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.sicc-selector {
+  display: inline-flex;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  gap: 4px;
+  padding: 4px;
+}
+
+.sicc-btn {
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sicc-btn:first-child, .sicc-btn:last-child {
+  border-radius: 6px;
+}
+
+.sicc-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.sicc-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px #6366f140;
+}
+
+.sicc-topbar {
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  box-sizing: border-box;
+  background: #fff;
+  justify-content: flex-start;
+  align-items:  center;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 12px 0;
+}
+
+.sicc-topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items:  center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.topbar-nav {
+  display: inline-flex;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  gap: 4px;
+  padding: 4px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  color: #64748b;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  align-items:  center;
+  gap: 8px;
+  padding: 8px 16px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav-btn:hover {
+  color: #1e293b;
+  background: #e2e8f0;
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 2px 8px #6366f140;
+}
+
+.sicc-topbar .sicc-selector {
+  display: inline-flex;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  gap: 4px;
+  padding: 4px;
+}
+
+.sicc-topbar .sicc-btn {
+  color: #64748b;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sicc-topbar .sicc-btn:hover {
+  color: #1e293b;
+  background: #e2e8f0;
+}
+
+.sicc-topbar .sicc-btn.active {
+  color: #fff;
+  background: #6366f1;
+  box-shadow: 0 2px 8px #6366f140;
+}
+
+.preset-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preset-tab {
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: all .15s;
+  font-size: 14px;
+}
+
+.preset-tab:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+}
+
+.preset-tab.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (width <= 1200px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (width <= 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <= 600px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  display: flex;
+  border-radius: 12px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  transition: all .2s;
+  box-shadow: 0 1px 3px #0000000a;
+}
+
+.job-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px #00000014;
+}
+
+.job-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items:  flex-start;
+  gap: 10px;
+}
+
+.job-card-flight {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.job-card-meta {
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+.card-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-row {
+  display: flex;
+  border-bottom: 1px solid #e2e8f080;
+  justify-content: space-between;
+  align-items:  center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.card-row:last-child {
+  border-bottom: none;
+}
+
+.card-row-label {
+  color: var(--text-secondary);
+}
+
+.card-action {
+  justify-content: center;
+  width: 100%;
+  margin-top: 4px;
+  transition: all .2s;
+}
+
+.card-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #6366f133;
+}
+
+.form-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.form-section {
+  border-top: 1px solid var(--border);
+  padding: 20px 24px;
+}
+
+.form-section:first-child {
+  border-top: none;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.info-banner {
+  display: flex;
+  color: var(--text-primary);
+  background: #6366f10a;
+  border: 1px solid #6366f11f;
+  border-radius: 8px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.info-banner svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.info-banner strong {
+  color: var(--accent-hover);
+}
+
+.section-badge {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.preset-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.preset-wrapper-content {
+  padding: 16px;
+}
+
+.service-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.service-panel:last-child {
+  margin-bottom: 0;
+}
+
+.service-panel-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
+  align-items:  center;
+  padding: 16px 20px;
+}
+
+.service-panel-title {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.remove-service-btn {
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  justify-content: center;
+  align-items:  center;
+  padding: 4px;
+  transition: all .15s;
+}
+
+.remove-service-btn:hover {
+  color: var(--danger);
+  background: #ef44441a;
+}
+
+.service-panel-timer {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.service-panel-timer span {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.service-panel-body {
+  padding: 20px;
+}
+
+.service-panel-footer {
+  display: flex;
+  border-top: 1px dashed var(--border);
+  justify-content: space-between;
+  align-items:  center;
+  padding: 16px 20px;
+}
+
+.service-panel-footer-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.metric-card.compliant {
+  background: #22c55e14;
+  border-color: #22c55e4d;
+}
+
+.metric-label {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.metric-value {
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.metric-status {
+  color: #4ade80;
+  display: flex;
+  align-items:  center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.add-service-btn {
+  border: 1px dashed var(--border);
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 12px 20px;
+  transition: all .15s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.add-service-btn:hover {
+  border-color: var(--accent);
+  background: #6366f10a;
+}
+
+.metric-status svg {
+  width: 14px;
+  height: 14px;
+}
+
+.metric-hint {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.timer-cell {
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
+  display: flex;
+  border-radius: 10px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items:  center;
+  height: 100%;
+  padding: 12px 16px;
+}
+
+.timer-cell .timer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timer-cell .timer-label {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.timer-cell .timer-display {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  letter-spacing: -.02em;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.timer-cell .timer-display span {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.timer-cell .timer-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.timer-cell .timer-btn {
+  display: inline-flex;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 6px;
+  padding: 8px 16px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #6366f126;
+}
+
+.timer-cell .timer-btn:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px #6366f133;
+}
+
+.timer-cell .timer-btn:active {
+  transform: translateY(0);
+}
+
+.timer-cell .timer-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.timer-cell .timer-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-label.required:after {
+  content: " *";
+  color: var(--danger);
+}
+
+.form-input, select.form-input {
+  border: 1px solid var(--border);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  outline: none;
+  border-radius: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  transition: border-color .15s;
+  font-size: 14px;
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+}
+
+.form-input:disabled {
+  opacity: .6;
+}
+
+.form-input[readonly] {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  cursor: default;
+  opacity: 1;
+}
+
+.field-hint {
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.searchable-dropdown {
+  position: relative;
+}
+
+.dropdown-arrow {
+  position: absolute;
+  color: var(--text-secondary);
+  pointer-events: none;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+}
+
+.dropdown-clear {
+  position: absolute;
+  color: var(--text-secondary);
+  cursor: pointer;
+  z-index: 5;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  transition: all .15s;
+  font-size: 18px;
+  line-height: 1;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
+}
+
+.dropdown-clear:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.dropdown-list {
+  position: absolute;
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
+  overflow: auto;
+  z-index: 20;
+  border-radius: 8px;
+  max-height: 240px;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-page);
+}
+
+.dropdown-empty {
+  color: var(--text-secondary);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.rule-preview, .linked-preview {
+  margin-bottom: 16px;
+}
+
+.rule-preview-inner, .linked-preview-inner {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.rule-item {
+  display: inline-flex;
+  color: var(--text-secondary);
+  margin-right: 18px;
+}
+
+.rule-item b {
+  color: var(--text-primary);
+}
+
+.job-header {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  display: flex;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+
+.job-header-field {
+  flex: 170px;
+  min-width: 150px;
+}
+
+.job-header-field .form-label {
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+.job-header-field .form-input {
+  background: var(--bg-page);
+  width: 100%;
+}
+
+.job-header-field .form-input.accent {
+  color: var(--accent-hover);
+}
+
+.job-header-field .form-input:disabled {
+  opacity: .85;
+  cursor: not-allowed;
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--bg-surface);
+  border: none;
+  border-radius: 10px;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 8px;
+}
+
+.tab-card {
+  cursor: pointer;
+  background: none;
+  border: 1px solid #0000;
+  border-radius: 6px;
+  flex: 1;
+  padding: 10px 14px;
+  transition: all .15s;
+}
+
+.tab-card:hover {
+  background: #6366f10a;
+}
+
+.tab-card.active {
+  background: var(--bg-surface-hover);
+  border-color: var(--accent);
+}
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items:  center;
+  margin-bottom: 2px;
+}
+
+.tab-title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tab-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.tab-body {
+  min-height: 200px;
+}
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+
+.panel-title {
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dispatch-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dispatch-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.dispatch-panel .panel-title {
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.timer-display {
+  display: flex;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  align-items:  center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.status-pill {
+  display: inline-flex;
+  border: 1px solid #0000;
+  border-radius: 9999px;
+  align-items:  center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.status-pill.not-started {
+  color: #64748b;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.status-pill.in-progress {
+  color: var(--info);
+  background: #38bdf81f;
+  border-color: #38bdf84d;
+}
+
+.status-pill.warning {
+  color: var(--warning);
+  background: #f59e0b1f;
+  border-color: #f59e0b4d;
+}
+
+.status-pill.overtime {
+  color: var(--danger);
+  background: #ef44441f;
+  border-color: #ef44444d;
+}
+
+.status-pill.compliant {
+  color: var(--success);
+  background: #22c55e1f;
+  border-color: #22c55e4d;
+}
+
+.status-pill.nc {
+  color: var(--danger);
+  background: #ef44441f;
+  border-color: #ef44444d;
+}
+
+.status-pill.submitted {
+  color: var(--accent);
+  background: #6366f114;
+  border-color: #6366f133;
+}
+
+.status-pill.cold-soak {
+  color: var(--info);
+  background: #38bdf81a;
+  border-color: #38bdf840;
+}
+
+.status-pill.eligible {
+  color: var(--success);
+  background: #22c55e1a;
+  border-color: #22c55e40;
+}
+
+.status-pill.locked {
+  color: #64748b;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.data-table thead th {
+  text-align: left;
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  padding: 12px 14px;
+  font-weight: 600;
+}
+
+.data-table tbody td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  padding: 11px 14px;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-overlay {
+  position: fixed;
+  display: flex;
+  z-index: 50;
+  background: #040716b3;
+  justify-content: center;
+  align-items:  center;
+  padding: 20px;
+  inset: 0;
+}
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hover);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}
+
+.modal-title {
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 18px;
+}
+
+.modal-sub {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.modal-verify {
+  justify-content: center;
+  width: 100%;
+  margin: 8px 0 4px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.modal-identity {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 4px;
+  padding: 12px 14px;
+}
+
+.identity-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.identity-meta {
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.method-chip {
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.method-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #6366f10d;
+}
+
+.badge-error, .badge-success {
+  display: flex;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.badge-error {
+  color: var(--danger);
+  background: #ef44441f;
+}
+
+.badge-success {
+  color: var(--success);
+  background: #22c55e1f;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 60px 20px;
+  font-size: 15px;
+}
+
+.job-id {
+  color: var(--text-secondary);
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pill-elapsed {
+  font-variant-numeric: tabular-nums;
+  opacity: .9;
+  margin-left: 4px;
+}
+
+.info-box {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.info-box strong {
+  color: var(--text-primary);
+}
+
+.create-header-row {
+  display: flex;
+  align-items:  flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.create-flight-group {
+  flex: 2;
+  min-width: 280px;
+}
+
+.create-etd-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.create-group-group {
+  flex: 1.5;
+  min-width: 200px;
+}
+
+#create-items-container {
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.create-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items:  center;
+  margin-bottom: 16px;
+}
+
+.create-items-title {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.create-items-count {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.create-items-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.create-items-table thead th {
+  text-align: left;
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  border-bottom: 2px solid var(--border);
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.create-items-table tbody td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.create-items-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.create-item-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  cursor: pointer;
+  position: relative;
+  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  transition: all .2s;
+}
+
+.create-item-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.create-item-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.create-item-checkbox:checked:after {
+  content: "";
+  position: absolute;
+  border: 2px solid #fff;
+  border-width: 0 2px 2px 0;
+  width: 5px;
+  height: 10px;
+  top: 1px;
+  left: 5px;
+  transform: rotate(45deg);
+}
+
+.create-item-destination {
+  display: inline-flex;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  gap: 2px;
+  padding: 3px;
+}
+
+.create-dest-btn {
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  transition: all .15s;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.create-dest-btn:first-child {
+  border-right: none;
+}
+
+.create-dest-btn:hover {
+  color: var(--text-primary);
+}
+
+.create-dest-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 3px #6366f14d;
+}
+
+.segmented-buttons {
+  display: flex;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  gap: 8px;
+  padding: 4px;
+}
+
+.segment-btn {
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  flex: 1;
+  padding: 10px 16px;
+  transition: all .15s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.segment-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.segment-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.form-footer {
+  display: flex;
+  border-top: 1px solid var(--border);
+  justify-content: space-between;
+  align-items:  center;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.footer-text {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (width >= 769px) {
+  .field-trays {
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  .field-dts {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .field-dtf {
+    grid-row: 3;
+    grid-column: 2;
+  }
+}
+
+@media (width <= 768px) {
+  .preset-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .timer-cell {
+    grid-column: span 2;
+  }
+
+  .field-hts {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .field-htf {
+    grid-row: 3;
+    grid-column: 2;
+  }
+
+  .field-dts {
+    grid-row: 4;
+    grid-column: 1;
+  }
+
+  .field-dtf {
+    grid-row: 4;
+    grid-column: 2;
+  }
+
+  .field-trays {
+    grid-row: 5;
+    grid-column: 1;
+  }
+
+  .field-staff {
+    grid-row: 5;
+    grid-column: 2;
+  }
+}
+
+@media (width <= 480px) {
+  .preset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timer-cell {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  .field-hts {
+    grid-row: 4;
+    grid-column: 1;
+  }
+
+  .field-htf {
+    grid-row: 5;
+    grid-column: 1;
+  }
+
+  .field-dts {
+    grid-row: 6;
+    grid-column: 1;
+  }
+
+  .field-dtf {
+    grid-row: 7;
+    grid-column: 1;
+  }
+
+  .field-trays {
+    grid-row: 8;
+    grid-column: 1;
+  }
+
+  .field-staff {
+    grid-row: 9;
+    grid-column: 1;
+  }
+}
+
+@media (width <= 768px) {
+  .metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <= 480px) {
+  .metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.fc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items:  flex-start;
+  margin-bottom: 16px;
+}
+
+.fc-header-title {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.fc-header-subtitle {
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.fc-mandatory-badge {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fc-meal-service {
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.fc-meal-service label {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fc-meal-service label .required {
+  color: var(--danger);
+}
+
+.fc-selection-bar {
+  display: flex;
+  border: 1px solid var(--border);
+  background: #6366f10a;
+  border-radius: 8px;
+  justify-content: space-between;
+  align-items:  center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+}
+
+.fc-selection-count {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fc-selection-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.fc-selection-note {
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.fc-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.fc-table thead {
+  background: var(--bg-surface);
+}
+
+.fc-table th {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border);
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.fc-table td {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.fc-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.fc-table tbody tr.selected {
+  background: #6366f10a;
+}
+
+.fc-table tbody tr.expanded-row {
+  background: var(--bg-surface);
+}
+
+.fc-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  cursor: pointer;
+  position: relative;
+  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  transition: all .2s;
+}
+
+.fc-checkbox:hover {
+  border-color: var(--accent);
+  background: var(--bg-surface-hover);
+}
+
+.fc-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.fc-checkbox:checked:after {
+  content: "";
+  position: absolute;
+  border: 2px solid #fff;
+  border-width: 0 2px 2px 0;
+  width: 5px;
+  height: 10px;
+  top: 1px;
+  left: 5px;
+  transform: rotate(45deg);
+}
+
+.fc-checkbox:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.fc-status-badge {
+  display: inline-flex;
+  border-radius: 12px;
+  align-items:  center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fc-status-badge.in-progress {
+  color: var(--success);
+  background: #22c55e29;
+}
+
+.fc-status-badge.not-started {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.fc-status-badge.compliant {
+  color: var(--success);
+  background: #22c55e29;
+}
+
+.fc-status-badge.non-compliant {
+  color: var(--danger);
+  background: #ef444429;
+}
+
+.fc-status-dot {
+  background: currentColor;
+  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+}
+
+.fc-expanded-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 20px;
+}
+
+.fc-expanded-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.fc-expanded-field label {
+  display: block;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fc-expanded-field label .required {
+  color: var(--danger);
+}
+
+.fc-timer-bar {
+  display: flex;
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  justify-content: space-between;
+  align-items:  center;
+  margin: 16px 0;
+  padding: 16px 20px;
+}
+
+.fc-timer-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fc-timer-label {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.fc-timer-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  letter-spacing: -.02em;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.fc-timer-value span {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.fc-timer-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.fc-metric-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.fc-metric-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.fc-metric-label {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.fc-metric-value {
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.fc-metric-status {
+  color: var(--success);
+  display: flex;
+  align-items:  center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.fc-metric-status.nc {
+  color: var(--danger);
+}
+
+.fc-metric-card.compliant {
+  border-color: var(--success);
+  background: #22c55e0d;
+}
+
+.fc-metric-card.nc {
+  border-color: var(--danger);
+  background: #ef44440d;
+}
+
+.fc-segmented-control {
+  display: flex;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.fc-segment-btn {
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  flex: 1;
+  padding: 10px 16px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.fc-segment-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.fc-segment-btn:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.fc-metric-hint {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.fc-expanded-footer {
+  display: flex;
+  border-top: 1px solid var(--border);
+  justify-content: space-between;
+  align-items:  center;
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.fc-expanded-footer-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.fc-footer {
+  display: flex;
+  border-top: 1px solid var(--border);
+  justify-content: space-between;
+  align-items:  center;
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.fc-footer-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+@media (width <= 768px) {
+  .fc-expanded-grid, .fc-metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <= 480px) {
+  .fc-selection-bar {
+    flex-direction: column;
+    align-items:  flex-start;
+    gap: 12px;
+  }
+
+  .fc-expanded-grid, .fc-metric-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .fc-table {
+    font-size: 12px;
+  }
+
+  .fc-table th, .fc-table td {
+    padding: 8px;
+  }
+}
+</style></head>
+  <body>
+    <div class="app">
+      <section class="screen" id="screen-detail">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title" id="detail-title">CCP6 Job</h1>
+            <p class="page-sub" id="detail-flight-sub"></p>
+          </div>
+          <div class="page-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="navigate('report')"
+            >
+              Web Report
+            </button>
+            <button
+              type="button"
+              class="btn-back"
+              onclick="navigate('current')"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          </div>
+        </div>
+
+        <!-- Persistent shared header -->
+        <div class="job-header" id="detail-header"></div>
+
+        <!-- Stage tabs -->
+        <div class="tab-bar" id="detail-tabs"></div>
+
+        <div class="tab-body" id="detail-body"></div>
+      </section>
+    </div>
+
+    <!-- Sign-off modal -->
+    <div id="signoff-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 class="modal-title">Sign Off — <span id="signoff-stage"></span></h2>
+        <p class="modal-sub">Confirm your identity to submit this stage</p>
+
+        <div id="signoff-error" class="badge-error hidden"></div>
+
+        <div class="modal-tabs" id="signoff-methods"></div>
+
+        <div class="form-group">
+          <label class="form-label" id="signoff-input-label" for="signoff-input"
+            >Staff ID</label
+          >
+          <input
+            type="text"
+            id="signoff-input"
+            class="form-input"
+            autocomplete="off"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="btn-primary modal-verify"
+          onclick="resolveIdentity()"
+        >
+          Verify &amp; Confirm
+        </button>
+
+        <div class="modal-identity hidden" id="signoff-confirm">
+          <p class="identity-name" id="signoff-name"></p>
+          <p class="identity-meta" id="signoff-role"></p>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="confirmSignoff(true)"
+            >
+              Confirm Submit
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="confirmSignoff(false)"
+            >
+              Change
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-ghost"
+          id="signoff-cancel"
+          onclick="closeSignoff()"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    
+  <script type="module">// ../sample-data.js
+var MIN = 60 * 1000;
+var ago = (mins) => new Date(Date.now() - mins * MIN).toISOString();
+var HEADER = {
+  flight_date: "2026-08-07",
+  etd: "14:30"
+};
+function mkItems(list) {
+  return list.map((it, i) => ({
+    link_id: "LINK-" + it.sku,
+    ccp5_record_id: it.rec || "CP5-" + (1000 + i * 7),
+    sku: it.sku,
+    item_description: it.desc,
+    class: it.cls,
+    quantity: it.qty
+  }));
+}
+var _linkIdCounter = 0;
+function mkFCItem(item, opts = {}) {
+  return {
+    linkId: "LINK-" + item.sku + "-" + (opts.index ?? _linkIdCounter++),
+    sku: item.sku,
+    item_description: item.desc,
+    class: item.cls,
+    quantity: item.qty,
+    startTemp: opts.startTemp ?? null,
+    finishTemp: opts.finishTemp ?? null,
+    startTime: opts.startTime ?? null,
+    finishTime: opts.finishTime ?? null,
+    durationMin: opts.durationMin ?? null,
+    status: opts.status ?? "NotStarted",
+    complianceResult: opts.compliance ?? null,
+    exceptionId: opts.exceptionId ?? null
+  };
+}
+function completeJob(job, closedAt) {
+  const staff = {
+    staffId: "STF-001",
+    staffName: "Alice Smith",
+    role: "Operator",
+    captureMethod: "staffid"
+  };
+  job.job_status = "Closed";
+  job.closed = true;
+  job.closedAt = closedAt;
+  job.preset.status = "Submitted";
+  job.preset.complianceResult = "Compliant";
+  if (job.preset.services) {
+    job.preset.services.forEach((s) => {
+      s.complianceResult = "Compliant";
+    });
+  }
+  if (job.preset.items) {
+    job.preset.items.forEach((it) => {
+      it.status = "Submitted";
+      it.complianceResult = "Compliant";
+    });
+  }
+  if (job.foodChecker) {
+    job.foodChecker.status = "Submitted";
+    (job.foodChecker.items || []).forEach((it) => {
+      it.status = "Submitted";
+      it.complianceResult = "Compliant";
+    });
+  }
+  const dispatchBase = {
+    status: "Submitted",
+    complianceResult: "Compliant",
+    coldSoakStart: ago(140),
+    beforeExitTime: ago(90),
+    coldSoakDurationMin: 120,
+    beforeExitTemps: {}
+  };
+  if (job.dispatch)
+    Object.assign(job.dispatch, dispatchBase);
+  job.dispatchPreset = { ...dispatchBase };
+  job.dispatchFC = { ...dispatchBase };
+  job.signoffs = [
+    { stage: "preset", ...staff, submittedAt: ago(110) },
+    { stage: "foodchecker", ...staff, submittedAt: ago(100) },
+    { stage: "dispatch", ...staff, submittedAt: ago(90) }
+  ];
+  job.history = (job.history || []).concat([
+    { at: ago(110), actor: staff.staffName, field: "preset", from: "NotStarted", to: "Submitted", stage: "preset", version: 1 },
+    { at: ago(100), actor: staff.staffName, field: "foodchecker", from: "NotStarted", to: "Submitted", stage: "foodchecker", version: 1 },
+    { at: ago(90), actor: staff.staffName, field: "dispatch", from: "ColdSoak", to: "Submitted", stage: "dispatch", version: 1 },
+    { at: ago(80), actor: staff.staffName, field: "job", from: "Open", to: "Closed", stage: "header", version: 1 }
+  ]);
+  return job;
+}
+var JOB_1 = {
+  job_id: "CCP6-260807-01",
+  flight_number: "QF12",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Lunch",
+  ta_group: "A",
+  airline: "Qantas (QF)",
+  rule_set: "QF",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(120),
+  linkedItems: mkItems([
+    { sku: "100100", desc: "Roasted Chicken Supreme", cls: "Economy", qty: 96, rec: "CP5-1001" },
+    { sku: "100210", desc: "Grilled Sea Bass Fillet", cls: "Premium Economy", qty: 48, rec: "CP5-1002" },
+    { sku: "100305", desc: "Chocolate Opera Cake", cls: "Economy", qty: 96, rec: "CP5-1003" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    services: [
+      {
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTempHorsDoeuvre: 5,
+        finishTempHorsDoeuvre: 4,
+        startTempDessert: 6,
+        finishTempDessert: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTempHorsDoeuvre: 6,
+        finishTempHorsDoeuvre: 5,
+        startTempDessert: 7,
+        finishTempDessert: 6,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      }
+    ],
+    items: [
+      mkFCItem({ sku: "SQZJ19", desc: "APP TUNA BALL / CABBAGE ROLL", cls: "BC", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      })
+    ],
+    traysHandled: 256,
+    staffCount: 6
+  },
+  foodChecker: {
+    status: "Submitted",
+    items: [
+      mkFCItem({ sku: "100100", desc: "Roasted Chicken Supreme", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "100210", desc: "Grilled Sea Bass Fillet", cls: "Premium Economy", qty: 48 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "100305", desc: "Chocolate Opera Cake", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "100410", desc: "Caesar Salad", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(120), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_2 = {
+  job_id: "CCP6-260807-02",
+  flight_number: "UA24",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Breakfast",
+  ta_group: "B",
+  airline: "United Airlines (UA)",
+  rule_set: "UA",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(90),
+  linkedItems: mkItems([
+    { sku: "200101", desc: "Egg White Omelette", cls: "Economy", qty: 120, rec: "CP5-2001" },
+    { sku: "200202", desc: "Buttermilk Pancake Stack", cls: "Business", qty: 36, rec: "CP5-2002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    services: [
+      {
+        startTime: null,
+        finishTime: null,
+        startTempHorsDoeuvre: null,
+        finishTempHorsDoeuvre: null,
+        startTempDessert: null,
+        finishTempDessert: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      }
+    ],
+    items: [
+      mkFCItem({ sku: "SQZJ19", desc: "EGG WHITE OMELETTE / TOAST", cls: "BC", qty: 120 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "BUTTERMILK PANCAKE STACK", cls: "BC", qty: 36 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "FRESH FRUIT BOWL", cls: "BC", qty: 120 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "SMOKED SALMON BAGEL", cls: "EY", qty: 36 }, { status: "NotStarted" })
+    ],
+    traysHandled: 180,
+    staffCount: 5
+  },
+  foodChecker: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "200101", desc: "Egg White Omelette", cls: "Economy", qty: 120 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "200202", desc: "Buttermilk Pancake Stack", cls: "Business", qty: 36 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "200303", desc: "Fresh Fruit Bowl", cls: "Economy", qty: 120 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "200404", desc: "Smoked Salmon Bagel", cls: "Business", qty: 36 }, { status: "NotStarted" })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(90), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_3 = {
+  job_id: "CCP6-260807-03",
+  flight_number: "SQ-ORD-31",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Dinner",
+  ta_group: "C",
+  airline: "Standard / Other Airline",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(150),
+  linkedItems: mkItems([
+    { sku: "300101", desc: "Beef Rendang with Jasmine Rice", cls: "Economy", qty: 144, rec: "CP5-3001" },
+    { sku: "300202", desc: "Pan Seared Salmon", cls: "Premium Economy", qty: 60, rec: "CP5-3002" },
+    { sku: "300303", desc: "Tiramisu Cup", cls: "Economy", qty: 144, rec: "CP5-3003" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    services: [
+      {
+        startTime: null,
+        finishTime: null,
+        startTempHorsDoeuvre: null,
+        finishTempHorsDoeuvre: null,
+        startTempDessert: null,
+        finishTempDessert: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      }
+    ],
+    items: [
+      mkFCItem({ sku: "SQZJ19", desc: "BEEF RENDANG / JASMINE RICE", cls: "BC", qty: 144 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "PAN SEARED SALMON", cls: "BC", qty: 60 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "TIRAMISU CUP", cls: "BC", qty: 144 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "GRILLED VEGETABLE PLATE", cls: "EY", qty: 60 }, { status: "NotStarted" })
+    ],
+    traysHandled: 300,
+    staffCount: 8
+  },
+  foodChecker: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "300101", desc: "Beef Rendang with Jasmine Rice", cls: "Economy", qty: 144 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "300202", desc: "Pan Seared Salmon", cls: "Premium Economy", qty: 60 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "300303", desc: "Tiramisu Cup", cls: "Economy", qty: 144 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "300404", desc: "Garden Salad", cls: "Economy", qty: 144 }, {
+        status: "NotStarted"
+      })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(150), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_4 = {
+  job_id: "CCP6-260807-04",
+  flight_number: "BA5",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Lunch",
+  ta_group: "D",
+  airline: "Standard / Other Airline",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(300),
+  linkedItems: mkItems([
+    { sku: "400101", desc: "Chicken Tikka Masala", cls: "Economy", qty: 72, rec: "CP5-4001" },
+    { sku: "400202", desc: "Vegetable Korma", cls: "Special Meal", qty: 24, rec: "CP5-4002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [
+      {
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTempHorsDoeuvre: 5,
+        finishTempHorsDoeuvre: 4,
+        startTempDessert: 6,
+        finishTempDessert: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTempHorsDoeuvre: 6,
+        finishTempHorsDoeuvre: 5,
+        startTempDessert: 7,
+        finishTempDessert: 6,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      }
+    ],
+    items: [
+      mkFCItem({ sku: "400101", desc: "Chicken Tikka Masala", cls: "Economy", qty: 72 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400202", desc: "Vegetable Korma", cls: "Special Meal", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400303", desc: "Garlic Naan", cls: "Economy", qty: 72 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400404", desc: "Mango Lassi", cls: "Special Meal", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      })
+    ]
+  },
+  foodChecker: {
+    status: "Submitted",
+    items: [
+      mkFCItem({ sku: "400101", desc: "Chicken Tikka Masala", cls: "Economy", qty: 72 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400202", desc: "Vegetable Korma", cls: "Special Meal", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400303", desc: "Garlic Naan", cls: "Economy", qty: 72 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      }),
+      mkFCItem({ sku: "400404", desc: "Mango Lassi", cls: "Special Meal", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant"
+      })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(300), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_5 = {
+  job_id: "CCP6-260807-05",
+  flight_number: "NH7",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Breakfast",
+  ta_group: "A",
+  airline: "Standard / Other Airline",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(400),
+  linkedItems: mkItems([
+    { sku: "500101", desc: "Japanese Chicken Teriyaki", cls: "Economy", qty: 108, rec: "CP5-5001" },
+    { sku: "500202", desc: "Tamago Sushi Roll", cls: "Economy", qty: 108, rec: "CP5-5002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    items: [
+      mkFCItem({ sku: "SQZJ19", desc: "JAPANESE CHICKEN TERIYAKI", cls: "BC", qty: 108 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "TAMAGO SUSHI ROLL", cls: "BC", qty: 108 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "MISO SOUP", cls: "BC", qty: 108 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "EDAMAME", cls: "EY", qty: 108 }, { status: "NotStarted" })
+    ]
+  },
+  foodChecker: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "500101", desc: "Japanese Chicken Teriyaki", cls: "Economy", qty: 108 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "500202", desc: "Tamago Sushi Roll", cls: "Economy", qty: 108 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "500303", desc: "Miso Soup", cls: "Economy", qty: 108 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "500404", desc: "Edamame", cls: "Economy", qty: 108 }, {
+        status: "NotStarted"
+      })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(400), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_6 = {
+  job_id: "CCP6-260807-06",
+  flight_number: "CX88",
+  flight_date: HEADER.flight_date,
+  etd: HEADER.etd,
+  meal_service: "Dinner",
+  ta_group: "B",
+  airline: "Standard / Other Airline",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(60),
+  linkedItems: mkItems([
+    { sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84, rec: "CP5-6001" },
+    { sku: "600202", desc: "Steamed Cod with Broccoli", cls: "Business", qty: 30, rec: "CP5-6002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}],
+    items: [
+      mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600202", desc: "Steamed Cod with Broccoli", cls: "Business", qty: 30 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600303", desc: "Spring Rolls", cls: "Economy", qty: 84 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600404", desc: "Hot & Sour Soup", cls: "Business", qty: 30 }, {
+        status: "NotStarted"
+      })
+    ]
+  },
+  foodChecker: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600202", desc: "Steamed Cod with Broccoli", cls: "Business", qty: 30 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600303", desc: "Spring Rolls", cls: "Economy", qty: 84 }, {
+        status: "NotStarted"
+      }),
+      mkFCItem({ sku: "600404", desc: "Hot & Sour Soup", cls: "Business", qty: 30 }, {
+        status: "NotStarted"
+      })
+    ]
+  },
+  dispatch: {
+    beforeExitTime: null,
+    beforeExitTemp: null,
+    beforeExitTemps: {},
+    coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(),
+    coldSoakDurationMin: null,
+    complianceResult: null,
+    status: null
+  },
+  signoffs: [],
+  exceptions: [],
+  history: [
+    { at: ago(60), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }
+  ]
+};
+var JOB_7 = {
+  job_id: "CCP6-260807-07",
+  flight_number: "EK215",
+  flight_date: HEADER.flight_date,
+  etd: "23:10",
+  meal_service: "Dinner",
+  ta_group: "A",
+  airline: "Emirates (EK)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(50),
+  linkedItems: mkItems([
+    { sku: "700101", desc: "Lamb Ouzi", cls: "Economy", qty: 120, rec: "CP5-7001" },
+    { sku: "700202", desc: "Grilled Sea Bass", cls: "Business", qty: 40, rec: "CP5-7002" },
+    { sku: "700303", desc: "Baklava", cls: "Economy", qty: 120, rec: "CP5-7003" },
+    { sku: "700404", desc: "Fresh Fruit Platter", cls: "Business", qty: 40, rec: "CP5-7004" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "700101", desc: "LAMB OUZI / RICE", cls: "EY", qty: 120 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "700202", desc: "GRILLED SEA BASS", cls: "BC", qty: 40 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "700303", desc: "BAKLAVA", cls: "EY", qty: 120 }, { status: "NotStarted" })
+    ],
+    traysHandled: 200,
+    staffCount: 6
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "700101", desc: "Lamb Ouzi", cls: "Economy", qty: 120 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "700202", desc: "Grilled Sea Bass", cls: "Business", qty: 40 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(50), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_8 = {
+  job_id: "CCP6-260807-08",
+  flight_number: "QR908",
+  flight_date: HEADER.flight_date,
+  etd: "13:20",
+  meal_service: "Lunch",
+  ta_group: "B",
+  airline: "Qatar Airways (QR)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(45),
+  linkedItems: mkItems([
+    { sku: "800101", desc: "Chicken Machboos", cls: "Economy", qty: 96, rec: "CP5-8001" },
+    { sku: "800202", desc: "Grilled Salmon", cls: "Business", qty: 32, rec: "CP5-8002" },
+    { sku: "800303", desc: "Umm Ali", cls: "Economy", qty: 96, rec: "CP5-8003" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "800101", desc: "CHICKEN MACHBOOS", cls: "EY", qty: 96 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "800202", desc: "GRILLED SALMON", cls: "BC", qty: 32 }, { status: "NotStarted" })
+    ],
+    traysHandled: 160,
+    staffCount: 5
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "800101", desc: "Chicken Machboos", cls: "Economy", qty: 96 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(45), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_9 = {
+  job_id: "CCP6-260807-09",
+  flight_number: "SQ12",
+  flight_date: HEADER.flight_date,
+  etd: "08:00",
+  meal_service: "Breakfast",
+  ta_group: "C",
+  airline: "Singapore Airlines (SQ)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(40),
+  linkedItems: mkItems([
+    { sku: "900101", desc: "Kaya Toast Set", cls: "Economy", qty: 108, rec: "CP5-9001" },
+    { sku: "900202", desc: "Dim Sum Platter", cls: "Business", qty: 36, rec: "CP5-9002" },
+    { sku: "900303", desc: "Fresh Fruit Bowl", cls: "Economy", qty: 108, rec: "CP5-9003" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "900101", desc: "KAYA TOAST SET", cls: "EY", qty: 108 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "900202", desc: "DIM SUM PLATTER", cls: "BC", qty: 36 }, { status: "NotStarted" })
+    ],
+    traysHandled: 180,
+    staffCount: 5
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "900101", desc: "Kaya Toast Set", cls: "Economy", qty: 108 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(40), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_10 = {
+  job_id: "CCP6-260807-10",
+  flight_number: "TG476",
+  flight_date: HEADER.flight_date,
+  etd: "21:30",
+  meal_service: "Dinner",
+  ta_group: "D",
+  airline: "Thai Airways (TG)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(35),
+  linkedItems: mkItems([
+    { sku: "100101", desc: "Pad Thai", cls: "Economy", qty: 84, rec: "CP5-1001" },
+    { sku: "100202", desc: "Tom Yum Soup", cls: "Business", qty: 28, rec: "CP5-1002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "100101", desc: "PAD THAI", cls: "EY", qty: 84 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "100202", desc: "TOM YUM SOUP", cls: "BC", qty: 28 }, { status: "NotStarted" })
+    ],
+    traysHandled: 140,
+    staffCount: 4
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "100101", desc: "Pad Thai", cls: "Economy", qty: 84 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(35), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_11 = {
+  job_id: "CCP6-260807-11",
+  flight_number: "MH67",
+  flight_date: HEADER.flight_date,
+  etd: "12:45",
+  meal_service: "Lunch",
+  ta_group: "A",
+  airline: "Malaysia Airlines (MH)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(30),
+  linkedItems: mkItems([
+    { sku: "110101", desc: "Nasi Lemak", cls: "Economy", qty: 96, rec: "CP5-1101" },
+    { sku: "110202", desc: "Rendang Beef", cls: "Business", qty: 32, rec: "CP5-1102" },
+    { sku: "110303", desc: "Kuih Tart", cls: "Economy", qty: 96, rec: "CP5-1103" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "110101", desc: "NASI LEMAK", cls: "EY", qty: 96 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "110202", desc: "RENDANG BEEF", cls: "BC", qty: 32 }, { status: "NotStarted" })
+    ],
+    traysHandled: 160,
+    staffCount: 5
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "110101", desc: "Nasi Lemak", cls: "Economy", qty: 96 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(30), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_12 = {
+  job_id: "CCP6-260807-12",
+  flight_number: "CI75",
+  flight_date: HEADER.flight_date,
+  etd: "09:15",
+  meal_service: "Breakfast",
+  ta_group: "B",
+  airline: "China Airlines (CI)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(25),
+  linkedItems: mkItems([
+    { sku: "120101", desc: "Congee Set", cls: "Economy", qty: 72, rec: "CP5-1201" },
+    { sku: "120202", desc: "Xiao Long Bao", cls: "Business", qty: 24, rec: "CP5-1202" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "120101", desc: "CONGEE SET", cls: "EY", qty: 72 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "120202", desc: "XIAO LONG BAO", cls: "BC", qty: 24 }, { status: "NotStarted" })
+    ],
+    traysHandled: 120,
+    staffCount: 4
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "120101", desc: "Congee Set", cls: "Economy", qty: 72 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(25), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_13 = {
+  job_id: "CCP6-260807-13",
+  flight_number: "BR18",
+  flight_date: HEADER.flight_date,
+  etd: "20:00",
+  meal_service: "Dinner",
+  ta_group: "C",
+  airline: "EVA Air (BR)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(20),
+  linkedItems: mkItems([
+    { sku: "130101", desc: "Braised Pork Rice", cls: "Economy", qty: 84, rec: "CP5-1301" },
+    { sku: "130202", desc: "Steamed Fish", cls: "Business", qty: 28, rec: "CP5-1302" },
+    { sku: "130303", desc: "Mango Pudding", cls: "Economy", qty: 84, rec: "CP5-1303" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "130101", desc: "BRAISED PORK RICE", cls: "EY", qty: 84 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "130202", desc: "STEAMED FISH", cls: "BC", qty: 28 }, { status: "NotStarted" })
+    ],
+    traysHandled: 140,
+    staffCount: 4
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "130101", desc: "Braised Pork Rice", cls: "Economy", qty: 84 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(20), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_14 = {
+  job_id: "CCP6-260807-14",
+  flight_number: "KE65",
+  flight_date: HEADER.flight_date,
+  etd: "11:30",
+  meal_service: "Lunch",
+  ta_group: "D",
+  airline: "Korean Air (KE)",
+  rule_set: "STANDARD",
+  site: "SICC2",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(15),
+  linkedItems: mkItems([
+    { sku: "140101", desc: "Bibimbap", cls: "Economy", qty: 108, rec: "CP5-1401" },
+    { sku: "140202", desc: "Bulgogi", cls: "Business", qty: 36, rec: "CP5-1402" },
+    { sku: "140303", desc: "Kimchi", cls: "Economy", qty: 108, rec: "CP5-1403" },
+    { sku: "140404", desc: "Tteok", cls: "Business", qty: 36, rec: "CP5-1404" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    items: [
+      mkFCItem({ sku: "140101", desc: "BIBIMBAP", cls: "EY", qty: 108 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "140202", desc: "BULGOGI", cls: "BC", qty: 36 }, { status: "NotStarted" })
+    ],
+    traysHandled: 180,
+    staffCount: 5
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "140101", desc: "Bibimbap", cls: "Economy", qty: 108 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(15), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_15 = {
+  job_id: "CCP6-260807-15",
+  flight_number: "QF1",
+  flight_date: HEADER.flight_date,
+  etd: "06:00",
+  meal_service: "Breakfast",
+  ta_group: "A",
+  airline: "Qantas (QF)",
+  rule_set: "QF",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(55),
+  linkedItems: mkItems([
+    { sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72, rec: "CP5-1501" },
+    { sku: "150202", desc: "Fresh Fruit Cup", cls: "Economy", qty: 72, rec: "CP5-1502" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "150202", desc: "Fresh Fruit Cup", cls: "Economy", qty: 72 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(55), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_16 = {
+  job_id: "CCP6-260807-16",
+  flight_number: "NZ5",
+  flight_date: HEADER.flight_date,
+  etd: "12:15",
+  meal_service: "Lunch",
+  ta_group: "B",
+  airline: "Air New Zealand (NZ)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(50),
+  linkedItems: mkItems([
+    { sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60, rec: "CP5-1601" },
+    { sku: "160202", desc: "Pavlova", cls: "Economy", qty: 60, rec: "CP5-1602" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "160202", desc: "Pavlova", cls: "Economy", qty: 60 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(50), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_17 = {
+  job_id: "CCP6-260807-17",
+  flight_number: "VA43",
+  flight_date: HEADER.flight_date,
+  etd: "18:30",
+  meal_service: "Dinner",
+  ta_group: "C",
+  airline: "Virgin Australia (VA)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(45),
+  linkedItems: mkItems([
+    { sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84, rec: "CP5-1701" },
+    { sku: "170202", desc: "Tim Tam", cls: "Economy", qty: 84, rec: "CP5-1702" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "170202", desc: "Tim Tam", cls: "Economy", qty: 84 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(45), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_18 = {
+  job_id: "CCP6-260807-18",
+  flight_number: "JQ7",
+  flight_date: HEADER.flight_date,
+  etd: "07:45",
+  meal_service: "Breakfast",
+  ta_group: "D",
+  airline: "Jetstar (JQ)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(40),
+  linkedItems: mkItems([
+    { sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96, rec: "CP5-1801" },
+    { sku: "180202", desc: "Coffee", cls: "Economy", qty: 96, rec: "CP5-1802" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "180202", desc: "Coffee", cls: "Economy", qty: 96 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(40), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_19 = {
+  job_id: "CCP6-260807-19",
+  flight_number: "TT29",
+  flight_date: HEADER.flight_date,
+  etd: "13:00",
+  meal_service: "Lunch",
+  ta_group: "A",
+  airline: "Tiger Airways (TT)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(35),
+  linkedItems: mkItems([
+    { sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72, rec: "CP5-1901" },
+    { sku: "190202", desc: "Spring Rolls", cls: "Economy", qty: 72, rec: "CP5-1902" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "190202", desc: "Spring Rolls", cls: "Economy", qty: 72 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(35), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_20 = {
+  job_id: "CCP6-260807-20",
+  flight_number: "FD31",
+  flight_date: HEADER.flight_date,
+  etd: "20:15",
+  meal_service: "Dinner",
+  ta_group: "B",
+  airline: "Thai AirAsia (FD)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(30),
+  linkedItems: mkItems([
+    { sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84, rec: "CP5-2001" },
+    { sku: "200202", desc: "Mango Sticky Rice", cls: "Economy", qty: 84, rec: "CP5-2002" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "200202", desc: "Mango Sticky Rice", cls: "Economy", qty: 84 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(30), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_21 = {
+  job_id: "CCP6-260807-21",
+  flight_number: "AK15",
+  flight_date: HEADER.flight_date,
+  etd: "08:30",
+  meal_service: "Breakfast",
+  ta_group: "C",
+  airline: "AirAsia (AK)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(25),
+  linkedItems: mkItems([
+    { sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60, rec: "CP5-2101" },
+    { sku: "210202", desc: "Teh Tarik", cls: "Economy", qty: 60, rec: "CP5-2102" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "210202", desc: "Teh Tarik", cls: "Economy", qty: 60 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(25), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_22 = {
+  job_id: "CCP6-260807-22",
+  flight_number: "5J12",
+  flight_date: HEADER.flight_date,
+  etd: "11:45",
+  meal_service: "Lunch",
+  ta_group: "D",
+  airline: "Cebu Pacific (5J)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(20),
+  linkedItems: mkItems([
+    { sku: "220101", desc: "Adobo", cls: "Economy", qty: 72, rec: "CP5-2201" },
+    { sku: "220202", desc: "Halo-Halo", cls: "Economy", qty: 72, rec: "CP5-2202" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "220202", desc: "Halo-Halo", cls: "Economy", qty: 72 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(20), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_23 = {
+  job_id: "CCP6-260807-23",
+  flight_number: "PR73",
+  flight_date: HEADER.flight_date,
+  etd: "21:00",
+  meal_service: "Dinner",
+  ta_group: "A",
+  airline: "Philippine Airlines (PR)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(15),
+  linkedItems: mkItems([
+    { sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60, rec: "CP5-2301" },
+    { sku: "230202", desc: "Lechon Kawali", cls: "Economy", qty: 60, rec: "CP5-2302" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "230202", desc: "Lechon Kawali", cls: "Economy", qty: 60 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(15), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var JOB_24 = {
+  job_id: "CCP6-260807-24",
+  flight_number: "MI41",
+  flight_date: HEADER.flight_date,
+  etd: "09:30",
+  meal_service: "Breakfast",
+  ta_group: "B",
+  airline: "SilkAir (MI)",
+  rule_set: "STANDARD",
+  site: "SICC1",
+  job_status: "Open",
+  closed: false,
+  createdAt: ago(10),
+  linkedItems: mkItems([
+    { sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48, rec: "CP5-2401" },
+    { sku: "240202", desc: "Soft Boiled Eggs", cls: "Economy", qty: 48, rec: "CP5-2402" }
+  ]),
+  preset: {
+    status: "NotStarted",
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: 0,
+    staffCount: 0,
+    exposureDurationMin: null,
+    complianceResult: null,
+    services: [{}]
+  },
+  foodChecker: { status: "NotStarted", items: [
+    mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, { status: "NotStarted" }),
+    mkFCItem({ sku: "240202", desc: "Soft Boiled Eggs", cls: "Economy", qty: 48 }, { status: "NotStarted" })
+  ] },
+  dispatch: { beforeExitTime: null, beforeExitTemp: null, beforeExitTemps: {}, coldSoakStart: new Date(Date.now() - 141 * 60000).toISOString(), coldSoakDurationMin: null, complianceResult: null, status: null },
+  signoffs: [],
+  exceptions: [],
+  history: [{ at: ago(10), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
+};
+var STAFF = [
+  { staffId: "ryan22", staffName: "Ryan", role: "FAA" },
+  { staffId: "faa11", staffName: "Noor Aisyah", role: "FAA" },
+  { staffId: "faa04", staffName: "Maya Tan", role: "FAA" },
+  { staffId: "fc07", staffName: "Ravi Kumar", role: "Food Checker" },
+  { staffId: "fc02", staffName: "Siti Rahayu", role: "Food Checker" },
+  { staffId: "cts09", staffName: "Boon Seng", role: "CTS" }
+];
+function buildSeed() {
+  const completedSICC1 = completeJob(JOB_4, ago(60));
+  const completedSICC2 = completeJob(JOB_1, ago(60));
+  return [
+    completedSICC1,
+    completedSICC2,
+    JOB_2,
+    JOB_3,
+    JOB_5,
+    JOB_6,
+    JOB_7,
+    JOB_8,
+    JOB_9,
+    JOB_10,
+    JOB_11,
+    JOB_12,
+    JOB_13,
+    JOB_14,
+    JOB_15,
+    JOB_16,
+    JOB_17,
+    JOB_18,
+    JOB_19,
+    JOB_20,
+    JOB_21,
+    JOB_22,
+    JOB_23,
+    JOB_24
+  ];
+}
+function seedStaff() {
+  return STAFF;
+}
+
+// script.js
+var _SVC = (() => {
+  const p = location.pathname.split("/");
+  return p[1] === "services-preview" ? p[2] : "";
+})();
+function fetchJson(url, opts, ms = 3000) {
+  const ctrl = new AbortController;
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { ...opts, signal: ctrl.signal }).then((r) => {
+    if (!r.ok)
+      throw new Error("HTTP " + r.status);
+    return r.json();
+  }).finally(() => clearTimeout(timer));
+}
+var store = {
+  save: (collection, data) => fetchJson(`/api/public/preview-store/${_SVC}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ collection, data })
+  }).catch(() => ({ ok: false })),
+  list: (collection) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}`, {
+    cache: "no-store"
+  }).catch(() => []),
+  records: (collection) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}&mode=all`, { cache: "no-store" }).catch(() => []),
+  get: (collection, key) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}&key=${encodeURIComponent(key)}`, { cache: "no-store" }).then((r) => r && r.record ? r.record : r).catch(() => null),
+  set: (collection, key, data) => fetchJson(`/api/public/preview-store/${_SVC}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ collection, key, data })
+  }).catch(() => ({ ok: false })),
+  del: (id) => fetch(`/api/public/preview-store/${_SVC}?id=${id}`, {
+    method: "DELETE"
+  }).catch(() => {})
+};
+var preview = {
+  serviceId: _SVC,
+  params: new URLSearchParams(location.search),
+  currentViewId() {
+    return this.params.get("view") || "";
+  },
+  recordId() {
+    return this.params.get("record") || this.params.get("id") || "";
+  },
+  recordKey(record) {
+    return record?.slotKey || record?.data?.id || record?.id || "";
+  },
+  async loadSubmission(recordId = this.recordId()) {
+    if (!recordId)
+      return null;
+    const direct = await store.get("submissions", recordId);
+    if (direct?.record)
+      return direct.record;
+    const { records = [] } = await store.records("submissions");
+    return records.find((r) => r.slotKey === recordId || r.id === recordId || r.data?.id === recordId) || null;
+  },
+  go(viewId, extra = {}) {
+    const next = new URLSearchParams;
+    next.set("view", viewId);
+    for (const [k, v] of Object.entries(extra)) {
+      if (v == null || v === "")
+        next.delete(k);
+      else
+        next.set(k, String(v));
+    }
+    location.href = `/services-preview/${this.serviceId}?${next.toString()}`;
+  },
+  openRecord(viewId, recordId) {
+    this.go(viewId, { record: recordId });
+  },
+  backTo(viewId) {
+    this.go(viewId, { record: null, id: null });
+  },
+  _embedQueue: Promise.resolve(),
+  embed: function(viewId, target, props) {
+    if (props === undefined)
+      props = {};
+    var run = async () => {
+      var el = typeof target === "string" ? document.querySelector(target) : target;
+      if (!el) {
+        console.error("[preview.embed] target not found:", target);
+        return null;
+      }
+      var colon = viewId.indexOf(":");
+      var svcId, vid;
+      if (colon !== -1) {
+        svcId = viewId.slice(0, colon);
+        vid = viewId.slice(colon + 1);
+      } else {
+        svcId = this.serviceId;
+        vid = viewId;
+      }
+      var src = "/services-preview/" + svcId + "/component/" + vid + ".js";
+      var embedKey = svcId + ":" + vid;
+      var script = document.querySelector('script[data-embed="' + embedKey + '"]');
+      var tag = script && script.dataset.tag ? script.dataset.tag : null;
+      if (!tag) {
+        if (script && !script.dataset.tag) {
+          script.remove();
+          script = null;
+        }
+        var captured = null;
+        var origDefine = customElements.define.bind(customElements);
+        customElements.define = (name, ctor, opts) => {
+          if (!captured && typeof name === "string" && name.indexOf("-") !== -1)
+            captured = name;
+          return origDefine(name, ctor, opts);
+        };
+        try {
+          script = document.createElement("script");
+          script.type = "module";
+          script.src = src;
+          script.dataset.embed = embedKey;
+          await new Promise((res, rej) => {
+            script.onload = () => {
+              res();
+            };
+            script.onerror = () => {
+              rej(new Error("failed to load " + src));
+            };
+            document.head.appendChild(script);
+          });
+          for (var i = 0;i < 40 && !captured && !window.__previewElementName; i++) {
+            await new Promise((r) => {
+              setTimeout(r, 25);
+            });
+          }
+        } finally {
+          customElements.define = origDefine;
+        }
+        tag = captured || window.__previewElementName || null;
+      }
+      if (!tag) {
+        console.error("[preview.embed] component defined no element:", vid);
+        return null;
+      }
+      script.dataset.tag = tag;
+      await customElements.whenDefined(tag);
+      var node = document.createElement(tag);
+      for (var k in props) {
+        if (!Object.hasOwn(props, k))
+          continue;
+        var v = props[k];
+        try {
+          node[k] = v;
+        } catch (e) {}
+        if (v != null && typeof v !== "object")
+          node.setAttribute(k, String(v));
+      }
+      el.replaceChildren(node);
+      return node;
+    };
+    var next = this._embedQueue.then(run, run);
+    this._embedQueue = next.catch(() => {});
+    return next;
+  }
+};
+if (!window.preview)
+  window.preview = preview;
+var VIEWS = {
+  current: "pv-5czmym",
+  all: "pv-kfb8yh",
+  create: "pv-ji169l",
+  detail: "pv-0gnlo8",
+  report: "pv-rnop2z"
+};
+var CONFIG = {
+  mealServices: ["Breakfast", "Lunch", "Dinner"],
+  taGroups: ["A", "B", "C", "D"],
+  airlines: [
+    { code: "QF", name: "Qantas (QF)" },
+    { code: "UA", name: "United Airlines (UA)" },
+    { code: "OAL", name: "Standard / Other Airline" }
+  ],
+  defaultAirline: "OAL",
+  ruleSets: {
+    STANDARD: {
+      exposureMax: 45,
+      presetTempMax: 15,
+      coldSoakMin: 120,
+      dispatchTempMax: 15
+    },
+    UA: {
+      exposureMax: 30,
+      presetTempMax: 15,
+      coldSoakMin: 120,
+      dispatchTempMax: 4
+    },
+    QF: {
+      exposureMax: 45,
+      presetTempMax: 15,
+      coldSoakMin: 180,
+      dispatchTempMax: 5
+    }
+  },
+  airlineRule: { QF: "QF", UA: "UA", OAL: "STANDARD" },
+  warningThresholdMin: 5
+};
+var state = {
+  jobs: [],
+  activeJobId: null,
+  activeTab: "preset",
+  currentScreen: "current",
+  siccFilter: "SICC1",
+  presetMethod: null,
+  createItems: [],
+  serviceExpanded: null,
+  adHocEnabled: false,
+  adHocItems: [],
+  signoff: {
+    open: false,
+    stage: null,
+    jobId: null,
+    method: "staffid",
+    resolved: null
+  }
+};
+function normalizeRecords(res) {
+  const arr = Array.isArray(res) ? res : res?.records || [];
+  return arr.map((r) => {
+    if (r && r.data && r.data.job_id)
+      return r.data;
+    if (r && r.job_id)
+      return r;
+    if (r && typeof r === "object") {
+      const nested = r.record || r.job || r.value;
+      if (nested && nested.job_id)
+        return nested;
+    }
+    return r;
+  }).filter((r) => r && typeof r === "object" && (r.job_id || r.linkedItems));
+}
+function findJobByRecord(recordId) {
+  if (!recordId)
+    return null;
+  return state.jobs.find((j) => j.job_id === recordId) || state.jobs.find((j) => j.slotKey === recordId) || state.jobs.find((j) => j.id === recordId || j.data?.id === recordId) || state.jobs.find((j) => (j.linkedItems || []).some((l) => l.link_id === recordId || l.ccp5_record_id === recordId)) || null;
+}
+async function loadJobs() {
+  let jobs = [];
+  try {
+    jobs = normalizeRecords(await store.records("ccp6_jobs"));
+  } catch (e) {
+    jobs = [];
+  }
+  if (!jobs.length) {
+    jobs = buildSeed();
+    for (const j of jobs) {
+      try {
+        await store.set("ccp6_jobs", j.job_id, j);
+      } catch (e) {}
+    }
+  }
+  state.jobs = jobs;
+}
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+function ruleFor(job) {
+  return CONFIG.ruleSets[job.rule_set] || CONFIG.ruleSets.STANDARD;
+}
+function elapsedMin(ts) {
+  if (!ts)
+    return null;
+  return Math.max(0, (Date.now() - new Date(ts).getTime()) / 60000);
+}
+function fmtElapsed(min) {
+  if (min == null)
+    return "—";
+  min = Math.max(0, min);
+  const totalSeconds = Math.floor(min * 60);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor(totalSeconds % 3600 / 60);
+  const s = totalSeconds % 60;
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+function fmtElapsedShort(min) {
+  if (min == null)
+    return "—";
+  min = Math.max(0, min);
+  const totalSeconds = Math.floor(min * 60);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor(totalSeconds % 3600 / 60);
+  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+}
+function formatTime(timestamp) {
+  if (!timestamp)
+    return "";
+  const d = new Date(timestamp);
+  return d.toTimeString().slice(0, 5);
+}
+function currentJob() {
+  return state.jobs.find((j) => j.job_id === state.activeJobId);
+}
+function hmLimits(job) {
+  const r = ruleFor(job);
+  return {
+    exposureMax: r.exposureMax,
+    presetTempMax: r.presetTempMax,
+    coldSoakMin: r.coldSoakMin,
+    dispatchTempMax: r.dispatchTempMax
+  };
+}
+function calcTPMH(svc) {
+  if (svc.traysHandled == null || svc.staffCount == null || svc.startTime == null || svc.finishTime == null)
+    return "—";
+  const hours = (new Date(svc.finishTime) - new Date(svc.startTime)) / (60 * 60 * 1000);
+  if (hours <= 0 || svc.staffCount <= 0)
+    return "—";
+  const tpmh = svc.traysHandled / (svc.staffCount * hours);
+  return tpmh.toFixed(1);
+}
+function num(id) {
+  const v = document.getElementById(id)?.value;
+  return v === "" || v == null ? null : parseFloat(v);
+}
+function timeOfDayHM(iso) {
+  if (!iso)
+    return null;
+  const d = new Date(iso);
+  return d.getHours() * 60 + d.getMinutes();
+}
+function hmParse(hhmm) {
+  if (!hhmm)
+    return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+function persistJob(job) {
+  try {
+    store.set("ccp6_jobs", job.job_id, job).catch(() => {});
+  } catch (e) {}
+}
+function maybeCloseJob(job) {
+  const done = [];
+  done.push(job.preset?.status === "Submitted");
+  done.push(job.foodChecker?.status === "Submitted");
+  if (job.site === "SICC2")
+    done.push(job.dispatch?.status === "Submitted");
+  if (done.every(Boolean) && !job.closed) {
+    job.closed = true;
+    job.job_status = "Closed";
+    job.closedAt = new Date().toISOString();
+    job.history.push({
+      at: job.closedAt,
+      actor: "system",
+      field: "job",
+      from: "Open",
+      to: "Closed",
+      stage: "job",
+      version: 1
+    });
+  }
+}
+function openSignoff(stage) {
+  state.signoff = {
+    open: true,
+    stage,
+    jobId: state.activeJobId,
+    method: "staffid",
+    resolved: null
+  };
+  document.getElementById("signoff-stage").textContent = stage === "preset" ? "Preset" : stage === "foodchecker" ? "Food Checker" : "Dispatch";
+  document.getElementById("signoff-input-label").textContent = "Staff ID";
+  document.getElementById("signoff-input").value = "";
+  document.getElementById("signoff-input").disabled = false;
+  document.getElementById("signoff-confirm").classList.add("hidden");
+  document.getElementById("signoff-error").classList.add("hidden");
+  renderSignoffMethods();
+  document.getElementById("signoff-overlay").classList.remove("hidden");
+  document.getElementById("signoff-input").focus();
+}
+function closeSignoff() {
+  state.signoff.open = false;
+  document.getElementById("signoff-overlay").classList.add("hidden");
+}
+function renderSignoffMethods() {
+  const wrap = document.getElementById("signoff-methods");
+  wrap.innerHTML = "";
+  const methods = ["staffid", "nfc"];
+  for (const m of methods) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "method-chip" + (m === state.signoff.method ? " active" : "");
+    b.textContent = m === "staffid" ? "Staff ID" : "NFC Card";
+    b.onclick = () => {
+      state.signoff.method = m;
+      renderSignoffMethods();
+    };
+    wrap.appendChild(b);
+  }
+}
+function resolveIdentity() {
+  const input = document.getElementById("signoff-input").value.trim();
+  const staff = seedStaff().find((s) => s.staffId.toLowerCase() === input.toLowerCase());
+  const err = document.getElementById("signoff-error");
+  const confirm = document.getElementById("signoff-confirm");
+  if (!staff) {
+    err.textContent = "Staff ID not found. Check the ID or tap the card again.";
+    err.classList.remove("hidden");
+    confirm.classList.add("hidden");
+    return;
+  }
+  err.classList.add("hidden");
+  state.signoff.resolved = staff;
+  document.getElementById("signoff-name").textContent = `${staff.staffName} (${staff.staffId})`;
+  document.getElementById("signoff-role").textContent = `Role: ${staff.role} · Capture: ${state.signoff.method.toUpperCase()}`;
+  document.getElementById("signoff-input").disabled = true;
+  confirm.classList.remove("hidden");
+}
+function confirmSignoff(confirmed) {
+  const confirm = document.getElementById("signoff-confirm");
+  if (!confirmed) {
+    document.getElementById("signoff-input").disabled = false;
+    state.signoff.resolved = null;
+    confirm.classList.add("hidden");
+    return;
+  }
+  commitStage(state.signoff.stage, state.signoff.resolved, state.signoff.method);
+  closeSignoff();
+  renderDetail();
+}
+function renderDetail() {
+  const job = currentJob();
+  if (!job) {
+    document.getElementById("detail-body").innerHTML = `<div class="empty-state">Job not found.</div>`;
+    return;
+  }
+  document.getElementById("detail-title").textContent = `CCP6 Job · ${job.flight_number}`;
+  document.getElementById("detail-flight-sub").classList.add("hidden");
+  renderHeader(job);
+  renderTabs(job);
+  const body = document.getElementById("detail-body");
+  if (state.activeTab === "preset") {
+    renderPreset(body, job);
+    stopDispatchTimerUpdates("preset");
+    stopDispatchTimerUpdates("fc");
+  } else if (state.activeTab === "foodchecker") {
+    renderFoodChecker(body, job);
+    stopDispatchTimerUpdates("preset");
+    stopDispatchTimerUpdates("fc");
+  } else if (state.activeTab === "dispatch")
+    renderDispatch(body, job);
+}
+function headerField(label, control) {
+  return `<div class="form-group job-header-field">
+    <label class="form-label">${esc(label)}</label>${control}
+  </div>`;
+}
+function headerControls(job, editable) {
+  const dis = editable ? "" : "disabled";
+  const sel = (id, value, options) => `<select class="form-input" id="${id}" ${dis}>${options.map((o) => `<option ${o === value ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  const txt = (id, value, extra = "") => `<input type="text" class="form-input ${extra}" id="${id}" value="${esc(value ?? "")}" ${dis} />`;
+  const fields = [
+    ["Flight Number", txt("h-flight", editable ? "" : job.flight_number)],
+    ["ETD (24h)", txt("h-etd", editable ? "" : job.etd)],
+    ["Group", sel("h-group", editable ? "" : job.ta_group, CONFIG.taGroups)],
+    ["Rule Set", txt("h-rule-set", editable ? "" : job.rule_set, "readonly")]
+  ];
+  return fields.map(([label, control]) => headerField(label, control)).join("");
+}
+function renderHeader(job) {
+  document.getElementById("detail-header").innerHTML = headerControls(job, false);
+}
+function renderTabs(job) {
+  const el = document.getElementById("detail-tabs");
+  const tabs = [
+    {
+      id: "preset",
+      title: "Preset",
+      subtitle: "FAA · flight-level, service sets",
+      status: presetLiveState(job)
+    },
+    {
+      id: "foodchecker",
+      title: "Food Checker",
+      subtitle: "Timer per item · mandatory for every job",
+      status: fcLiveState(job)
+    }
+  ];
+  if (job.site === "SICC2") {
+    tabs.push({
+      id: "dispatch",
+      title: "Dispatch",
+      subtitle: "CTS · timer toward a minimum",
+      status: dispatchLiveState(job)
+    });
+  }
+  el.innerHTML = tabs.map((t) => `
+        <div class="tab-card${state.activeTab === t.id ? " active" : ""}" onclick="switchTab('${t.id}')">
+          <div class="tab-header">
+            <span class="tab-title">${t.title}</span>
+            <span class="status-pill ${t.status.cls}">${t.status.label}</span>
+          </div>
+          <div class="tab-subtitle">${t.subtitle}</div>
+        </div>
+      `).join("");
+}
+function switchTab(tab) {
+  if (state.activeTab === "foodchecker" && tab !== "foodchecker")
+    stopFCTimer();
+  state.activeTab = tab;
+  renderDetail();
+}
+function renderSubmittedPanel(job, stage) {
+  const so = (job.signoffs || []).find((s) => s.stage === stage);
+  return `<div class="panel"><span class="status-pill submitted">Submitted</span>${so ? ` <span style="margin-left:8px">by ${esc(so.staffName)} (${esc(so.staffId)}) · ${esc(new Date(so.submittedAt).toLocaleString())}</span>` : ""}</div>`;
+}
+function exceptionKey(scope) {
+  return scope === "preset" || scope === "dispatch" ? "exc-" + scope : "exc-fc-" + scope;
+}
+function readException(scope) {
+  const key = exceptionKey(scope);
+  const val = (id) => document.getElementById(id)?.value.trim() ?? "";
+  return {
+    rootCause: val(`${key}-root`),
+    otherReason: val(`${key}-other`),
+    immediateCorrection: val(`${key}-immediate`),
+    correctiveAction: val(`${key}-corrective`),
+    foodDisposed: val(`${key}-disposed`),
+    remarks: val(`${key}-remarks`),
+    photos: []
+  };
+}
+function validateException(scope) {
+  const key = exceptionKey(scope);
+  const root = document.getElementById(`${key}-root`)?.value ?? "";
+  const other = document.getElementById(`${key}-other`)?.value ?? "";
+  const immediate = document.getElementById(`${key}-immediate`)?.value ?? "";
+  const corrective = document.getElementById(`${key}-corrective`)?.value ?? "";
+  if (root === "Find root cause")
+    return "Root cause is required.";
+  if (root === "Other" && !other.trim())
+    return "Other reason is required.";
+  if (!immediate.trim())
+    return "Immediate correction is required.";
+  if (!corrective.trim())
+    return "Corrective action is required.";
+  return "";
+}
+function presetLiveState(job) {
+  const p = job.preset;
+  if (p.status === "Submitted") {
+    return {
+      label: p.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant",
+      cls: p.complianceResult === "Compliant" ? "compliant" : "nc",
+      el: null
+    };
+  }
+  if (!p.startTime)
+    return { label: "Not Started", cls: "not-started", el: null };
+  const el = elapsedMin(p.startTime);
+  const max = hmLimits(job).exposureMax;
+  if (el > max)
+    return { label: "Overtime", cls: "overtime", el };
+  if (el >= max - CONFIG.warningThresholdMin)
+    return { label: "Warning", cls: "warning", el };
+  return { label: "In Progress", cls: "in-progress", el };
+}
+function fcLiveState(job) {
+  const items = job.foodChecker?.items || [];
+  if (items.length === 0)
+    return { label: "No items", cls: "not-started", el: null };
+  const started = items.filter((it) => it.startTime).length;
+  const finished = items.filter((it) => it.finishTime || it.complianceResult).length;
+  if (finished === items.length) {
+    const allCompliant = items.every((it) => it.complianceResult === "Compliant");
+    return {
+      label: "Completed",
+      cls: allCompliant ? "compliant" : "nc",
+      el: null
+    };
+  }
+  if (started > 0)
+    return {
+      label: `${started}/${items.length} started`,
+      cls: "in-progress",
+      el: null
+    };
+  return { label: "No items started", cls: "not-started", el: null };
+}
+function dispatchLiveState(job) {
+  const live = dispatchLive(job);
+  if (!live)
+    return { label: "Locked", cls: "locked", el: null };
+  return live;
+}
+function renderServiceRow(svc, index, submitted, limits, job) {
+  const prefix = `p-s${index}`;
+  const isExpanded = state.serviceExpanded === index;
+  const elapsed = svc.startTime ? fmtElapsed(elapsedMin(svc.startTime)) : "00:00";
+  const showStart = !submitted && !svc.startTime;
+  const showFinish = !submitted && svc.startTime && !svc.finishTime;
+  const canRemove = !svc.startTime && index > 0;
+  const htStartField = isExpanded ? `<div class="form-input-static">${svc.startTempHorsDoeuvre != null ? svc.startTempHorsDoeuvre + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-hts" value="${svc.startTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" />`;
+  const htFinishField = isExpanded ? `<div class="form-input-static">${svc.finishTempHorsDoeuvre != null ? svc.finishTempHorsDoeuvre + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-htf" value="${svc.finishTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" />`;
+  const dtStartField = isExpanded ? `<div class="form-input-static">${svc.startTempDessert != null ? svc.startTempDessert + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dts" value="${svc.startTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" />`;
+  const dtFinishField = isExpanded ? `<div class="form-input-static">${svc.finishTempDessert != null ? svc.finishTempDessert + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dtf" value="${svc.finishTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" />`;
+  let actionBtn;
+  if (showStart) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startService(${index})">Start</button>`;
+  } else if (showFinish) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish</button>`;
+  } else if (canRemove) {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); removeService(${index})">Remove</button>`;
+  } else {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); toggleServiceExpand(${index})">${isExpanded ? "Close" : "View"}</button>`;
+  }
+  let rowHtml = `
+    <tr class="${isExpanded ? "selected" : ""}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
+      <td>${index + 1}</td>
+      <td><span id="${prefix}-timer-display">${elapsed}</span> <span style="color:var(--text-secondary);font-size:12px">/ ${limits.exposureMax} min</span></td>
+      <td>${htStartField}</td>
+      <td>${htFinishField}</td>
+      <td>${dtStartField}</td>
+      <td>${dtFinishField}</td>
+      <td>${actionBtn}</td>
+    </tr>
+  `;
+  if (isExpanded) {
+    rowHtml += `
+      <tr class="expanded-row">
+        <td colspan="7">
+          <div class="fc-expanded-panel">
+            <div class="preset-grid" style="margin-bottom: 16px;">
+              <div class="form-group"><label class="form-label">Start Time</label>
+                <input type="time" class="form-input" id="${prefix}-startTime-expanded" value="${formatTime(svc.startTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'startTime', this.value)" /></div>
+              <div class="form-group"><label class="form-label">Finish Time</label>
+                <input type="time" class="form-input" id="${prefix}-finishTime-expanded" value="${formatTime(svc.finishTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'finishTime', this.value)" /></div>
+              <div class="timer-cell">
+                <div class="timer-info">
+                  <div class="timer-label">Timer</div>
+                  <div class="timer-display" id="${prefix}-timer-display-expanded">${elapsed} <span>/ ${limits.exposureMax} min</span></div>
+                </div>
+              </div>
+              <div class="form-group field-hts"><label class="form-label required">Hors d'oeuvre Start (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-hts-expanded" value="${svc.startTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" /></div>
+              <div class="form-group field-htf"><label class="form-label required">Hors d'oeuvre Finish (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-htf-expanded" value="${svc.finishTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" /></div>
+              <div class="form-group field-dts"><label class="form-label required">Dessert Start (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-dts-expanded" value="${svc.startTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" /></div>
+              <div class="form-group field-dtf"><label class="form-label required">Dessert Finish (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-dtf-expanded" value="${svc.finishTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" /></div>
+            </div>
+
+            <div class="metric-cards">
+              <div class="metric-card ${svc.complianceResult === "Compliant" ? "compliant" : ""}">
+                <div class="metric-label">Exposure</div>
+                <div class="metric-value">${svc.exposureDurationMin ?? "—"} min</div>
+                ${svc.exposureDurationMin != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.exposureMax} min</div>` : ""}
+              </div>
+              <div class="metric-card ${svc.complianceResult === "Compliant" ? "compliant" : ""}">
+                <div class="metric-label">Max Temperature</div>
+                <div class="metric-value">${svc.maxSurfaceTemp ?? "—"} °C</div>
+                ${svc.maxSurfaceTemp != null ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Within ${limits.presetTempMax} °C</div>` : ""}
+              </div>
+              <div class="metric-card ${svc.complianceResult === "Compliant" ? "compliant" : ""} ${svc.complianceResult === "NonCompliant" ? "nc" : ""}">
+                <div class="metric-label">SERVICE SET RESULT</div>
+                <div class="metric-value">${svc.complianceResult ?? "—"}</div>
+                ${svc.complianceResult === "Compliant" ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
+                ${svc.complianceResult === "NonCompliant" ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
+                ${svc.complianceResult == null ? `<div class="metric-hint">Calculated on finish</div>` : ""}
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">TPMH</div>
+                <div class="metric-value">${calcTPMH(svc)}</div>
+                <div class="metric-hint">Hours-worked basis — OQ-10</div>
+              </div>
+            </div>
+            <div id="${prefix}-error" class="badge-error hidden" style="margin-top:12px"></div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+  return rowHtml;
+}
+function toggleServiceExpand(index) {
+  state.serviceExpanded = state.serviceExpanded === index ? null : index;
+  renderPreset(document.getElementById("detail-body"), currentJob());
+}
+function updateServiceField(index, field, value) {
+  const job = currentJob();
+  if (job && job.preset.services[index]) {
+    job.preset.services[index][field] = value === "" ? null : parseFloat(value);
+    persistJob(job);
+  }
+}
+function updatePresetField(field, value) {
+  const job = currentJob();
+  job.preset[field] = value ? parseInt(value) : 0;
+  persistJob(job);
+}
+window.updatePresetField = updatePresetField;
+function updateServiceTimeField(index, field, value) {
+  const job = currentJob();
+  if (job && job.preset.services[index]) {
+    if (value) {
+      const [h, m] = value.split(":").map(Number);
+      const d = new Date;
+      d.setHours(h, m, 0, 0);
+      job.preset.services[index][field] = d.getTime();
+    } else {
+      job.preset.services[index][field] = null;
+    }
+    persistJob(job);
+  }
+}
+window.toggleServiceExpand = toggleServiceExpand;
+window.updateServiceField = updateServiceField;
+window.updateServiceTimeField = updateServiceTimeField;
+function getServiceField(prefix, field) {
+  const expandedValue = num(`${prefix}-${field}-expanded`);
+  if (expandedValue != null)
+    return expandedValue;
+  return num(`${prefix}-${field}`);
+}
+window.getServiceField = getServiceField;
+function updatePresetRemarks(value) {
+  const job = currentJob();
+  if (job) {
+    job.preset.remarks = value;
+    persistJob(job);
+  }
+}
+window.updatePresetRemarks = updatePresetRemarks;
+function updatePresetNote(value) {
+  const job = currentJob();
+  if (job) {
+    job.preset.note = value;
+    persistJob(job);
+  }
+}
+window.updatePresetNote = updatePresetNote;
+var serviceTimerInterval = null;
+function startServiceTimerUpdates() {
+  if (serviceTimerInterval)
+    return;
+  serviceTimerInterval = setInterval(() => {
+    const job = currentJob();
+    if (!job || !job.preset.services)
+      return;
+    job.preset.services.forEach((svc, i) => {
+      if (svc.startTime && !svc.finishTime) {
+        const elapsed = fmtElapsed(elapsedMin(svc.startTime));
+        const prefix = `p-s${i}`;
+        const limits = hmLimits(job);
+        const timerEl = document.getElementById(`${prefix}-timer-display`);
+        const timerElExpanded = document.getElementById(`${prefix}-timer-display-expanded`);
+        if (timerEl)
+          timerEl.textContent = elapsed;
+        if (timerElExpanded)
+          timerElExpanded.textContent = elapsed + ` / ${limits.exposureMax} min`;
+      }
+    });
+  }, 1000);
+}
+function stopServiceTimerUpdates() {
+  if (serviceTimerInterval) {
+    clearInterval(serviceTimerInterval);
+    serviceTimerInterval = null;
+  }
+}
+window.startServiceTimerUpdates = startServiceTimerUpdates;
+window.stopServiceTimerUpdates = stopServiceTimerUpdates;
+function renderPresetTabs(activeMethod) {
+  return `
+    <div class="preset-tabs">
+      <button type="button" class="preset-tab ${activeMethod === "services" ? "active" : ""}" onclick="togglePresetMethod('services')">Services</button>
+      <button type="button" class="preset-tab ${activeMethod === "items" ? "active" : ""}" onclick="togglePresetMethod('items')">Items</button>
+    </div>
+  `;
+}
+function togglePresetMethod(method) {
+  state.presetMethod = method;
+  const job = currentJob();
+  if (method === "items") {
+    console.log("[preset items tab] items:", job.preset?.items);
+  }
+  renderPreset(document.getElementById("detail-body"), job);
+}
+window.togglePresetMethod = togglePresetMethod;
+function renderPreset(body, job) {
+  const p = job.preset;
+  const submitted = p.status === "Submitted";
+  const site = job.site || "SICC2";
+  if (site === "SICC2") {
+    state.presetMethod = "items";
+    renderPresetItems(body, job, p, submitted, "");
+  } else {
+    state.presetMethod = state.presetMethod || "services";
+    const tabs = renderPresetTabs(state.presetMethod);
+    if (state.presetMethod === "services") {
+      renderPresetServices(body, job, p, submitted, tabs);
+    } else {
+      renderPresetItems(body, job, p, submitted, tabs);
+    }
+  }
+}
+function renderPresetServices(body, job, p, submitted, tabs) {
+  if (!p.services)
+    p.services = [{}];
+  const services = p.services;
+  const limits = hmLimits(job);
+  body.innerHTML = `
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="form-group">
+        <label class="form-label">Trays / meals handled</label>
+        <input type="number" class="form-input" id="preset-trays" value="${job.preset.traysHandled || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('traysHandled', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">No of Staff</label>
+        <input type="number" class="form-input" id="preset-staff" value="${job.preset.staffCount || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('staffCount', this.value)" />
+      </div>
+    </div>
+
+    ${tabs}
+
+    <div class="table-wrap">
+      <table class="fc-table">
+        <thead><tr>
+          <th style="width:40px">#</th>
+          <th>TIMER</th>
+          <th>HORS D'OEUVRE START °C *</th>
+          <th>HORS D'OEUVRE FINISH °C *</th>
+          <th>DESSERT START °C *</th>
+          <th>DESSERT FINISH °C *</th>
+          <th>ACTION</th>
+        </tr></thead>
+        <tbody>
+          ${services.map((svc, i) => renderServiceRow(svc, i, submitted, limits, job)).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button" class="add-service-btn" onclick="addService()">+ Add service (${ordinal(services.length + 1)} service)</button>
+
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Remarks</label>
+      <textarea class="form-input" id="preset-remarks" placeholder="Remarks" rows="3" oninput="updatePresetRemarks(this.value)">${job.preset.remarks || ""}</textarea>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+      <div class="service-panel-footer-text">
+        ${submitted ? '<span style="color:var(--accent)">Already submitted</span> · ' : ""}Submit is enabled once at least one service is started and every started service is finished.
+      </div>
+      <button type="button" class="btn-primary" onclick="submitStage('preset')" ${services.length > 0 && services.some((s) => s.startTime) && services.every((s) => !s.startTime || s.finishTime) ? "" : "disabled"}>${submitted ? "Re-submit" : "Submit"}</button>
+    </div>
+  `;
+}
+function renderPresetItems(body, job, p, submitted, tabs) {
+  const items = p.items || [];
+  const notStartedCount = items.filter((it) => !it.startTime).length;
+  const activeCount = items.filter((it) => it.startTime && !it.finishTime).length;
+  body.innerHTML = `
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="form-group">
+        <label class="form-label">Trays / meals handled</label>
+        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('traysHandled', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">No of Staff</label>
+        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('staffCount', this.value)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note</label>
+        <textarea class="form-input" id="preset-note" placeholder="Note" rows="3" oninput="updatePresetNote(this.value)">${job.preset.note || ""}</textarea>
+      </div>
+    </div>
+
+    ${tabs}
+
+    <div class="fc-header">
+      <div>
+        <h2 class="fc-header-title">Preset recording — FAA</h2>
+        <div class="fc-header-subtitle">Item-level · Annexure 5.3 / 5.4</div>
+      </div>
+      <div class="fc-mandatory-badge">${activeCount} active · ${notStartedCount} not started</div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="fc-table">
+        <thead><tr>
+          <th style="width:40px">#</th>
+          <th>CLASS</th>
+          <th>ITEM DESCRIPTION</th>
+          <th>SKU</th>
+          <th>QTY</th>
+          <th>START °C *</th>
+          <th>FINISH °C</th>
+          <th>ELAPSED</th>
+          <th>ITEM STATUS</th>
+          <th>ACTION</th>
+        </tr></thead>
+        <tbody>
+          ${items.map((item, i) => renderPresetSICC2Row(item, i, submitted, job)).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    ${submitted ? renderSubmittedPanel(job, "preset") : `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px"><div class="service-panel-footer-text">Submit is enabled once at least one item is started and every started item is finished.</div><button type="button" class="btn-primary" onclick="submitStage('preset')" ${items.length > 0 && items.some((it) => it.startTime) && items.every((it) => !it.startTime || it.finishTime) ? "" : "disabled"}>Submit</button></div>`}
+  `;
+}
+function renderPresetSICC2Row(item, i, submitted, job) {
+  const st = itemStatus(item, job);
+  const isInProgress = st.cls === "in-progress";
+  const isFinished = !!item.complianceResult;
+  const isExpanded = state.presetSICC2Expanded === item.linkId;
+  const statusBadge = isInProgress ? `<span class="fc-status-badge in-progress"><span class="fc-status-dot"></span>In Progress</span>` : isFinished ? `<span class="fc-status-badge ${item.complianceResult === "Compliant" ? "compliant" : "non-compliant"}"><span class="fc-status-dot"></span>${item.complianceResult}</span>` : `<span class="fc-status-badge not-started"><span class="fc-status-dot"></span>Not started</span>`;
+  const startTempField = isExpanded ? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updatePresetItemField('${item.linkId}', 'startTemp')" />`;
+  const finishTempField = item.startTime ? isExpanded ? `<div class="form-input-static">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updatePresetItemField('${item.linkId}', 'finishTemp')" />` : "—";
+  let actionBtn;
+  if (isFinished) {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">Close</button>`;
+  } else if (!item.startTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+  } else if (item.startTime && !item.finishTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+  } else {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
+  }
+  let rowHtml = `
+    <tr class="${isExpanded ? "selected" : ""}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
+      <td>${i + 1}</td>
+      <td>${esc(item.class)}</td>
+      <td>${esc(item.item_description)}</td>
+      <td>${esc(item.sku)}</td>
+      <td>${esc(item.quantity)}</td>
+      <td>${startTempField}</td>
+      <td>${finishTempField}</td>
+      <td><span id="preset-elapsed-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
+      <td>${statusBadge}</td>
+      <td>${actionBtn}</td>
+    </tr>
+  `;
+  if (isExpanded) {
+    const limits = hmLimits(job);
+    rowHtml += `
+      <tr class="expanded-row">
+        <td colspan="10">
+          <div class="fc-expanded-panel">
+            <div class="fc-expanded-grid">
+              <div class="fc-expanded-field">
+                <label class="required">Start temp (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" />
+              </div>
+              <div class="fc-expanded-field">
+                <label>Start time</label>
+                <input type="text" class="form-input" readonly value="${item.startTime ? new Date(item.startTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
+              </div>
+              <div class="fc-expanded-field">
+                <label class="required">Finish temp (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" />
+              </div>
+              <div class="fc-expanded-field">
+                <label>Finish time</label>
+                <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
+              </div>
+            </div>
+
+            <div class="fc-timer-bar">
+              <div class="fc-timer-display">
+                <div class="fc-timer-label">TIMER</div>
+                <div class="fc-timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"} <span>/ ${limits.exposureMax} min</span></div>
+              </div>
+              <div class="fc-timer-buttons">
+                ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+                ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+              <div class="fc-metric-card">
+                <div class="fc-metric-label">MAX TEMPERATURE</div>
+                <div class="fc-metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
+                <div class="fc-metric-sub">${item.finishTemp <= 15 ? "✓ Within 15 °C" : "✗ Exceeds 15 °C"}</div>
+              </div>
+              <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+                <div class="fc-metric-label">ITEM RESULT</div>
+                <div class="fc-metric-value">${item.complianceResult || "—"}</div>
+                ${item.complianceResult === "Compliant" ? `<div class="fc-metric-status"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
+                ${item.complianceResult === "Non-Compliant" ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
+                ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ""}
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+  return rowHtml;
+}
+function togglePresetSICC2Expand(linkId) {
+  state.presetSICC2Expanded = state.presetSICC2Expanded === linkId ? null : linkId;
+  document.querySelectorAll("tr.expanded-row").forEach((r) => r.remove());
+  document.querySelectorAll("tr.selected").forEach((r) => r.classList.remove("selected"));
+  if (state.presetSICC2Expanded) {
+    const row = document.querySelector(`tr[onclick*="${linkId}"]`);
+    if (row) {
+      row.classList.add("selected");
+      const job = currentJob();
+      const item = (job.preset.items || []).find((it) => it.linkId === linkId);
+      if (item) {
+        const limits = hmLimits(job);
+        const st = itemStatus(item, job);
+        const expandedHtml = `
+          <tr class="expanded-row">
+            <td colspan="9">
+              <div class="fc-expanded-panel">
+                <div class="fc-expanded-grid">
+                  <div class="fc-expanded-field">
+                    <label class="required">Start temp (°C)</label>
+                    <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" />
+                  </div>
+                  <div class="fc-expanded-field">
+                    <label>Start time</label>
+                    <input type="text" class="form-input" readonly value="${item.startTime ? new Date(item.startTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
+                  </div>
+                  <div class="fc-expanded-field">
+                    <label class="required">Finish temp (°C)</label>
+                    <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" />
+                  </div>
+                  <div class="fc-expanded-field">
+                    <label>Finish time</label>
+                    <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
+                  </div>
+                </div>
+                <div class="fc-timer-bar">
+                  <div class="fc-timer-display">
+                    <div class="fc-timer-label">TIMER</div>
+                    <div class="fc-timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"} <span>/ ${limits.exposureMax} min</span></div>
+                  </div>
+                  <div class="fc-timer-buttons">
+                    ${!item.startTime ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+                    ${item.startTime && !item.finishTime ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+                  <div class="fc-metric-card">
+                    <div class="fc-metric-label">MAX TEMPERATURE</div>
+                    <div class="fc-metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
+                    <div class="fc-metric-sub">${item.finishTemp != null && item.finishTemp <= 15 ? "✓ Within 15 °C" : item.finishTemp != null ? "✗ Exceeds 15 °C" : "—"}</div>
+                  </div>
+                  <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+                    <div class="fc-metric-label">ITEM RESULT</div>
+                    <div class="fc-metric-value">${item.complianceResult || "—"}</div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>`;
+        row.insertAdjacentHTML("afterend", expandedHtml);
+      }
+    }
+  }
+}
+window.togglePresetSICC2Expand = togglePresetSICC2Expand;
+function updatePresetGates() {
+  const finish = document.getElementById("p-finish");
+  const hts = num("p-hts");
+  const dts = num("p-dts");
+  const htf = num("p-htf");
+  const dtf = num("p-dtf");
+  if (finish)
+    finish.disabled = !(hts != null && dts != null && htf != null && dtf != null);
+}
+function showErr(id, msg) {
+  const e = document.getElementById(id);
+  if (!e)
+    return;
+  e.textContent = msg;
+  e.classList.toggle("hidden", !msg);
+}
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function addService() {
+  const job = currentJob();
+  const p = job.preset;
+  if (!p.services)
+    p.services = [{}];
+  p.services.push({
+    startTime: null,
+    finishTime: null,
+    startTempHorsDoeuvre: null,
+    finishTempHorsDoeuvre: null,
+    startTempDessert: null,
+    finishTempDessert: null,
+    traysHandled: null,
+    staffCount: null,
+    exposureDurationMin: null,
+    maxSurfaceTemp: null,
+    complianceResult: null
+  });
+  renderDetail();
+}
+function removeService(index) {
+  const job = currentJob();
+  const services = job.preset.services || [{}];
+  if (services[index].startTime || services.length <= 1)
+    return;
+  services.splice(index, 1);
+  renderDetail();
+}
+function startService(index) {
+  const job = currentJob();
+  const svc = job.preset.services[index];
+  const prefix = `p-s${index}`;
+  if (svc.startTime)
+    return;
+  const hts = getServiceField(prefix, "hts");
+  const dts = getServiceField(prefix, "dts");
+  if (hts == null && dts == null) {
+    showErr(`${prefix}-error`, "At least one start temperature is required before starting the timer.");
+    return;
+  }
+  svc.startTempHorsDoeuvre = hts;
+  svc.startTempDessert = dts;
+  svc.traysHandled = getServiceField(prefix, "trays") ?? 0;
+  svc.staffCount = getServiceField(prefix, "staff") ?? 0;
+  svc.startTime = new Date().toISOString();
+  job.history = job.history || [];
+  job.history.push({
+    at: svc.startTime,
+    actor: "FAA",
+    field: "preset",
+    from: "NotStarted",
+    to: "InProgress",
+    stage: "preset",
+    version: 1
+  });
+  renderDetail();
+  startServiceTimerUpdates();
+}
+function finishService(index) {
+  const job = currentJob();
+  const svc = job.preset.services[index];
+  const prefix = `p-s${index}`;
+  if (!svc.startTime || svc.finishTime)
+    return;
+  const htf = getServiceField(prefix, "htf");
+  const dtf = getServiceField(prefix, "dtf");
+  if (svc.startTempHorsDoeuvre != null && htf == null) {
+    showErr(`${prefix}-error`, "Hors d'oeuvre finish temperature is required to finish the timer.");
+    return;
+  }
+  if (svc.startTempDessert != null && dtf == null) {
+    showErr(`${prefix}-error`, "Dessert finish temperature is required to finish the timer.");
+    return;
+  }
+  svc.finishTempHorsDoeuvre = htf;
+  svc.finishTempDessert = dtf;
+  svc.finishTime = new Date().toISOString();
+  const limits = hmLimits(job);
+  svc.exposureDurationMin = Math.round((new Date(svc.finishTime) - new Date(svc.startTime)) / 60000);
+  const maxTemp = Math.max(svc.startTempHorsDoeuvre, svc.finishTempHorsDoeuvre, svc.startTempDessert, svc.finishTempDessert);
+  svc.maxSurfaceTemp = maxTemp;
+  svc.complianceResult = svc.exposureDurationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+  job.history.push({
+    at: svc.finishTime,
+    actor: "FAA",
+    field: "preset",
+    from: "Started",
+    to: svc.complianceResult,
+    stage: "preset",
+    version: 1
+  });
+  renderDetail();
+  const stillRunning = job.preset.services.some((s) => s.startTime && !s.finishTime);
+  if (!stillRunning)
+    stopServiceTimerUpdates();
+}
+window.startService = startService;
+window.finishService = finishService;
+function startPreset() {
+  const job = currentJob();
+  const p = job.preset;
+  if (p.startTime)
+    return;
+  const hts = num("p-hts");
+  const dts = num("p-dts");
+  if (hts == null || dts == null) {
+    showErr("preset-error", "Both start temperatures are required before starting the timer.");
+    return;
+  }
+  p.startTempHorsDoeuvre = hts;
+  p.startTempDessert = dts;
+  p.traysHandled = num("p-trays") ?? 0;
+  p.staffCount = num("p-staff") ?? 0;
+  p.startTime = new Date().toISOString();
+  p.history = p.history || [];
+  job.history.push({
+    at: p.startTime,
+    actor: "FAA",
+    field: "preset",
+    from: "NotStarted",
+    to: "InProgress",
+    stage: "preset",
+    version: 1
+  });
+  renderDetail();
+}
+function finishPreset() {
+  const job = currentJob();
+  const p = job.preset;
+  if (!p.startTime || p.finishTime)
+    return;
+  const htf = num("p-htf");
+  const dtf = num("p-dtf");
+  if (htf == null || dtf == null) {
+    showErr("preset-error", "Both finish temperatures are required before finishing.");
+    return;
+  }
+  p.finishTempHorsDoeuvre = htf;
+  p.finishTempDessert = dtf;
+  p.finishTime = new Date().toISOString();
+  const limits = hmLimits(job);
+  p.exposureDurationMin = Math.round((new Date(p.finishTime) - new Date(p.startTime)) / 60000);
+  const maxTemp = Math.max(p.startTempHorsDoeuvre, p.finishTempHorsDoeuvre, p.startTempDessert, p.finishTempDessert);
+  p.maxSurfaceTemp = maxTemp;
+  p.complianceResult = p.exposureDurationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+  job.history.push({
+    at: p.finishTime,
+    actor: "FAA",
+    field: "preset",
+    from: "Started",
+    to: p.complianceResult,
+    stage: "preset",
+    version: 1
+  });
+  renderDetail();
+}
+function itemStatus(item, job) {
+  const max = hmLimits(job).exposureMax;
+  if (item.complianceResult) {
+    const duration = item.finishTime && item.startTime ? (new Date(item.finishTime) - new Date(item.startTime)) / 60000 : null;
+    return {
+      label: item.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant",
+      cls: item.complianceResult === "Compliant" ? "compliant" : "nc",
+      el: duration
+    };
+  }
+  if (!item.startTime)
+    return { label: "Not Started", cls: "not-started", el: null };
+  const el = elapsedMin(item.startTime);
+  if (el > max)
+    return { label: "Overtime", cls: "overtime", el };
+  if (el >= max - CONFIG.warningThresholdMin)
+    return { label: "Warning", cls: "warning", el };
+  return { label: "In Progress", cls: "in-progress", el };
+}
+function renderFoodChecker(body, job) {
+  const rec = job.foodChecker;
+  const submitted = rec.status === "Submitted";
+  const items = rec.items || [];
+  const selectedCount = (state.fcSelected || []).length;
+  const notCheckedCount = items.filter((it) => !it.complianceResult).length;
+  const site = job.site || "SICC2";
+  body.innerHTML = `
+    <div class="fc-header">
+      <div>
+        <h2 class="fc-header-title">Food Checker</h2>
+        <div class="fc-header-subtitle">Item-level · ${site === "SICC1" ? "Annexure 5.3 / 5.4" : "Annexure 5.2"}</div>
+      </div>
+      <div class="fc-mandatory-badge">Mandatory for every job</div>
+    </div>
+
+    <div class="fc-meal-service">
+      <label class="form-label required" for="fc-meal-service">Meal Service</label>
+      <select class="form-input" id="fc-meal-service" ${submitted ? "disabled" : ""}>
+        <option value="Breakfast" ${job.meal_service === "Breakfast" ? "selected" : ""}>Breakfast</option>
+        <option value="Lunch" ${job.meal_service === "Lunch" ? "selected" : ""}>Lunch</option>
+        <option value="Dinner" ${job.meal_service === "Dinner" ? "selected" : ""}>Dinner</option>
+      </select>
+      <div class="fc-selection-note">C1: free text on paper, so a dropdown here</div>
+    </div>
+
+    ${site !== "SICC1" && selectedCount > 0 ? `
+      <div class="fc-selection-bar">
+        <div class="fc-selection-count">${selectedCount} row(s) selected</div>
+        <div class="fc-selection-actions">
+          <button type="button" class="btn-secondary" onclick="fcStartSelected()" ${submitted ? "disabled" : ""}>Start selected</button>
+          <button type="button" class="btn-secondary" onclick="fcFinishSelected()" ${submitted ? "disabled" : ""}>Finish selected</button>
+          <button type="button" class="btn-ghost" onclick="fcClearSelection()">Clear</button>
+        </div>
+      </div>
+      <div class="fc-selection-note">One timestamp for several rows, data still stored per item — as the paper form is filled</div>
+    ` : ""}
+
+    <div class="table-wrap">
+      <table class="fc-table">
+        <thead><tr>
+          ${site === "SICC1" ? `
+            <th style="width:40px">#</th>
+            <th>CLASS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th>SKU</th>
+            <th>QTY</th>
+            <th>START °C *</th>
+            <th>FINISH °C</th>
+            <th>ELAPSED</th>
+            <th>ITEM STATUS</th>
+            <th>ACTION</th>
+          ` : `
+            <th style="width:40px">#</th>
+            <th>CLASS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th>SKU</th>
+            <th>QTY</th>
+            <th>START °C *</th>
+            <th>FINISH °C</th>
+            <th>ELAPSED</th>
+            <th>ITEM STATUS</th>
+            <th>ACTION</th>
+          `}
+        </tr></thead>
+        <tbody>
+          ${items.map((item, i) => renderFCRow(job, item, i, submitted)).join("")}
+        </tbody>
+      </table>
+    </div>
+
+
+
+    <div class="fc-footer">
+      <div class="fc-footer-text">${notCheckedCount} of ${items.length} items not yet checked (OQ-08).</div>
+      ${submitted ? renderSubmittedPanel(job, "foodchecker") : `<button type="button" class="btn-primary" onclick="submitStage('foodchecker')" ${items.length === 0 || !items.every((it) => it.complianceResult) ? "disabled" : ""}>Submit</button>`}
+    </div>
+  `;
+}
+function renderFCRow(job, item, i, submitted) {
+  const site = job.site || "SICC2";
+  const st = itemStatus(item, job);
+  const dis = submitted ? "disabled" : "";
+  const isSelected = (state.fcSelected || []).includes(item.linkId);
+  const isInProgress = st.cls === "in-progress";
+  const isFinished = !!item.complianceResult;
+  let actionBtn = "";
+  if (site === "SICC1") {
+    if (!item.startTime && !submitted) {
+      actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+    } else if (item.startTime && !item.finishTime && !submitted) {
+      actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+    } else if (isFinished && item.complianceResult === "Non-Compliant") {
+      actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
+    }
+  } else if (!item.startTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+  } else if (item.startTime && !item.finishTime && !submitted) {
+    actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+  } else if (isFinished && item.complianceResult === "Non-Compliant") {
+    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
+  }
+  const statusBadge = isInProgress ? `<span class="fc-status-badge in-progress"><span class="fc-status-dot"></span>In Progress</span>` : isFinished ? `<span class="fc-status-badge ${item.complianceResult === "Compliant" ? "compliant" : "non-compliant"}"><span class="fc-status-dot"></span>${item.complianceResult}</span>` : `<span class="fc-status-badge not-started"><span class="fc-status-dot"></span>Not started</span>`;
+  let rowHtml = `
+    <tr class="${isSelected ? "selected" : ""}" onclick="toggleFCExpand('${item.linkId}')" style="cursor: pointer;">
+      ${site !== "SICC1" ? `<td><input type="checkbox" class="fc-checkbox" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); fcToggleSelect('${item.linkId}')" /></td>` : `<td>${i + 1}</td>`}
+      <td>${esc(item.class)}</td>
+      <td>${esc(item.item_description)}</td>
+      <td>${esc(item.sku)}</td>
+      <td>${esc(item.quantity)}</td>
+      <td>${state.fcExpanded === item.linkId ? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'startTemp'); updateItemGate('${item.linkId}')" />`}</td>
+      <td>${item.startTime ? state.fcExpanded === item.linkId ? `<div class="form-input-static">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" />` : "—"}</td>
+      <td><span id="fc-elapsed-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
+      <td>${statusBadge}</td>
+      <td>${actionBtn}</td>
+    </tr>
+  `;
+  if (state.fcExpanded === item.linkId) {
+    rowHtml += renderFCExpandedPanel(job, item, submitted);
+  }
+  return rowHtml;
+}
+function renderFCExpandedPanel(job, item, submitted) {
+  const st = itemStatus(item, job);
+  const elapsed = st.el != null ? fmtElapsed(st.el) : "—";
+  const maxTemp = item.finishTemp ? Math.max(item.startTemp ?? 0, item.finishTemp) : item.startTemp ?? "—";
+  return `
+    <tr class="expanded-row">
+      <td colspan="10">
+        <div class="fc-expanded-panel">
+          <div class="fc-expanded-grid">
+            <div class="fc-expanded-field">
+              <label class="required">Start temp (°C)</label>
+              <input type="number" step="0.1" class="form-input" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'startTemp'); updateItemGate('${item.linkId}')" />
+            </div>
+            <div class="fc-expanded-field">
+              <label>Start time</label>
+              <input type="time" class="form-input" value="${formatTime(item.startTime)}" disabled />
+            </div>
+            <div class="fc-expanded-field">
+              <label class="required">Finish temp (°C)</label>
+              <input type="number" step="0.1" class="form-input" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" />
+            </div>
+            <div class="fc-expanded-field">
+              <label>Finish time</label>
+              <input type="time" class="form-input" value="${formatTime(item.finishTime)}" disabled />
+            </div>
+          </div>
+
+          <!-- Timer Control Bar -->
+          <div class="fc-timer-bar">
+            <div class="fc-timer-display">
+              <div class="fc-timer-label">TIMER</div>
+              <div class="fc-timer-value">${elapsed} <span>/ ${hmLimits(job).exposureMax} min</span></div>
+            </div>
+            <div class="fc-timer-buttons">
+              ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+              ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+            </div>
+          </div>
+
+          <div class="fc-metric-cards">
+            <div class="fc-metric-card">
+              <div class="fc-metric-label">MAX TEMPERATURE</div>
+              <div class="fc-metric-value">${maxTemp} °C</div>
+              <div class="fc-metric-hint">${item.finishTemp ? "Final reading" : "Awaiting finish temperature"}</div>
+            </div>
+            <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+              <div class="fc-metric-label">ITEM RESULT</div>
+              <div class="fc-metric-value">${item.complianceResult ?? "—"}</div>
+              ${item.complianceResult === "Compliant" ? `<div class="fc-metric-status"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
+              ${item.complianceResult === "Non-Compliant" ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
+              ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ""}
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Remarks</label>
+            <textarea class="form-input" id="fc-${item.linkId}-remarks" placeholder="Remarks" rows="3"></textarea>
+          </div>
+
+          ${item.complianceResult === "Non-Compliant" ? `
+          <div style="margin-top:20px;padding:16px;border:1px solid var(--border);border-radius:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="form-group">
+                <label class="form-label required">Root cause</label>
+                <select class="form-input" id="exc-fc-${item.linkId}-root">
+                  <option value="">Select root cause...</option><option>Equipment</option><option>Process</option><option>Manpower</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Corrective action</label>
+                <input type="text" class="form-input" id="exc-fc-${item.linkId}-corrective" placeholder="Corrective action taken" />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Food disposed?</label>
+                <div class="fc-segmented-control">
+                  <button type="button" class="fc-segment-btn" id="exc-fc-${item.linkId}-disposed-yes" onclick="toggleDisposed('${item.linkId}','yes')">Yes</button>
+                  <button type="button" class="fc-segment-btn active" id="exc-fc-${item.linkId}-disposed-no" onclick="toggleDisposed('${item.linkId}','no')">No</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Photo evidence</label>
+                <div>
+                  <input type="file" accept="image/*" id="exc-fc-${item.linkId}-photo" style="display:none" onchange="handlePhotoUpload('${item.linkId}', this)" />
+                  <button type="button" class="btn-photo" style="border:2px dashed var(--border);background:transparent;padding:16px 24px;border-radius:8px;color:var(--accent);cursor:pointer" onclick="document.getElementById('exc-fc-${item.linkId}-photo').click()">+ Photo</button>
+                  <div id="exc-fc-${item.linkId}-photo-preview" style="margin-top:8px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          ` : ""}
+
+          <div id="fc-error-${item.linkId}" class="badge-error hidden" style="margin-top:12px"></div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+var fcTimerInterval = null;
+function startFCTimer() {
+  if (fcTimerInterval)
+    return;
+  fcTimerInterval = setInterval(() => {
+    const job = currentJob();
+    if (!job)
+      return;
+    const items = job.foodChecker.items || [];
+    for (let i = 0;i < items.length; i++) {
+      const item = items[i];
+      if (item.startTime && !item.finishTime) {
+        const elapsed = elapsedMin(item.startTime);
+        const rowEl = document.getElementById(`fc-elapsed-${i}`);
+        if (rowEl)
+          rowEl.textContent = fmtElapsed(elapsed);
+        if (state.fcExpanded === item.linkId) {
+          const timerVal = document.querySelector(".fc-timer-value");
+          if (timerVal) {
+            const limits = hmLimits(job);
+            timerVal.innerHTML = `${fmtElapsed(elapsed)} <span>/ ${limits.exposureMax} min</span>`;
+          }
+        }
+      }
+    }
+    const hasRunning = items.some((it) => it.startTime && !it.finishTime);
+    if (!hasRunning)
+      stopFCTimer();
+  }, 1000);
+}
+function stopFCTimer() {
+  if (fcTimerInterval) {
+    clearInterval(fcTimerInterval);
+    fcTimerInterval = null;
+  }
+}
+function checkAndStartFCTimer() {
+  const job = currentJob();
+  if (!job)
+    return;
+  const hasRunning = (job.foodChecker.items || []).some((it) => it.startTime && !it.finishTime);
+  if (hasRunning && !fcTimerInterval)
+    startFCTimer();
+}
+function toggleFCExpand(linkId) {
+  state.fcExpanded = state.fcExpanded === linkId ? null : linkId;
+  renderDetail();
+}
+function fcToggleSelect(linkId) {
+  if (!state.fcSelected)
+    state.fcSelected = [];
+  const idx = state.fcSelected.indexOf(linkId);
+  if (idx >= 0) {
+    state.fcSelected.splice(idx, 1);
+  } else {
+    state.fcSelected.push(linkId);
+  }
+  renderDetail();
+}
+function fcClearSelection() {
+  state.fcSelected = [];
+  renderDetail();
+}
+function fcStartSelected() {
+  const job = currentJob();
+  const items = job.foodChecker.items || [];
+  const selected = (state.fcSelected || []).filter((id) => {
+    const item = items.find((it) => it.linkId === id);
+    return item && !item.startTime && !item.complianceResult;
+  });
+  if (selected.length === 0) {
+    showErr("fc-error", "No selectable items in selection.");
+    return;
+  }
+  const now = new Date().toISOString();
+  for (const linkId of selected) {
+    const item = items.find((it) => it.linkId === linkId);
+    if (!item)
+      continue;
+    const st = document.getElementById(`fc-st-temp-${linkId}`)?.value;
+    if (st === "" || st == null) {
+      showErr("fc-error", `Start temperature required for ${item.item_description}.`);
+      return;
+    }
+    item.startTemp = parseFloat(st);
+    item.startTime = now;
+    job.history.push({
+      at: now,
+      actor: "Food Checker",
+      field: "fc.item",
+      from: "NotStarted",
+      to: "InProgress",
+      stage: "foodchecker",
+      version: 1
+    });
+  }
+  state.fcSelected = [];
+  renderDetail();
+  checkAndStartFCTimer();
+}
+function fcFinishSelected() {
+  const job = currentJob();
+  const items = job.foodChecker.items || [];
+  const selected = (state.fcSelected || []).filter((id) => {
+    const item = items.find((it) => it.linkId === id);
+    return item && item.startTime && !item.complianceResult;
+  });
+  if (selected.length === 0) {
+    showErr("fc-error", "No finishable items in selection.");
+    return;
+  }
+  const now = new Date().toISOString();
+  for (const linkId of selected) {
+    const item = items.find((it) => it.linkId === linkId);
+    if (!item)
+      continue;
+    const ft = document.getElementById(`fc-ft-temp-${linkId}`)?.value;
+    if (ft === "" || ft == null) {
+      showErr("fc-error", `Finish temperature required for ${item.item_description}.`);
+      return;
+    }
+    item.finishTemp = parseFloat(ft);
+    item.finishTime = now;
+    const limits = hmLimits(job);
+    item.durationMin = Math.round((new Date(now) - new Date(item.startTime)) / 60000);
+    const maxTemp = Math.max(item.startTemp, item.finishTemp);
+    item.complianceResult = item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+    job.history.push({
+      at: now,
+      actor: "Food Checker",
+      field: "fc.item",
+      from: "InProgress",
+      to: item.complianceResult,
+      stage: "foodchecker",
+      version: 1
+    });
+  }
+  state.fcSelected = [];
+  state.fcExpanded = null;
+  renderDetail();
+  checkAndStartFCTimer();
+}
+window.toggleFCExpand = toggleFCExpand;
+window.fcToggleSelect = fcToggleSelect;
+window.fcClearSelection = fcClearSelection;
+window.fcStartSelected = fcStartSelected;
+window.fcFinishSelected = fcFinishSelected;
+function updateItemGate(linkId) {
+  const btn = document.getElementById("fc-st-" + linkId);
+  if (!btn)
+    return;
+  const st = document.getElementById("fc-st-temp-" + linkId);
+  btn.disabled = st && st.value === "";
+}
+function updateItemField(linkId, field) {
+  const job = currentJob();
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId);
+  if (!item)
+    return;
+  const inputEl = document.getElementById(`fc-${field === "startTemp" ? "st" : "ft"}-temp-${linkId}`);
+  if (!inputEl)
+    return;
+  const value = inputEl.value;
+  if (value !== "" && value != null) {
+    item[field] = parseFloat(value);
+  } else {
+    item[field] = null;
+  }
+}
+function updateStartTime(linkId) {
+  const job = currentJob();
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId);
+  if (!item)
+    return;
+  const inputEl = document.getElementById(`fc-st-time-${linkId}`);
+  if (!inputEl)
+    return;
+  const value = inputEl.value;
+  if (value) {
+    const [hours, minutes] = value.split(":").map(Number);
+    const now = new Date;
+    now.setHours(hours, minutes, 0, 0);
+    item.startTime = now.toISOString();
+    const expandedInput = document.querySelector(`#fc-expanded-${linkId} input[type="time"]:disabled`);
+    if (expandedInput) {
+      expandedInput.value = value;
+    }
+  } else {
+    item.startTime = null;
+  }
+}
+function startItem(linkId) {
+  const job = currentJob();
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId) || (job.preset.items || []).find((it) => it.linkId === linkId);
+  if (!item)
+    return;
+  const isPresetItem = (job.preset.items || []).includes(item);
+  const inputEl = document.getElementById("fc-st-temp-" + linkId) || document.getElementById("preset-st-temp-" + linkId);
+  const st = inputEl?.value;
+  const startTemp = st !== "" && st != null ? parseFloat(st) : item.startTemp;
+  if (startTemp == null || isNaN(startTemp)) {
+    showErr(`fc-error-${linkId}`, "Start temperature is required before starting this item's timer.");
+    return;
+  }
+  item.startTemp = startTemp;
+  item.startTime = new Date().toISOString();
+  job.history.push({
+    at: item.startTime,
+    actor: isPresetItem ? "FAA" : "Food Checker",
+    field: isPresetItem ? "preset.item" : "fc.item",
+    from: "NotStarted",
+    to: "InProgress",
+    stage: isPresetItem ? "preset" : "foodchecker",
+    version: 1
+  });
+  renderDetail();
+  if (isPresetItem)
+    startPresetTimer();
+  else
+    checkAndStartFCTimer();
+}
+function finishItem(linkId) {
+  const job = currentJob();
+  const item = (job.foodChecker.items || []).find((it) => it.linkId === linkId) || (job.preset.items || []).find((it) => it.linkId === linkId);
+  if (!item)
+    return;
+  const isPresetItem = (job.preset.items || []).includes(item);
+  const ft = document.getElementById("fc-ft-temp-" + linkId)?.value || document.getElementById("preset-ft-temp-" + linkId)?.value;
+  if (ft === "" || ft == null) {
+    showErr(`fc-error-${linkId}`, "Finish temperature is required before completing this item.");
+    return;
+  }
+  item.finishTemp = parseFloat(ft);
+  item.finishTime = new Date().toISOString();
+  const limits = hmLimits(job);
+  item.durationMin = Math.round((new Date(item.finishTime) - new Date(item.startTime)) / 60000);
+  const maxTemp = Math.max(item.startTemp, item.finishTemp);
+  item.complianceResult = item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+  job.history.push({
+    at: item.finishTime,
+    actor: isPresetItem ? "FAA" : "Food Checker",
+    field: isPresetItem ? "preset.item" : "fc.item",
+    from: "InProgress",
+    to: item.complianceResult,
+    stage: isPresetItem ? "preset" : "foodchecker",
+    version: 1
+  });
+  renderDetail();
+  if (isPresetItem)
+    checkPresetTimerStop();
+  else
+    checkAndStartFCTimer();
+}
+var presetTimerInterval = null;
+function startPresetTimer() {
+  if (presetTimerInterval)
+    return;
+  presetTimerInterval = setInterval(() => {
+    const job = currentJob();
+    if (!job)
+      return;
+    const items = job.preset.items || [];
+    for (let i = 0;i < items.length; i++) {
+      const item = items[i];
+      if (item.startTime && !item.finishTime) {
+        const elapsed = elapsedMin(item.startTime);
+        const rowEl = document.getElementById(`preset-elapsed-${item.linkId}`);
+        if (rowEl)
+          rowEl.textContent = fmtElapsed(elapsed);
+        if (state.presetSICC2Expanded === item.linkId) {
+          const timerVal = document.getElementById(`preset-timer-${item.linkId}`);
+          if (timerVal) {
+            const limits = hmLimits(job);
+            timerVal.innerHTML = `${fmtElapsed(elapsed)} <span>/ ${limits.exposureMax} min</span>`;
+          }
+        }
+      }
+    }
+    const hasRunning = items.some((it) => it.startTime && !it.finishTime);
+    if (!hasRunning)
+      stopPresetTimer();
+  }, 1000);
+}
+function stopPresetTimer() {
+  if (presetTimerInterval) {
+    clearInterval(presetTimerInterval);
+    presetTimerInterval = null;
+  }
+}
+function checkPresetTimerStop() {
+  const job = currentJob();
+  if (!job)
+    return;
+  const items = job.preset.items || [];
+  const hasRunning = items.some((it) => it.startTime && !it.finishTime);
+  if (!hasRunning)
+    stopPresetTimer();
+}
+function updatePresetItemField(linkId, field, value) {
+  const job = currentJob();
+  const item = (job.preset.items || []).find((it) => it.linkId === linkId);
+  if (!item)
+    return;
+  if (value === undefined) {
+    const inputEl = document.getElementById(`preset-${field === "startTemp" ? "st" : "ft"}-temp-${linkId}`);
+    if (!inputEl)
+      return;
+    value = inputEl.value;
+  }
+  item[field] = value === "" || value == null ? null : parseFloat(value);
+}
+window.updatePresetItemField = updatePresetItemField;
+function fmtDuration(min) {
+  if (min == null)
+    return "—";
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h > 0 ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
+}
+function setDispatchNow(type) {
+  const now = new Date;
+  const timeStr = now.toTimeString().slice(0, 5);
+  const el = document.getElementById(`d-${type}-exit-time`);
+  if (el)
+    el.value = timeStr;
+  updateDispatchBeforeExitTime(type, timeStr);
+}
+window.setDispatchNow = setDispatchNow;
+function updateDispatchItemTemp(type, linkId, value) {
+  const job = currentJob();
+  const dispatch = type === "preset" ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch)
+    return;
+  if (!dispatch.beforeExitTemps)
+    dispatch.beforeExitTemps = {};
+  dispatch.beforeExitTemps[linkId] = value === "" || value == null ? null : parseFloat(value);
+  persistJob(job);
+  const limits = hmLimits(job);
+  const itemTemp = dispatch.beforeExitTemps[linkId];
+  const itemResult = itemTemp != null ? itemTemp <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant" : null;
+  const inputEl = document.querySelector(`input[onchange*="updateDispatchItemTemp('${type}', '${linkId}'"]`);
+  if (inputEl) {
+    const row = inputEl.closest("tr");
+    const resultCell = row?.querySelector("td:last-child");
+    if (resultCell) {
+      resultCell.innerHTML = itemResult ? `<span class="status-pill ${itemResult === "Compliant" ? "compliant" : "nc"}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>';
+    }
+  }
+  const items = type === "preset" ? job.preset.items : job.foodChecker.items;
+  const allTempsEntered = items.length > 0 && items.every((item) => dispatch.beforeExitTemps?.[item.linkId] != null);
+  const exitTimeInput = document.getElementById(`d-${type}-exit-time`);
+  const nowBtn = exitTimeInput?.nextElementSibling;
+  if (exitTimeInput) {
+    if (allTempsEntered) {
+      exitTimeInput.removeAttribute("disabled");
+      exitTimeInput.placeholder = "";
+    } else {
+      exitTimeInput.setAttribute("disabled", "");
+      exitTimeInput.placeholder = "Enter all temps first";
+    }
+  }
+  if (nowBtn && nowBtn.tagName === "BUTTON") {
+    nowBtn.style.display = allTempsEntered ? "" : "none";
+  }
+}
+window.updateDispatchItemTemp = updateDispatchItemTemp;
+function updateDispatchBeforeExitTime(type, value) {
+  const job = currentJob();
+  const dispatch = type === "preset" ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch)
+    return;
+  dispatch.beforeExitTime = value || null;
+  if (dispatch.coldSoakStart && value) {
+    const [h, m] = value.split(":").map(Number);
+    const exitTimeMinutes = h * 60 + m;
+    const startDate = new Date(dispatch.coldSoakStart);
+    const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
+    let durationMin = exitTimeMinutes - startMinutes;
+    if (durationMin < 0)
+      durationMin += 24 * 60;
+    dispatch.coldSoakDurationMin = durationMin;
+  }
+  persistJob(job);
+  stopDispatchTimerUpdates(type);
+  const coldSoakStart = dispatch.coldSoakStart;
+  if (coldSoakStart) {
+    const el = dispatch.coldSoakDurationMin;
+    const valueEl = document.getElementById(`dispatch-timer-value-${type}`);
+    if (valueEl)
+      valueEl.textContent = fmtElapsedShort(el);
+  }
+  const exitTimeInput = document.getElementById(`d-${type}-exit-time`);
+  const nowBtn = exitTimeInput?.nextElementSibling;
+  if (nowBtn && nowBtn.tagName === "BUTTON")
+    nowBtn.style.display = "none";
+}
+window.updateDispatchBeforeExitTime = updateDispatchBeforeExitTime;
+function submitDispatch(type) {
+  const job = currentJob();
+  const dispatch = type === "preset" ? job.dispatchPreset : job.dispatchFC;
+  if (!dispatch)
+    return;
+  const items = type === "preset" ? job.preset.items || [] : job.foodChecker.items || [];
+  const temps = Object.values(dispatch.beforeExitTemps || {}).filter((v) => v != null && v !== "");
+  if (temps.length < items.length) {
+    alert("Please enter temperatures for all items before submitting.");
+    return;
+  }
+  dispatch.status = "Submitted";
+  dispatch.submittedAt = new Date().toISOString();
+  const limits = hmLimits(job);
+  const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
+  dispatch.complianceResult = maxTemp != null && maxTemp <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant";
+  persistJob(job);
+  renderDispatch(document.getElementById("detail-body"), job);
+}
+window.submitDispatch = submitDispatch;
+function dispatchLive(job) {
+  if (job.site !== "SICC2")
+    return null;
+  const presetDispatch = job.dispatchPreset;
+  const fcDispatch = job.dispatchFC;
+  if (!presetDispatch && !fcDispatch) {
+    return { label: "Locked", cls: "locked", el: null };
+  }
+  if (presetDispatch?.status === "Submitted" && fcDispatch?.status === "Submitted") {
+    const presetCompliant = presetDispatch.complianceResult === "Compliant";
+    const fcCompliant = fcDispatch.complianceResult === "Compliant";
+    const overallCompliant = presetCompliant && fcCompliant;
+    return {
+      label: overallCompliant ? "Compliant" : "Non-Compliant",
+      cls: overallCompliant ? "compliant" : "nc",
+      el: null
+    };
+  }
+  const presetColdSoakStart = presetDispatch?.coldSoakStart;
+  const fcColdSoakStart = fcDispatch?.coldSoakStart;
+  if (presetColdSoakStart || fcColdSoakStart) {
+    const coldSoakStart = presetColdSoakStart && fcColdSoakStart ? Math.min(presetColdSoakStart, fcColdSoakStart) : presetColdSoakStart || fcColdSoakStart;
+    const el = elapsedMin(coldSoakStart);
+    const min = hmLimits(job).coldSoakMin;
+    if (el >= min)
+      return { label: "Eligible for dispatch", cls: "eligible", el };
+    return { label: "Cold Soak", cls: "cold-soak", el };
+  }
+  return { label: "Locked", cls: "locked", el: null };
+}
+function renderDispatchPanel(dispatch, items, type) {
+  const submitted = dispatch?.status === "Submitted";
+  const limits = hmLimits(currentJob());
+  const min = limits.coldSoakMin;
+  const coldSoakStart = dispatch?.coldSoakStart || (dispatch?.status === "ColdSoak" ? Date.now() : null);
+  const el = dispatch?.coldSoakDurationMin ?? (coldSoakStart ? elapsedMin(coldSoakStart) : null);
+  const progress = el != null ? Math.min(el / min * 100, 100) : 0;
+  const isEligible = el != null && el >= min;
+  const coldSoakStartStr = coldSoakStart ? new Date(coldSoakStart).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }) : "—";
+  const dis = submitted ? "disabled" : "";
+  const hasExitTime = !!dispatch?.beforeExitTime;
+  const allTempsEntered = items.length > 0 && items.every((item) => dispatch?.beforeExitTemps?.[item.linkId] != null);
+  const tempDisabled = dis;
+  const exitTimeDisabled = dis || (!allTempsEntered ? "disabled" : "");
+  return `
+    <div class="fc-timer-bar" style="margin-bottom:16px">
+      <div class="fc-timer-display">
+        <div class="fc-timer-value" id="dispatch-timer-value-${type}" style="font-size:48px;font-weight:700">${el != null ? dispatch?.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el) : "—"}</div>
+        <div style="margin-top:8px">
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div id="dispatch-timer-progress-${type}" style="height:100%;width:${progress}%;background:var(--success);transition:width 1s"></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;padding:0 24px">
+        <div style="font-size:14px;color:var(--text-secondary)">Cold soak minimum <b>${fmtDuration(min)}</b> · from ${coldSoakStartStr}</div>
+        <div style="font-size:14px;font-weight:600;margin-top:4px">${isEligible ? "Minimum already met — eligible for dispatch" : "Cold soak in progress..."}</div>
+      </div>
+    </div>
+    
+    <div class="form-grid" style="margin-top:16px">
+      <div class="form-group">
+        <label class="form-label">Cold soak start</label>
+        <input type="text" class="form-input" readonly value="${coldSoakStartStr}" style="background:var(--bg-surface)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label required">Before-exit time (24h)</label>
+        <div style="display:flex;gap:8px">
+          <input type="time" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? "Enter all temps first" : ""}" />
+          ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
+        </div>
+      </div>
+    </div>
+    
+    <div class="table-wrap" style="margin-top:20px">
+      <table class="fc-table">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="width:80px">CLASS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th style="width:100px">SKU</th>
+            <th style="width:140px">BEFORE-EXIT TEMP °C *</th>
+            <th style="width:120px">ITEM RESULT</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map((item, i) => {
+    const itemTemp = dispatch?.beforeExitTemps?.[item.linkId] ?? "";
+    const itemResult = itemTemp !== "" && itemTemp != null ? parseFloat(itemTemp) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant" : null;
+    return `<tr>
+              <td>${i + 1}</td>
+              <td>${esc(item.class)}</td>
+              <td>${esc(item.item_description)}</td>
+              <td>${esc(item.sku)}</td>
+              <td><input type="number" step="0.1" class="form-input" value="${itemTemp}" ${tempDisabled} onchange="updateDispatchItemTemp('${type}', '${item.linkId}', this.value)" onclick="event.stopPropagation()" style="width:100px" /></td>
+              <td>${itemResult ? `<span class="status-pill ${itemResult === "Compliant" ? "compliant" : "nc"}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>'}</td>
+            </tr>`;
+  }).join("")}
+        </tbody>
+      </table>
+    </div>
+    
+    ${!submitted ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
+  `;
+}
+var dispatchTimerIntervals = {};
+function startDispatchTimerUpdates(type) {
+  stopDispatchTimerUpdates(type);
+  dispatchTimerIntervals[type] = setInterval(() => {
+    const job = currentJob();
+    if (!job)
+      return;
+    const dispatch = type === "preset" ? job.dispatchPreset : job.dispatchFC;
+    if (!dispatch || !dispatch.coldSoakStart)
+      return;
+    const el = elapsedMin(dispatch.coldSoakStart);
+    const min = hmLimits(job).coldSoakMin;
+    const progress = Math.min(el / min * 100, 100);
+    const valueEl = document.getElementById(`dispatch-timer-value-${type}`);
+    const progressEl = document.getElementById(`dispatch-timer-progress-${type}`);
+    const displayValue = dispatch.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el);
+    if (valueEl)
+      valueEl.textContent = displayValue;
+    if (progressEl)
+      progressEl.style.width = `${progress}%`;
+    if (dispatch.beforeExitTime) {
+      stopDispatchTimerUpdates(type);
+    }
+  }, 1000);
+}
+function stopDispatchTimerUpdates(type) {
+  if (dispatchTimerIntervals[type]) {
+    clearInterval(dispatchTimerIntervals[type]);
+    delete dispatchTimerIntervals[type];
+  }
+}
+function renderDispatch(body, job) {
+  if (job.site !== "SICC2") {
+    body.innerHTML = `<div class="empty-state">Dispatch is not available at ${esc(job.site)}.</div>`;
+    return;
+  }
+  const presetItems = job.preset.items || [];
+  const fcItems = job.foodChecker.items || [];
+  body.innerHTML = `
+    <div class="dispatch-panels">
+      <div class="dispatch-panel">
+        <h3 class="panel-title">Preset Dispatch</h3>
+        ${renderDispatchPanel(job.dispatchPreset, presetItems, "preset")}
+      </div>
+      <div class="dispatch-panel">
+        <h3 class="panel-title">Food Checker Dispatch</h3>
+        ${renderDispatchPanel(job.dispatchFC, fcItems, "fc")}
+      </div>
+    </div>
+  `;
+  const presetDispatch = job.dispatchPreset;
+  const fcDispatch = job.dispatchFC;
+  if (presetDispatch && presetDispatch.coldSoakStart && presetDispatch.status !== "Submitted") {
+    if (!presetDispatch.beforeExitTime) {
+      startDispatchTimerUpdates("preset");
+    } else {
+      stopDispatchTimerUpdates("preset");
+    }
+  } else {
+    stopDispatchTimerUpdates("preset");
+  }
+  if (fcDispatch && fcDispatch.coldSoakStart && fcDispatch.status !== "Submitted") {
+    if (!fcDispatch.beforeExitTime) {
+      startDispatchTimerUpdates("fc");
+    } else {
+      stopDispatchTimerUpdates("fc");
+    }
+  } else {
+    stopDispatchTimerUpdates("fc");
+  }
+}
+function submitStage(stage) {
+  const job = currentJob();
+  const errId = stage === "preset" ? "preset-error" : stage === "foodchecker" ? "fc-error" : "dispatch-error";
+  if (stage === "preset") {
+    const presetMethod = job.site === "SICC2" ? "items" : state.presetMethod || "services";
+    const itemsToCheck = presetMethod === "items" ? job.preset.items || [] : job.preset.services || [{}];
+    if (itemsToCheck.length === 0)
+      return showErr(errId, presetMethod === "items" ? "No preset items to submit." : "No preset services to submit.");
+    const startedItems = itemsToCheck.filter((s) => s.startTime);
+    if (startedItems.length === 0)
+      return showErr(errId, presetMethod === "items" ? "At least one preset item must be started." : "At least one preset service must be started.");
+    if (!startedItems.every((s) => s.finishTime))
+      return showErr(errId, presetMethod === "items" ? "All started items must be finished before submitting." : "All started services must be finished before submitting.");
+    const finishedItems = startedItems.filter((s) => s.finishTime);
+    const allCompliant = finishedItems.every((s) => s.complianceResult === "Compliant");
+    job.preset.complianceResult = allCompliant ? "Compliant" : "Non-Compliant";
+    const maxExposure = Math.max(...finishedItems.map((s) => s.exposureDurationMin || 0));
+    const maxTemp = Math.max(...finishedItems.map((s) => s.maxSurfaceTemp || 0));
+    job.preset.exposureDurationMin = maxExposure;
+    job.preset.maxSurfaceTemp = maxTemp;
+    const hasNonCompliant = finishedItems.some((s) => s.complianceResult === "Non-Compliant");
+    if (hasNonCompliant) {
+      const exErr = validateException("preset");
+      if (exErr)
+        return showErr(errId, exErr);
+    }
+  }
+  if (stage === "foodchecker") {
+    const items = job.foodChecker.items || [];
+    if (!items.length)
+      return showErr(errId, "No linked items to check.");
+    const unfinished = items.filter((it) => !it.complianceResult);
+    if (unfinished.length)
+      return showErr(errId, `${unfinished.length} item(s) still unfinished.`);
+    for (const it of items) {
+      if (it.complianceResult === "Non-Compliant") {
+        const exErr = validateException(it.linkId);
+        if (exErr)
+          return showErr(errId, `${it.sku}: ${exErr}`);
+      }
+    }
+  }
+  if (stage === "dispatch") {
+    const t = document.getElementById("d-exit-time")?.value;
+    const temp = document.getElementById("d-exit-temp")?.value;
+    if (!t || temp === "")
+      return showErr(errId, "Before-exit time and temperature are required.");
+    job.dispatch.beforeExitTime = t;
+    job.dispatch.beforeExitTemp = parseFloat(temp);
+    const exitHM = hmParse(t);
+    const startHM = timeOfDayHM(job.preset.finishTime);
+    let dur = exitHM - startHM;
+    if (dur < 0)
+      dur += 1440;
+    job.dispatch.coldSoakDurationMin = dur;
+    const limits = hmLimits(job);
+    job.dispatch.complianceResult = dur < limits.coldSoakMin || job.dispatch.beforeExitTemp > limits.dispatchTempMax ? "Non-Compliant" : "Compliant";
+    if (job.dispatch.complianceResult === "Non-Compliant") {
+      const exErr = validateException("dispatch");
+      if (exErr)
+        return showErr(errId, exErr);
+    }
+    renderDetail();
+  }
+  openSignoff(stage);
+}
+function commitStage(stage, resolved, method) {
+  const job = currentJob();
+  if (!job)
+    return;
+  const now = new Date().toISOString();
+  const signoff = {
+    stage,
+    staffId: resolved.staffId,
+    staffName: resolved.staffName,
+    role: resolved.role,
+    captureMethod: method,
+    submittedAt: now
+  };
+  job.signoffs = job.signoffs || [];
+  if (stage === "preset") {
+    job.preset.status = "Submitted";
+    if (job.preset.complianceResult === "Non-Compliant") {
+      const ex = readException("preset");
+      ex.exception_id = "EXC-" + job.job_id + "-preset";
+      job.exceptions = job.exceptions || [];
+      job.exceptions.push(ex);
+      job.preset.exceptionId = ex.exception_id;
+    }
+    job.signoffs.push(signoff);
+    job.history.push({
+      at: now,
+      actor: resolved.staffId,
+      field: "preset",
+      from: "Started",
+      to: "Submitted",
+      stage: "preset",
+      version: 1
+    });
+    if (job.site === "SICC2") {
+      const presetItems = job.preset?.items || [];
+      const lastPresetFinish = presetItems.filter((i) => i.finishTime).reduce((max, i) => Math.max(max, new Date(i.finishTime).getTime()), 0);
+      if (!job.dispatchPreset)
+        job.dispatchPreset = {};
+      job.dispatchPreset.status = "ColdSoak";
+      job.dispatchPreset.coldSoakStart = lastPresetFinish || job.preset?.finishTime || Date.now();
+    }
+  }
+  if (stage === "foodchecker") {
+    job.foodChecker.status = "Submitted";
+    for (const it of job.foodChecker.items || []) {
+      if (it.complianceResult === "Non-Compliant") {
+        const ex = readException(it.linkId);
+        ex.exception_id = "EXC-" + job.job_id + "-" + it.sku;
+        job.exceptions = job.exceptions || [];
+        job.exceptions.push(ex);
+        it.exceptionId = ex.exception_id;
+      }
+    }
+    job.signoffs.push(signoff);
+    job.history.push({
+      at: now,
+      actor: resolved.staffId,
+      field: "foodchecker",
+      from: "InProgress",
+      to: "Submitted",
+      stage: "foodchecker",
+      version: 1
+    });
+    if (job.site === "SICC2") {
+      const fcItems = job.foodChecker?.items || [];
+      const lastFCFinish = fcItems.filter((i) => i.finishTime).reduce((max, i) => Math.max(max, new Date(i.finishTime).getTime()), 0);
+      if (!job.dispatchFC)
+        job.dispatchFC = {};
+      job.dispatchFC.status = "ColdSoak";
+      job.dispatchFC.coldSoakStart = lastFCFinish || Date.now();
+    }
+  }
+  if (stage === "dispatch") {
+    job.dispatch.status = "Submitted";
+    if (job.dispatch.complianceResult === "Non-Compliant") {
+      const ex = readException("dispatch");
+      ex.exception_id = "EXC-" + job.job_id + "-dispatch";
+      job.exceptions = job.exceptions || [];
+      job.exceptions.push(ex);
+      job.dispatch.exceptionId = ex.exception_id;
+    }
+    job.signoffs.push(signoff);
+    job.history.push({
+      at: now,
+      actor: resolved.staffId,
+      field: "dispatch",
+      from: "ColdSoak",
+      to: "Submitted",
+      stage: "dispatch",
+      version: 1
+    });
+  }
+  maybeCloseJob(job);
+  persistJob(job);
+  if (state.activeTab === "dispatch") {
+    renderDispatch(document.getElementById("detail-body"), job);
+  }
+}
+function tickDetailLive() {
+  const job = currentJob();
+  if (!job)
+    return;
+  const pillEl = document.getElementById("preset-pill");
+  const timerEl = document.getElementById("p-timer-display");
+  if (state.activeTab === "preset") {
+    const st = presetLiveState(job);
+    if (pillEl)
+      pillEl.innerHTML = pill(st.label, st.cls, st.el);
+    if (timerEl && job.preset.startTime)
+      timerEl.textContent = fmtElapsed(elapsedMin(job.preset.startTime));
+  }
+  if (state.activeTab === "foodchecker") {
+    (job.foodChecker.items || []).forEach((it, i) => {
+      const el = document.getElementById("fc-elapsed-" + i);
+      if (!el)
+        return;
+      const st = itemStatus(it, job);
+      if (st.el != null)
+        el.textContent = fmtElapsed(st.el);
+    });
+  }
+  if (state.activeTab === "dispatch") {
+    const dispEl = document.getElementById("disp-elapsed");
+    const pillEl2 = document.getElementById("disp-pill");
+    if (dispEl && pillEl2) {
+      const live = dispatchLive(job);
+      dispEl.textContent = live.el != null ? fmtElapsed(live.el) : "—";
+      pillEl2.innerHTML = pill(live.label, live.cls, live.el);
+    }
+  }
+}
+function startTicker() {
+  setInterval(() => {
+    if (state.currentScreen === "detail")
+      tickDetailLive();
+  }, 1000);
+}
+window.preview = preview;
+window.switchTab = switchTab;
+window.startPreset = startPreset;
+window.finishPreset = finishPreset;
+window.updatePresetGates = updatePresetGates;
+window.addService = addService;
+window.removeService = removeService;
+window.startService = startService;
+window.finishService = finishService;
+window.startItem = startItem;
+window.finishItem = finishItem;
+window.updateItemGate = updateItemGate;
+window.updateItemField = updateItemField;
+window.updateStartTime = updateStartTime;
+function toggleDisposed(linkId, value) {
+  const yesBtn = document.getElementById(`exc-fc-${linkId}-disposed-yes`);
+  const noBtn = document.getElementById(`exc-fc-${linkId}-disposed-no`);
+  if (value === "yes") {
+    yesBtn.classList.add("active");
+    noBtn.classList.remove("active");
+  } else {
+    noBtn.classList.add("active");
+    yesBtn.classList.remove("active");
+  }
+}
+function handlePhotoUpload(linkId, input) {
+  const file = input.files[0];
+  if (!file)
+    return;
+  const reader = new FileReader;
+  reader.onload = (e) => {
+    const preview2 = document.getElementById(`exc-fc-${linkId}-photo-preview`);
+    if (preview2) {
+      preview2.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:120px;border-radius:6px" />`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+window.toggleDisposed = toggleDisposed;
+window.handlePhotoUpload = handlePhotoUpload;
+window.submitStage = submitStage;
+window.resolveIdentity = resolveIdentity;
+window.confirmSignoff = confirmSignoff;
+window.closeSignoff = closeSignoff;
+window.navigate = (s) => {
+  if (s === "current")
+    preview.go(VIEWS.current);
+  if (s === "report") {
+    const j = currentJob();
+    preview.openRecord(VIEWS.report, j && j.job_id || state.activeJobId || "");
+  }
+};
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!state.jobs.length)
+    state.jobs = buildSeed();
+  const recordId = preview.recordId();
+  if (recordId)
+    state.activeJobId = recordId;
+  await loadJobs();
+  if (recordId) {
+    const m = findJobByRecord(recordId);
+    if (m)
+      state.activeJobId = m.job_id;
+    else
+      state.activeJobId = recordId;
+  }
+  state.currentScreen = "detail";
+  renderDetail();
+  startTicker();
+});
+</script></body>
+</html>

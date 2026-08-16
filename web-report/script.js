@@ -1,4 +1,4 @@
-import { buildSeed, seedStaff, seedFlights } from "./sample-data.js";
+import { buildSeed, seedStaff, seedFlights } from "../sample-data.js";
 
 const _SVC = (() => {
 	const p = location.pathname.split("/");
@@ -188,7 +188,7 @@ var preview = {
 if (!window.preview) window.preview = preview;
 
 const VIEWS = {
-	current: "pv-ccp6-current",
+	current: "pv-5czmym",
 	all: "pv-kfb8yh",
 	create: "pv-ji169l",
 	detail: "pv-0gnlo8",
@@ -365,152 +365,123 @@ function formatTime(timestamp) {
 	return d.toTimeString().slice(0, 5);
 }
 
-function livePresetStatus(job) {
-	const p = job.preset || {};
-	if (p.status === "Submitted")
-		return {
-			label: p.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant",
-			cls: p.complianceResult === "Compliant" ? "compliant" : "nc",
-		};
-	if (!p.startTime)
-		return { label: "Not Started", cls: "not-started", el: null };
-	const el = elapsedMin(p.startTime);
-	const rule = ruleFor(job);
-	if (el > rule.exposureMax) return { label: "Overtime", cls: "overtime", el };
-	const warnAt = rule.exposureMax - CONFIG.warningThresholdMin;
-	if (el >= warnAt) return { label: "Warning", cls: "warning", el };
-	return { label: "In Progress", cls: "in-progress", el };
+function currentJob() {
+	return state.jobs.find((j) => j.job_id === state.activeJobId);
 }
 
-function fcSummary(job) {
-	const items = job.foodChecker?.items || [];
-	let inProg = 0;
-	let done = 0;
-	let maxEl = 0;
-	for (const it of items) {
-		const finished =
-			it.finishTime ||
-			it.status === "Compliant" ||
-			it.status === "NonCompliant";
-		if (finished) done += 1;
-		else if (it.startTime) {
-			inProg += 1;
-			maxEl = Math.max(maxEl, elapsedMin(it.startTime));
+function hmLimits(job) {
+	const r = ruleFor(job);
+	return {
+		exposureMax: r.exposureMax,
+		presetTempMax: r.presetTempMax,
+		coldSoakMin: r.coldSoakMin,
+		dispatchTempMax: r.dispatchTempMax,
+	};
+}
+
+function calcTPMH(svc) {
+	if (
+		svc.traysHandled == null ||
+		svc.staffCount == null ||
+		svc.startTime == null ||
+		svc.finishTime == null
+	)
+		return "—";
+	const hours =
+		(new Date(svc.finishTime) - new Date(svc.startTime)) / (60 * 60 * 1000);
+	if (hours <= 0 || svc.staffCount <= 0) return "—";
+	const tpmh = svc.traysHandled / (svc.staffCount * hours);
+	return tpmh.toFixed(1);
+}
+
+function title(stage) {
+	return stage === "preset"
+		? "Preset"
+		: stage === "foodchecker"
+			? "Food Checker"
+			: "Dispatch";
+}
+
+function num(id) {
+	const v = document.getElementById(id)?.value;
+	return v === "" || v == null ? null : parseFloat(v);
+}
+
+function timeOfDayHM(iso) {
+	if (!iso) return null;
+	const d = new Date(iso);
+	return d.getHours() * 60 + d.getMinutes();
+}
+
+function hmParse(hhmm) {
+	if (!hhmm) return null;
+	const [h, m] = hhmm.split(":").map(Number);
+	return h * 60 + m;
+}
+
+function persistJob(job) {
+	try {
+		store.set("ccp6_jobs", job.job_id, job).catch(() => {});
+	} catch (e) {}
+}
+
+function maybeCloseJob(job) {
+	const done = [];
+	done.push(job.preset?.status === "Submitted");
+	done.push(job.foodChecker?.status === "Submitted");
+	if (job.site === "SICC2") done.push(job.dispatch?.status === "Submitted");
+	if (done.every(Boolean) && !job.closed) {
+		job.closed = true;
+		job.job_status = "Closed";
+		job.closedAt = new Date().toISOString();
+		job.history.push({
+			at: job.closedAt,
+			actor: "system",
+			field: "job",
+			from: "Open",
+			to: "Closed",
+			stage: "job",
+			version: 1,
+		});
+	}
+}
+
+function fmtDuration(min) {
+	if (min == null) return "—";
+	const h = Math.floor(min / 60);
+	const m = Math.round(min % 60);
+	return h > 0 ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
+}
+
+function stageResultText(job, stage) {
+	if (stage === "preset") {
+		const p = job.preset;
+		if (p.status === "Submitted")
+			return p.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant";
+		if (p.startTime && !p.finishTime) return "In Progress";
+		return "Not Started";
+	}
+	if (stage === "foodchecker") {
+		const fc = job.foodChecker;
+		const items = fc.items || [];
+		if (fc.status === "Submitted") {
+			const nc = items.filter(
+				(i) => i.complianceResult === "Non-Compliant",
+			).length;
+			return nc ? "Non-Compliant" : "Compliant";
 		}
+		const started = items.filter((i) => i.startTime).length;
+		if (started) return started + "/" + items.length + " started";
+		return items.length ? "Not Started" : "No items";
 	}
-	return { total: items.length, inProg, done, maxEl: maxEl || null };
-}
-
-function dispatchSummary(job) {
-	const d = job.dispatch;
-	if (job.site !== "SICC2") return null;
-	if (d?.status === "Submitted") {
-		return {
-			label: d.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant",
-			cls: d.complianceResult === "Compliant" ? "compliant" : "nc",
-		};
+	if (stage === "dispatch") {
+		const d = job.dispatch;
+		if (job.site !== "SICC2") return "—";
+		if (!d || d.status !== "Submitted")
+			return d?.coldSoakStart ? "Cold Soak" : "Locked";
+		return d.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant";
 	}
-	if (job.preset.status !== "Submitted" || !job.preset.finishTime) {
-		return { label: "Locked", cls: "locked" };
-	}
-	const el = elapsedMin(job.preset.finishTime);
-	const min = ruleFor(job).coldSoakMin;
-	if (el >= min) return { label: "Eligible for dispatch", cls: "eligible", el };
-	return { label: "Cold Soak", cls: "cold-soak", el };
-}
-
-function pill(label, cls, el) {
-	const time =
-		el != null ? `<span class="pill-elapsed">${fmtElapsed(el)}</span>` : "";
-	return `<span class="status-pill ${cls}">${label}${time}</span>`;
-}
-
-function jobCard(job) {
-	const preset = livePresetStatus(job);
-	const fc = fcSummary(job);
-	const disp = dispatchSummary(job);
-	const totalQty = (job.linkedItems || []).reduce(
-		(s, it) => s + (it.quantity || 0),
-		0,
-	);
-	const cardId = "card-" + esc(job.job_id);
-	return `
-    <div class="job-card" data-job="${esc(job.job_id)}" id="${cardId}">
-      <div class="job-card-head">
-        <div>
-          <div class="job-card-flight">${esc(job.flight_number)} · ${esc(job.flight_date)}</div>
-          <div class="job-card-meta">ETD ${esc(job.etd)} · ${esc(job.meal_service)} · Grp ${esc(job.ta_group)} · ${esc(job.airline)} · ${esc(job.site)}</div>
-        </div>
-        <span class="job-id">${esc(job.job_id)}</span>
-      </div>
-      <div class="card-rows">
-        <div class="card-row"><span class="card-row-label">Preset</span><span class="preset-pill" data-preset>${pill(preset.label, preset.cls, preset.el)}</span></div>
-        <div class="card-row">
-          <span class="card-row-label">Food Checker</span>
-          <span data-fc>${fc.done}/${fc.total} done${fc.inProg ? " · " + fmtElapsed(fc.maxEl) : ""}</span>
-        </div>
-        ${disp ? `<div class="card-row"><span class="card-row-label">Dispatch</span><span class="dispatch-pill" data-dispatch>${pill(disp.label, disp.cls, disp.el)}</span></div>` : ""}
-        <div class="card-row"><span class="card-row-label">Linked sources</span><span>${(job.linkedItems || []).length} items · ${totalQty} qty</span></div>
-      </div>
-      <button type="button" class="btn-primary card-action" onclick="openJob('${esc(job.job_id)}')">Open Job</button>
-    </div>`;
-}
-
-function filterBySICC(site) {
-	state.siccFilter = site;
-	document.querySelectorAll(".sicc-btn").forEach((btn) => {
-		btn.classList.toggle("active", btn.dataset.sicc === site);
-	});
-	renderCurrent();
-}
-window.filterBySICC = filterBySICC;
-
-function renderCurrent() {
-	const grid = document.getElementById("current-grid");
-	const jobs = state.jobs.filter(
-		(j) =>
-			j.closed !== true &&
-			j.job_status !== "Voided" &&
-			j.site === state.siccFilter,
-	);
-
-	if (!jobs.length) {
-		grid.innerHTML = `<div class="empty-state">No active CCP6 jobs. Create a job to get started.</div>`;
-		return;
-	}
-	grid.innerHTML = jobs.map(jobCard).join("");
-}
-
-// Update only the live timer nodes in place so the grid is NOT rebuilt every
-// second (which broke clicks and caused layout jumps).
-function tickCurrent() {
-	const grid = document.getElementById("current-grid");
-	if (!grid) return;
-	for (const job of state.jobs) {
-		if (job.closed === true || job.job_status === "Voided") continue;
-		const card = grid.querySelector('[data-job="' + job.job_id + '"]');
-		if (!card) continue;
-		const presetEl = card.querySelector("[data-preset]");
-		if (presetEl) {
-			const st = livePresetStatus(job);
-			presetEl.innerHTML = pill(st.label, st.cls, st.el);
-		}
-		const fcEl = card.querySelector("[data-fc]");
-		if (fcEl) {
-			const fc = fcSummary(job);
-			fcEl.textContent =
-				fc.done +
-				"/" +
-				fc.total +
-				" done" +
-				(fc.inProg ? " · " + fmtElapsed(fc.maxEl) : "");
-		}
-		const dispEl = card.querySelector("[data-dispatch]");
-		if (dispEl) {
-			const d = dispatchSummary(job);
-			dispEl.innerHTML = pill(d.label, d.cls, d.el);
-		}
-	}
+	return "";
 }
 
 function overallCompliance(job) {
@@ -536,62 +507,155 @@ function downloadFile(name, content, type) {
 	URL.revokeObjectURL(url);
 }
 
-// ── Routing ─────────────────────────────────────────────────────────
-function navigate(screen, opts) {
-	if (screen === "all") return preview.go(VIEWS.all);
-	if (screen === "create")
-		return preview.go(VIEWS.create, { sicc: state.siccFilter });
-	if (screen === "detail") {
-		const jobId = (opts && opts.jobId) || state.activeJobId || "";
-		return preview.go(VIEWS.detail, { id: jobId });
+function renderReport() {
+	const job = currentJob();
+	const body = document.getElementById("report-body");
+	if (!job) {
+		body.innerHTML = `<div class="empty-state">Job not found.</div>`;
+		return;
 	}
-	if (screen === "report") {
-		const jobId = (opts && opts.jobId) || state.activeJobId || "";
-		return preview.go(VIEWS.report, { id: jobId });
-	}
-	for (const key of Object.keys(SCREEN_IDS)) {
-		document
-			.getElementById(SCREEN_IDS[key])
-			.classList.toggle("hidden", key !== screen);
-	}
-	state.currentScreen = screen;
-	updateTopbarNav();
-	if (window.__renderHooks?.[screen]) window.__renderHooks[screen]();
-	window.scrollTo({ top: 0 });
+	document.getElementById("report-sub").textContent =
+		`${job.flight_number} · ${job.meal_service} · Grp ${job.ta_group} · ${job.airline} · ${job.site}`;
+	const tag = (label, v) =>
+		`<div class="form-group"><div class="jh-label">${esc(label)}</div><div class="jh-value">${esc(v)}</div></div>`;
+	const fcItems = (job.foodChecker.items || [])
+		.map(
+			(it) => `<tr>
+    <td>${esc(it.sku)}</td><td>${esc(it.item_description)}</td><td>${esc(it.class)}</td><td>${esc(it.quantity)}</td>
+    <td>${it.startTemp ?? "—"}</td><td>${it.finishTemp ?? "—"}</td><td>${it.durationMin ?? "—"} min</td>
+    <td>${esc(it.complianceResult || "Not Started")}</td></tr>`,
+		)
+		.join("");
+	const signoffRows = (job.signoffs || [])
+		.map(
+			(s) =>
+				`<tr><td>${esc(s.stage)}</td><td>${esc(s.staffName)} (${esc(s.staffId)})</td><td>${esc(s.role)}</td><td>${esc(s.captureMethod)}</td><td>${esc(new Date(s.submittedAt).toLocaleString())}</td></tr>`,
+		)
+		.join("");
+	const historyRows = (job.history || [])
+		.map(
+			(h) =>
+				`<tr><td>${esc(new Date(h.at).toLocaleString())}</td><td>${esc(h.actor)}</td><td>${esc(h.field)}</td><td>${esc(h.from)} → ${esc(h.to)}</td><td>${esc(h.stage)}</td></tr>`,
+		)
+		.join("");
+	const overall = overallCompliance(job);
+	body.innerHTML = `
+    <div class="panel"><div class="panel-title">Job Context</div><div class="form-grid">
+      ${tag("Job ID", job.job_id)}${tag("Flight", job.flight_number)}${tag("Flight Date", job.flight_date)}${tag("ETD", job.etd)}
+      ${tag("Meal Service", job.meal_service)}${tag("Group", job.ta_group)}${tag("Airline", job.airline)}${tag("Site", job.site)}
+      ${tag("Rule Set", job.rule_set)}${tag("Status", job.job_status || (job.closed ? "Closed" : "Open"))}${tag("Overall", overall)}
+    </div></div>
+    <div class="panel"><div class="panel-title">Linked CCP5 Items</div><div class="table-wrap"><table class="data-table">
+      <thead><tr><th>SKU</th><th>Description</th><th>Class</th><th>Qty</th><th>Source</th></tr></thead>
+      <tbody>${(job.linkedItems || []).map((l) => `<tr><td>${esc(l.sku)}</td><td>${esc(l.item_description)}</td><td>${esc(l.class)}</td><td>${esc(l.quantity)}</td><td>${esc(l.ccp5_record_id)}</td></tr>`).join("")}</tbody>
+    </table></div></div>
+    <div class="panel"><div class="panel-title">Preset</div><div class="form-grid">
+      ${tag("Start", job.preset.startTime ? new Date(job.preset.startTime).toLocaleString() : "—")}
+      ${tag("Finish", job.preset.finishTime ? new Date(job.preset.finishTime).toLocaleString() : "—")}
+      ${tag("Exposure", (job.preset.exposureDurationMin ?? "—") + " min")}
+      ${tag("HO Start/Finish", (job.preset.startTempHorsDoeuvre ?? "—") + " / " + (job.preset.finishTempHorsDoeuvre ?? "—") + " °C")}
+      ${tag("Dessert Start/Finish", (job.preset.startTempDessert ?? "—") + " / " + (job.preset.finishTempDessert ?? "—") + " °C")}
+      ${tag("Result", job.preset.complianceResult || "—")}
+      ${tag("Trays/Staff", (job.preset.traysHandled ?? "—") + " / " + (job.preset.staffCount ?? "—"))}
+    </div></div>
+    <div class="panel"><div class="panel-title">Food Checker</div><div class="table-wrap"><table class="data-table">
+      <thead><tr><th>SKU</th><th>Description</th><th>Class</th><th>Qty</th><th>Start</th><th>Finish</th><th>Duration</th><th>Result</th></tr></thead>
+      <tbody>${fcItems || `<tr><td>No items</td></tr>`}</tbody></table></div></div>
+    ${
+			job.site === "SICC2"
+				? `<div class="panel"><div class="panel-title">Dispatch</div><div class="form-grid">
+      ${tag("Cold Soak Start", job.dispatch?.coldSoakStart ? new Date(job.dispatch.coldSoakStart).toLocaleString() : "—")}
+      ${tag("Before-Exit Time", job.dispatch?.beforeExitTime || "—")}
+      ${tag("Dispatch Temp", (job.dispatch?.beforeExitTemp ?? "—") + " °C")}
+      ${tag("Cold Soak Duration", (job.dispatch?.coldSoakDurationMin ?? "—") + " min")}
+      ${tag("Result", job.dispatch?.complianceResult || "—")}
+    </div></div>`
+				: ""
+		}
+    <div class="panel"><div class="panel-title">Exceptions</div>
+      ${(job.exceptions || []).length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Root Cause</th><th>Correction</th><th>Disposed</th></tr></thead><tbody>${job.exceptions.map((e) => `<tr><td>${esc(e.exception_id)}</td><td>${esc(e.rootCause || e.root_cause)}</td><td>${esc(e.immediateCorrection || e.immediate_correction)}</td><td>${esc(e.foodDisposed != null ? (e.foodDisposed === true || e.foodDisposed === "Yes" ? "Yes" : "No") : e.food_disposed)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-state" style="padding:20px">No exceptions recorded.</div>`}
+    </div>
+    <div class="panel"><div class="panel-title">Sign-offs</div>
+      ${signoffRows ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Stage</th><th>Staff</th><th>Role</th><th>Method</th><th>Submitted</th></tr></thead><tbody>${signoffRows}</tbody></table></div>` : `<div class="empty-state" style="padding:20px">No sign-offs yet.</div>`}
+    </div>
+    <div class="panel"><div class="panel-title">Record History</div>
+      ${historyRows ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Time</th><th>Actor</th><th>Field</th><th>Change</th><th>Stage</th></tr></thead><tbody>${historyRows}</tbody></table></div>` : `<div class="empty-state" style="padding:20px">No history.</div>`}
+    </div>`;
 }
 
-function updateTopbarNav() {
-	document.querySelectorAll(".topbar-nav .nav-btn").forEach((btn) => {
-		btn.classList.toggle("active", btn.dataset.screen === state.currentScreen);
-	});
+function exportJob(format) {
+	const job = currentJob();
+	if (!job) return;
+	const lines = [`CCP6 Web Report — ${job.job_id}`];
+	lines.push(`Job ID,${job.job_id}`);
+	lines.push(`Flight,${job.flight_number}`);
+	lines.push(`Flight Date,${job.flight_date}`);
+	lines.push(`ETD,${job.etd}`);
+	lines.push(`Meal Service,${job.meal_service}`);
+	lines.push(`Group,${job.ta_group}`);
+	lines.push(`Airline,${job.airline}`);
+	lines.push(`Site,${job.site}`);
+	lines.push(`Rule Set,${job.rule_set}`);
+	lines.push(`Overall,${overallCompliance(job)}`);
+	const csv = lines
+		.map((l) =>
+			l
+				.split(",")
+				.map((c) => `"${String(c).replace(/"/g, '""')}"`)
+				.join(","),
+		)
+		.join("\n");
+	downloadFile(
+		"ccp6-" + job.job_id + (format === "pdf" ? ".csv" : ".csv"),
+		csv,
+		"text/csv",
+	);
 }
 
-function openJob(jobId) {
-	navigate("detail", { jobId });
+// ── Init ────────────────────────────────────────────────────────────
+function toggleDisposed(linkId, value) {
+	const yesBtn = document.getElementById(`exc-fc-${linkId}-disposed-yes`);
+	const noBtn = document.getElementById(`exc-fc-${linkId}-disposed-no`);
+	if (value === "yes") {
+		yesBtn.classList.add("active");
+		noBtn.classList.remove("active");
+	} else {
+		noBtn.classList.add("active");
+		yesBtn.classList.remove("active");
+	}
 }
-function openReport(jobId) {
-	navigate("report", { jobId });
-}
+window.toggleDisposed = toggleDisposed;
 
-function startTicker() {
-	setInterval(() => {
-		if (state.currentScreen === "current") tickCurrent();
-	}, 1000);
+function handlePhotoUpload(linkId, input) {
+	const file = input.files[0];
+	if (!file) return;
+	const reader = new FileReader();
+	reader.onload = (e) => {
+		const preview = document.getElementById(`exc-fc-${linkId}-photo-preview`);
+		if (preview) {
+			preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:120px;border-radius:6px" />`;
+		}
+	};
+	reader.readAsDataURL(file);
 }
 
 // ── Init ────────────────────────────────────────────────────────────
 window.preview = preview;
-window.navigate = navigate;
-window.openJob = openJob;
-window.openReport = openReport;
-window.filterBySICC = filterBySICC;
-window.updateTopbarNav = updateTopbarNav;
+window.exportJob = exportJob;
+window.renderReport = renderReport;
+window.navigate = (s) => {
+	if (s === "current") preview.go(VIEWS.current);
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
-	window.__renderHooks = { current: renderCurrent };
 	if (!state.jobs.length) state.jobs = buildSeed();
-	navigate("current");
+	const recordId = preview.recordId();
+	if (recordId) state.activeJobId = recordId;
 	await loadJobs();
-	navigate("current");
-	startTicker();
+	if (recordId) {
+		const m = findJobByRecord(recordId);
+		if (m) state.activeJobId = m.job_id;
+		else state.activeJobId = recordId;
+	}
+	renderReport();
 });

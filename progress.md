@@ -3,26 +3,70 @@
 Status of the CCP6 Operational Service preview developed from `index.md` (v14),
 following `AGENTS.md` conventions.
 
-## Files
+## Architecture (multi-folder, like `table-report/`)
 
-| File | Purpose |
-|---|---|
-| `index.html` | Single uploaded view. Hosts all 5 screens + the sign-off modal. |
-| `style.css` | Flat dark theme on the provided palette; component + classes. |
-| `script.js` | `_SVC` / `store` / `preview` boilerplate, routing, data load, all screen logic. |
-| `sample-data.js` | Seeded mock jobs, staff list, and flight list. |
+Each screen is its own uploaded view folder (`index.html` + `script.js` +
+`style.css`), mirroring the pre-existing `table-report/` folder. Cross-view
+navigation uses `preview.go` / `preview.openRecord`. Root hosts only the
+Current Jobs (S1) landing view.
+
+| Path | Purpose |
+| --- | --- |
+| `index.html` / `script.js` / `style.css` | **S1 — Current CCP6 Jobs** (root view). `navigate()` dispatches to the other folders. |
+| `table-report/` | **S2 — All CCP6 Jobs** (pre-existing, untouched). |
+| `create-job/` | **S3 — Create CCP6 Job** form. |
+| `job-detail/` | **S4 — Job Detail** (Preset / Food Checker / Dispatch tabs + sign-off modal). |
+| `web-report/` | **S5 — Web Report**. |
+| `sample-data.js` | Shared seed (`buildSeed`, `seedStaff`, `seedFlights`) imported by every folder. |
 | `index.md` | Spec (source of truth). |
 | `AGENTS.md` | Platform working conventions. |
 
+### View IDs (placeholders — replace with real platform ids)
+
+`VIEWS` map (root `script.js`):
+
+```js
+const VIEWS = {
+  current: "pv-ccp6-current",
+  all:     "pv-kfb8yh",        // existing table-report id
+  create:  "pv-create-dummy",  // placeholder → create-job/
+  detail:  "pv-detail-dummy",  // placeholder → job-detail/
+  report:  "pv-report-dummy",  // placeholder → web-report/
+};
+```
+
+When the real `pv-xxxxx` ids are known, update `VIEWS` in root `script.js`
+and the back-navigation `preview.go(VIEWS.current)` calls in each folder.
+
+### Cross-view wiring
+
+| From → To | Call |
+| --- | --- |
+| S1 → S3 Create | `preview.go(VIEWS.create)` |
+| S1 → S4 Detail | `preview.openRecord(VIEWS.detail, jobId)` |
+| S1 → S2 All | `preview.go(VIEWS.all)` |
+| S4 → S1 Back | `preview.go(VIEWS.current)` |
+| S4 → S5 Report | `preview.openRecord(VIEWS.report, jobId)` |
+| S3 → S4 (after create) | `preview.openRecord(VIEWS.detail, newJobId)` |
+| S5 → S1 Back | `preview.go(VIEWS.current)` |
+
+Each folder's `script.js` carries its own `_SVC` / `store` / `preview`
+boilerplate, `CONFIG`, `state`, shared helpers (`esc`, `ruleFor`, `elapsedMin`,
+`fmtElapsed`, `loadJobs`, `findJobByRecord`, `currentJob`, `persistJob`, …),
+and only that screen's functions + `window.*` exposures + `DOMContentLoaded`
+init (which resolves the `record` param via `findJobByRecord`).
+
 ## What works
 
-### Scaffold & conventions
+### Scaffold & conventions (per folder)
+
 - Boilerplate (`_SVC`, `store`, `preview`) at top of `script.js`; `window.preview` set.
 - `style.css` + `script.js` split out per AGENTS.md.
 - Default palette in `:root` (`--bg-page #0f193c`, `--accent #6366f1`, etc.).
 - `VIEWS` id map + `SCREEN_IDS` for routing; every inline handler exposed on `window`.
 
 ### Configuration (`CONFIG`)
+
 - Meal Service: **Breakfast / Lunch / Dinner**
 - Group: **A / B / C / D**
 - Airlines → rule sets: Qantas (QF), United (UA), Standard/OAL
@@ -33,6 +77,7 @@ following `AGENTS.md` conventions.
 - Warning threshold default 5 min.
 
 ### S1 — Current CCP6 Jobs
+
 - Card view of active jobs (closed/voided excluded).
 - One card per parent job: flight header, Preset pill + live elapsed, Food Checker
   counts / most critical timer, Dispatch Cold Soak / Eligible (SICC2 only), linked
@@ -42,6 +87,7 @@ following `AGENTS.md` conventions.
   SICC1, SICC2, closed compliant, closed non-compliant).
 
 ### S4 — Job Detail (the core form)
+
 - **Shared persistent header**: Job ID, flight, date, ETD, meal, group, airline,
   site, rule set, exposure limit, cold-soak/dispatch limits (SICC2).
 - **Tabs**: Preset / Food Checker / Dispatch (Dispatch only for SICC2).
@@ -58,6 +104,7 @@ following `AGENTS.md` conventions.
 - Compliance + job roll-up all system-calculated per §8.2.rules.
 
 ### Sign-off modal (v14 pattern)
+
 - Opens via `submitStage()` only after per-stage + exception validation (order of
   operations per §5.6).
 - Staff ID / NFC method chips; identity resolved against seeded staff list.
@@ -67,12 +114,14 @@ following `AGENTS.md` conventions.
   applicable stages (incl. SICC2 Dispatch) are submitted.
 
 ### Data / seeding
+
 - `loadJobs()` reads `ccp6_jobs` from `store`; seeds from `sample-data.js` on
   first run; falls back to in-memory seed when the API is unavailable (so the
   static demo works).
 - `persistJob()` saves each change with a silent catch (no unhandled rejections).
 
 ## Verified in-browser (static server)
+
 - Current cards render with ticking timers and correct pills.
 - Open Job → detail renders header + tabs correctly.
 - Submit before finishing → blocked, modal not opened.
@@ -83,6 +132,7 @@ following `AGENTS.md` conventions.
 ## Implemented in this pass
 
 ### S3 — Create CCP6 Job (was a no-op)
+
 - Flight searchable dropdown populated from `seedFlights()` with free-text
   filter (flight number / airline) and click-to-select.
 - Live rule-set preview updates on airline change; linked-item + derived
@@ -95,6 +145,7 @@ following `AGENTS.md` conventions.
 - Added `site` to the flight seed data (derived, not keyed).
 
 ### S2 — All CCP6 Jobs (was empty/stubs)
+
 - Full data table with all §5.2 columns, including closed/voided jobs.
 - Free-text search; filter panel (site, meal, group, airline, status, overall)
   toggled via Filters; overall compliance roll-up helper.
@@ -102,17 +153,20 @@ following `AGENTS.md` conventions.
 - `exportExcel()` downloads a CSV of the filtered set.
 
 ### S5 — Web Report (was empty/stub)
+
 - Full single-job report: context, linked CCP5 items, Preset, Food Checker
   rows, Dispatch (SICC2), exceptions, sign-off actors, record history.
 - `exportJob()` downloads the report as CSV.
 
 ### Bug fixes
+
 - Food Checker Start/Finish button ids now keyed by `linkId` (were index), so
   `updateItemGate` correctly enables/disables Start on temperature entry.
 - Direct-loading the report view now sets `activeJobId` from the record param
   (previously only handled the detail view).
 
 ### Initial-render robustness (job not showing on load)
+
 - Jobs are seeded **synchronously** before the first paint, so the current list
   (and a freshly-created job's detail) render immediately instead of waiting on
   the network.
@@ -126,15 +180,18 @@ following `AGENTS.md` conventions.
   record id — so deep links still open the right job on the detail/report views.
 
 ## Not yet implemented (next steps)
+
 - Exception: photo evidence capture not wired to final HTML submission.
 - A11y: table inputs lack labels (42 warnings).
 - PDF export (currently CSV for both PDF/Excel buttons).
 - View IDs in the `VIEWS` map are placeholders pending real platform ids.
 
 ## Run locally
+
 ```
 python3 -m http.server 8812
 # open http://localhost:8812/index.html
 ```
+
 Rather note: the `/api/public/preview-store` endpoints are absent on a plain
 static server, so the store calls 404/501 and code auto-seeds in memory.

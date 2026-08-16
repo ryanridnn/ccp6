@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 — Job Detail</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="screen" id="screen-detail">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title" id="detail-title">CCP6 Job</h1>
+            <p class="page-sub" id="detail-flight-sub"></p>
+          </div>
+          <div class="page-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="navigate('report')"
+            >
+              Web Report
+            </button>
+            <button
+              type="button"
+              class="btn-back"
+              onclick="navigate('current')"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          </div>
+        </div>
+
+        <!-- Persistent shared header -->
+        <div class="job-header" id="detail-header"></div>
+
+        <!-- Stage tabs -->
+        <div class="tab-bar" id="detail-tabs"></div>
+
+        <div class="tab-body" id="detail-body"></div>
+      </section>
+    </div>
+
+    <!-- Sign-off modal -->
+    <div id="signoff-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 class="modal-title">Sign Off — <span id="signoff-stage"></span></h2>
+        <p class="modal-sub">Confirm your identity to submit this stage</p>
+
+        <div id="signoff-error" class="badge-error hidden"></div>
+
+        <div class="modal-tabs" id="signoff-methods"></div>
+
+        <div class="form-group">
+          <label class="form-label" id="signoff-input-label" for="signoff-input"
+            >Staff ID</label
+          >
+          <input
+            type="text"
+            id="signoff-input"
+            class="form-input"
+            autocomplete="off"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="btn-primary modal-verify"
+          onclick="resolveIdentity()"
+        >
+          Verify &amp; Confirm
+        </button>
+
+        <div class="modal-identity hidden" id="signoff-confirm">
+          <p class="identity-name" id="signoff-name"></p>
+          <p class="identity-meta" id="signoff-role"></p>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="confirmSignoff(true)"
+            >
+              Confirm Submit
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="confirmSignoff(false)"
+            >
+              Change
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-ghost"
+          id="signoff-cancel"
+          onclick="closeSignoff()"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>

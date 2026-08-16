@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 — Create Job</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="screen" id="screen-create">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">
+              Create CCP6 Job — <span id="create-sicc-label">SICC1</span>
+            </h1>
+          </div>
+          <button type="button" class="btn-back" onclick="navigate('current')">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <div class="form-card">
+          <form id="create-form" onsubmit="submitCreateJob(event)">
+            <div class="form-section">
+              <div class="create-mode-header">
+                <div class="form-group">
+                  <div class="segmented-buttons" id="create-mode-buttons">
+                    <button
+                      type="button"
+                      class="segment-btn active"
+                      data-value="manual"
+                    >
+                      Manual
+                    </button>
+                    <button
+                      type="button"
+                      class="segment-btn"
+                      data-value="scheduled"
+                    >
+                      Scheduled
+                    </button>
+                  </div>
+                  <input type="hidden" id="create-mode" value="manual" />
+                </div>
+              </div>
+              <div class="create-mode-divider"></div>
+
+              <div class="create-header-row">
+                <div class="form-group create-flight-group">
+                  <label class="form-label required" for="create-flight"
+                    >Flight Number</label
+                  >
+                  <div class="searchable-dropdown" id="create-flight-wrap">
+                    <input
+                      type="text"
+                      id="create-flight"
+                      class="form-input"
+                      placeholder="Search flight…"
+                      autocomplete="off"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="dropdown-clear hidden"
+                      id="create-flight-clear"
+                      onclick="clearCreateFlight()"
+                    >
+                      ×
+                    </button>
+                    <div class="dropdown-arrow">▾</div>
+                    <div
+                      class="dropdown-list hidden"
+                      id="create-flight-list"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="form-group create-etd-group">
+                  <label class="form-label required" for="create-etd"
+                    >ETD (24h)</label
+                  >
+                  <input
+                    type="time"
+                    id="create-etd"
+                    class="form-input"
+                    required
+                  />
+                  <div
+                    id="create-etd-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
+                </div>
+
+                <div class="form-group create-group-group">
+                  <label class="form-label required">Group</label>
+                  <div class="segmented-buttons" id="create-group-buttons">
+                    <button type="button" class="segment-btn" data-value="A">
+                      A
+                    </button>
+                    <button type="button" class="segment-btn" data-value="B">
+                      B
+                    </button>
+                    <button type="button" class="segment-btn" data-value="C">
+                      C
+                    </button>
+                    <button type="button" class="segment-btn" data-value="D">
+                      D
+                    </button>
+                  </div>
+                  <input type="hidden" id="create-group" required />
+                  <div
+                    id="create-group-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
+                </div>
+
+                <div class="form-group create-ruleset-group">
+                  <label class="form-label">Rule Set</label>
+                  <input
+                    type="text"
+                    id="create-ruleset"
+                    class="form-input"
+                    readonly
+                    placeholder="—"
+                  />
+                </div>
+              </div>
+
+              <div class="create-trays-staff-section">
+                <div class="create-trays-staff-row">
+                  <div class="form-group">
+                    <label class="form-label" for="create-trays"
+                      >Trays / meals handled</label
+                    >
+                    <input
+                      type="number"
+                      id="create-trays"
+                      class="form-input"
+                      min="0"
+                      placeholder="0"
+                    />
+                    <div
+                      id="create-trays-readonly"
+                      class="create-readonly-text hidden"
+                    >
+                      <div class="cr-value"></div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="create-staff"
+                      >No of Staff</label
+                    >
+                    <input
+                      type="number"
+                      id="create-staff"
+                      class="form-input"
+                      min="0"
+                      placeholder="0"
+                    />
+                    <div
+                      id="create-staff-readonly"
+                      class="create-readonly-text hidden"
+                    >
+                      <div class="cr-value"></div>
+                    </div>
+                  </div>
+                  <div class="form-group create-meal-service-group hidden">
+                    <label class="form-label" for="create-meal-service"
+                      >Meal Service</label
+                    >
+                    <select id="create-meal-service" class="form-input">
+                      <option value="">Select...</option>
+                      <option value="Breakfast">Breakfast</option>
+                      <option value="Lunch">Lunch</option>
+                      <option value="Dinner">Dinner</option>
+                    </select>
+                    <div
+                      id="create-meal-service-readonly"
+                      class="create-readonly-text hidden"
+                    >
+                      <div class="cr-value"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="create-services-section hidden"
+                id="create-services-section"
+              >
+                <div class="create-services-header">
+                  <h3 class="create-services-title">Services</h3>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="addServiceRow()"
+                  >
+                    + Add Service
+                  </button>
+                </div>
+                <div
+                  class="create-services-list"
+                  id="create-services-list"
+                ></div>
+              </div>
+
+              <div id="create-items-container" class="hidden">
+                <div class="create-items-header">
+                  <h3 class="create-items-title">Linked Items</h3>
+                  <span class="create-items-count" id="create-items-count"
+                    >0 items selected</span
+                  >
+                </div>
+                <div class="create-items-list" id="create-items-list"></div>
+              </div>
+
+              <div
+                id="ad-hoc-toggle"
+                class="ad-hoc-toggle hidden"
+                style="margin-top: 16px"
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    id="ad-hoc-checkbox"
+                    onchange="toggleAdHocMode()"
+                  />
+                  <span>Add Ad Hoc items manually</span>
+                </label>
+              </div>
+
+              <div
+                id="ad-hoc-container"
+                class="hidden"
+                style="margin-top: 16px"
+              >
+                <div class="create-items-header">
+                  <h3 class="create-items-title">Ad Hoc Items</h3>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="addAdHocItem()"
+                    style="padding: 6px 12px; font-size: 12px"
+                  >
+                    + Add Item
+                  </button>
+                </div>
+                <div id="ad-hoc-list"></div>
+              </div>
+
+              <div id="error-list" class="error-list hidden"></div>
+
+              <div class="form-actions" style="margin-top: 24px">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="navigate('current')"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn-primary">Create job</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
