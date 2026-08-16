@@ -598,14 +598,26 @@ function initCreateModeButtons() {
 	const hiddenInput = document.getElementById("create-mode");
 	if (!container || !hiddenInput) return;
 
-	// Set default to manual
-	hiddenInput.value = "manual";
-	const firstBtn = container.querySelector(".segment-btn[data-value='manual']");
-	if (firstBtn) firstBtn.classList.add("active");
+	// Only set default mode if state.createMode hasn't been explicitly set yet
+	const currentMode = state.createMode;
+	if (!currentMode) {
+		state.createMode = "manual";
+	}
 
-	// Add click handlers
+	// Sync hidden input + button active state with current state.createMode
+	hiddenInput.value = state.createMode;
+	container
+		.querySelectorAll(".segment-btn")
+		.forEach((b) => b.classList.remove("active"));
+	const activeBtn = container.querySelector(
+		".segment-btn[data-value='" + state.createMode + "']",
+	);
+	if (activeBtn) activeBtn.classList.add("active");
+
+	// Add click handlers (dedupe-safe, adding to already-listening element is a no-op)
 	container.querySelectorAll(".segment-btn").forEach((btn) => {
 		btn.addEventListener("click", () => {
+			if (state.createMode === btn.dataset.value) return;
 			container
 				.querySelectorAll(".segment-btn")
 				.forEach((b) => b.classList.remove("active"));
@@ -649,36 +661,6 @@ function updateCreateModeUI() {
 		} else {
 			groupButtons.classList.remove("hidden");
 			groupReadonly.classList.add("hidden");
-		}
-	}
-
-	// Trays
-	const traysInput = document.getElementById("create-trays");
-	const traysReadonly = document.getElementById("create-trays-readonly");
-	if (traysInput && traysReadonly) {
-		if (isScheduled) {
-			traysInput.classList.add("hidden");
-			traysReadonly.classList.remove("hidden");
-			traysReadonly.querySelector(".cr-value").textContent =
-				traysInput.value || "0";
-		} else {
-			traysInput.classList.remove("hidden");
-			traysReadonly.classList.add("hidden");
-		}
-	}
-
-	// Staff
-	const staffInput = document.getElementById("create-staff");
-	const staffReadonly = document.getElementById("create-staff-readonly");
-	if (staffInput && staffReadonly) {
-		if (isScheduled) {
-			staffInput.classList.add("hidden");
-			staffReadonly.classList.remove("hidden");
-			staffReadonly.querySelector(".cr-value").textContent =
-				staffInput.value || "0";
-		} else {
-			staffInput.classList.remove("hidden");
-			staffReadonly.classList.add("hidden");
 		}
 	}
 
@@ -828,10 +810,6 @@ function selectCreateFlight(f) {
 					b.classList.toggle("active", b.dataset.value === f.ta_group),
 				);
 		}
-		if (f.trays != null)
-			document.getElementById("create-trays").value = f.trays;
-		if (f.staff != null)
-			document.getElementById("create-staff").value = f.staff;
 		if (f.meal_service)
 			document.getElementById("create-meal-service").value = f.meal_service;
 	}
@@ -855,6 +833,13 @@ function selectCreateFlight(f) {
 		renderServicesTable();
 	}
 
+	// Meal Service: populate in both modes; show in SICC1 only
+	if (f.site === "SICC1") {
+		if (f.meal_service)
+			document.getElementById("create-meal-service").value = f.meal_service;
+		updateMealServiceVisibility();
+	}
+
 	// Update read-only text displays in Scheduled mode
 	updateCreateModeUI();
 	// Show/hide services section based on flight + site
@@ -874,9 +859,7 @@ function clearCreateFlight() {
 	document
 		.querySelectorAll("#create-group-buttons .segment-btn")
 		.forEach((b) => b.classList.remove("active"));
-	// Trays / Staff / Meal Service
-	document.getElementById("create-trays").value = "";
-	document.getElementById("create-staff").value = "";
+	// Meal Service
 	document.getElementById("create-meal-service").value = "";
 	// Linked items + ad hoc
 	state.createItems = [];
@@ -1418,6 +1401,7 @@ function submitCreateJob(event) {
 
 // ── Init ────────────────────────────────────────────────────────────
 window.preview = preview;
+window.state = state;
 window.submitCreateJob = submitCreateJob;
 window.selectCreateFlight = selectCreateFlight;
 window.clearCreateFlight = clearCreateFlight;

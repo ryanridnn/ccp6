@@ -1417,18 +1417,24 @@ select.form-input {
 }
 
 .create-flight-group {
-	flex: 2;
+	flex: 0 0 50%;
+	max-width: 50%;
 	min-width: 280px;
 }
 
-.create-etd-group {
-	flex: 1;
-	min-width: 140px;
+/* ETD/Group sizing handled by .create-fields-row grid */
+
+.create-fields-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 16px;
+	margin-bottom: 16px;
 }
 
-.create-group-group {
-	flex: 1.5;
-	min-width: 200px;
+@media (max-width: 768px) {
+	.create-fields-row {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* ── Create form items list ────────────────────────────── */
@@ -2166,23 +2172,6 @@ select.form-input {
 }
 
 /* ── Trays/Staff section ────────────────────────────────── */
-.create-trays-staff-section {
-	margin-top: 16px;
-	margin-bottom: 16px;
-}
-
-.create-trays-staff-row {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 16px;
-}
-
-@media (max-width: 768px) {
-	.create-trays-staff-row {
-		grid-template-columns: 1fr;
-	}
-}
-
 /* ── Services section ────────────────────────────────── */
 .create-services-section {
 	margin-top: 16px;

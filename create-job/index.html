@@ -87,7 +87,9 @@
                     ></div>
                   </div>
                 </div>
+              </div>
 
+              <div class="create-fields-row">
                 <div class="form-group create-etd-group">
                   <label class="form-label required" for="create-etd"
                     >ETD (24h)</label
@@ -141,149 +143,102 @@
                     placeholder="—"
                   />
                 </div>
-              </div>
 
-              <div class="create-trays-staff-section">
-                <div class="create-trays-staff-row">
-                  <div class="form-group">
-                    <label class="form-label" for="create-trays"
-                      >Trays / meals handled</label
-                    >
-                    <input
-                      type="number"
-                      id="create-trays"
-                      class="form-input"
-                      min="0"
-                      placeholder="0"
-                    />
-                    <div
-                      id="create-trays-readonly"
-                      class="create-readonly-text hidden"
-                    >
-                      <div class="cr-value"></div>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="create-staff"
-                      >No of Staff</label
-                    >
-                    <input
-                      type="number"
-                      id="create-staff"
-                      class="form-input"
-                      min="0"
-                      placeholder="0"
-                    />
-                    <div
-                      id="create-staff-readonly"
-                      class="create-readonly-text hidden"
-                    >
-                      <div class="cr-value"></div>
-                    </div>
-                  </div>
-                  <div class="form-group create-meal-service-group hidden">
-                    <label class="form-label" for="create-meal-service"
-                      >Meal Service</label
-                    >
-                    <select id="create-meal-service" class="form-input">
-                      <option value="">Select...</option>
-                      <option value="Breakfast">Breakfast</option>
-                      <option value="Lunch">Lunch</option>
-                      <option value="Dinner">Dinner</option>
-                    </select>
-                    <div
-                      id="create-meal-service-readonly"
-                      class="create-readonly-text hidden"
-                    >
-                      <div class="cr-value"></div>
-                    </div>
+                <div class="form-group create-meal-service-group hidden">
+                  <label class="form-label" for="create-meal-service"
+                    >Meal Service</label
+                  >
+                  <select id="create-meal-service" class="form-input">
+                    <option value="">Select...</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                  </select>
+                  <div
+                    id="create-meal-service-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div
-                class="create-services-section hidden"
-                id="create-services-section"
-              >
-                <div class="create-services-header">
-                  <h3 class="create-services-title">Services</h3>
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    onclick="addServiceRow()"
-                  >
-                    + Add Service
-                  </button>
-                </div>
-                <div
-                  class="create-services-list"
-                  id="create-services-list"
-                ></div>
-              </div>
-
-              <div id="create-items-container" class="hidden">
-                <div class="create-items-header">
-                  <h3 class="create-items-title">Linked Items</h3>
-                  <span class="create-items-count" id="create-items-count"
-                    >0 items selected</span
-                  >
-                </div>
-                <div class="create-items-list" id="create-items-list"></div>
-              </div>
-
-              <div
-                id="ad-hoc-toggle"
-                class="ad-hoc-toggle hidden"
-                style="margin-top: 16px"
-              >
-                <label
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    cursor: pointer;
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    id="ad-hoc-checkbox"
-                    onchange="toggleAdHocMode()"
-                  />
-                  <span>Add Ad Hoc items manually</span>
-                </label>
-              </div>
-
-              <div
-                id="ad-hoc-container"
-                class="hidden"
-                style="margin-top: 16px"
-              >
-                <div class="create-items-header">
-                  <h3 class="create-items-title">Ad Hoc Items</h3>
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    onclick="addAdHocItem()"
-                    style="padding: 6px 12px; font-size: 12px"
-                  >
-                    + Add Item
-                  </button>
-                </div>
-                <div id="ad-hoc-list"></div>
-              </div>
-
-              <div id="error-list" class="error-list hidden"></div>
-
-              <div class="form-actions" style="margin-top: 24px">
+            <div
+              class="create-services-section hidden"
+              id="create-services-section"
+            >
+              <div class="create-services-header">
+                <h3 class="create-services-title">Services</h3>
                 <button
                   type="button"
                   class="btn-secondary"
-                  onclick="navigate('current')"
+                  onclick="addServiceRow()"
                 >
-                  Cancel
+                  + Add Service
                 </button>
-                <button type="submit" class="btn-primary">Create job</button>
               </div>
+              <div class="create-services-list" id="create-services-list"></div>
+            </div>
+
+            <div id="create-items-container" class="hidden">
+              <div class="create-items-header">
+                <h3 class="create-items-title">Linked Items</h3>
+                <span class="create-items-count" id="create-items-count"
+                  >0 items selected</span
+                >
+              </div>
+              <div class="create-items-list" id="create-items-list"></div>
+            </div>
+
+            <div
+              id="ad-hoc-toggle"
+              class="ad-hoc-toggle hidden"
+              style="margin-top: 16px"
+            >
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="ad-hoc-checkbox"
+                  onchange="toggleAdHocMode()"
+                />
+                <span>Add Ad Hoc items manually</span>
+              </label>
+            </div>
+
+            <div id="ad-hoc-container" class="hidden" style="margin-top: 16px">
+              <div class="create-items-header">
+                <h3 class="create-items-title">Ad Hoc Items</h3>
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="addAdHocItem()"
+                  style="padding: 6px 12px; font-size: 12px"
+                >
+                  + Add Item
+                </button>
+              </div>
+              <div id="ad-hoc-list"></div>
+            </div>
+
+            <div id="error-list" class="error-list hidden"></div>
+
+            <div class="form-actions" style="margin-top: 24px">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="navigate('current')"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Create job</button>
             </div>
           </form>
         </div>
