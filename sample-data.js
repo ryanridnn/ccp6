@@ -36,6 +36,73 @@ function mkFCItem(item, opts = {}) {
   };
 }
 
+function completeJob(job, closedAt) {
+  const staff = {
+    staffId: "STF-001",
+    staffName: "Alice Smith",
+    role: "Operator",
+    captureMethod: "staffid",
+  };
+
+  job.job_status = "Closed";
+  job.closed = true;
+  job.closedAt = closedAt;
+
+  // Preset
+  job.preset.status = "Submitted";
+  job.preset.complianceResult = "Compliant";
+  if (job.preset.services) {
+    job.preset.services.forEach((s) => {
+      s.complianceResult = "Compliant";
+    });
+  }
+  if (job.preset.items) {
+    job.preset.items.forEach((it) => {
+      it.status = "Submitted";
+      it.complianceResult = "Compliant";
+    });
+  }
+
+  // Food checker
+  if (job.foodChecker) {
+    job.foodChecker.status = "Submitted";
+    (job.foodChecker.items || []).forEach((it) => {
+      it.status = "Submitted";
+      it.complianceResult = "Compliant";
+    });
+  }
+
+  // Dispatch
+  const dispatchBase = {
+    status: "Submitted",
+    complianceResult: "Compliant",
+    coldSoakStart: ago(140),
+    beforeExitTime: ago(90),
+    coldSoakDurationMin: 120,
+    beforeExitTemps: {},
+  };
+  if (job.dispatch) Object.assign(job.dispatch, dispatchBase);
+  job.dispatchPreset = { ...dispatchBase };
+  job.dispatchFC = { ...dispatchBase };
+
+  // Signoffs
+  job.signoffs = [
+    { stage: "preset", ...staff, submittedAt: ago(110) },
+    { stage: "foodchecker", ...staff, submittedAt: ago(100) },
+    { stage: "dispatch", ...staff, submittedAt: ago(90) },
+  ];
+
+  // History
+  job.history = (job.history || []).concat([
+    { at: ago(110), actor: staff.staffName, field: "preset", from: "NotStarted", to: "Submitted", stage: "preset", version: 1 },
+    { at: ago(100), actor: staff.staffName, field: "foodchecker", from: "NotStarted", to: "Submitted", stage: "foodchecker", version: 1 },
+    { at: ago(90), actor: staff.staffName, field: "dispatch", from: "ColdSoak", to: "Submitted", stage: "dispatch", version: 1 },
+    { at: ago(80), actor: staff.staffName, field: "job", from: "Open", to: "Closed", stage: "header", version: 1 },
+  ]);
+
+  return job;
+}
+
 const JOB_1 = {
   job_id: "CCP6-260807-01",
   flight_number: "QF12",
@@ -58,32 +125,85 @@ const JOB_1 = {
     status: "NotStarted",
     services: [
       {
-        startTime: null,
-        finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTempHorsDoeuvre: 5,
+        finishTempHorsDoeuvre: 4,
+        startTempDessert: 6,
+        finishTempDessert: 5,
         traysHandled: 0,
         staffCount: 0,
-        exposureDurationMin: null,
+        exposureDurationMin: 45,
         maxSurfaceTemp: null,
-        complianceResult: null,
+        complianceResult: "Compliant",
+      },
+      {
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTempHorsDoeuvre: 6,
+        finishTempHorsDoeuvre: 5,
+        startTempDessert: 7,
+        finishTempDessert: 6,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant",
       }
     ],
     items: [
-      mkFCItem({ sku: "SQZJ19", desc: "APP TUNA BALL / CABBAGE ROLL", cls: "BC", qty: 24 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "SQZJ19", desc: "APP TUNA BALL / CABBAGE ROLL", cls: "BC", qty: 24 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
+      }),
     ],
     traysHandled: 256,
     staffCount: 6,
   },
   foodChecker: {
-    status: "NotStarted",
+    status: "Submitted",
     items: [
-      mkFCItem({ sku: "100100", desc: "Roasted Chicken Supreme", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
-      mkFCItem({ sku: "100210", desc: "Grilled Sea Bass Fillet", cls: "Premium Economy", qty: 48 }, { status: "NotStarted" }),
-      mkFCItem({ sku: "100305", desc: "Chocolate Opera Cake", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
-      mkFCItem({ sku: "100410", desc: "Caesar Salad", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
+      mkFCItem({ sku: "100100", desc: "Roasted Chicken Supreme", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
+      }),
+      mkFCItem({ sku: "100210", desc: "Grilled Sea Bass Fillet", cls: "Premium Economy", qty: 48 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
+      }),
+      mkFCItem({ sku: "100305", desc: "Chocolate Opera Cake", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
+      }),
+      mkFCItem({ sku: "100410", desc: "Caesar Salad", cls: "Economy", qty: 96 }, {
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
+      }),
     ],
   },
   dispatch: {
@@ -276,36 +396,111 @@ const JOB_4 = {
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}],
+    services: [
+      {
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTempHorsDoeuvre: 5,
+        finishTempHorsDoeuvre: 4,
+        startTempDessert: 6,
+        finishTempDessert: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant",
+      },
+      {
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTempHorsDoeuvre: 6,
+        finishTempHorsDoeuvre: 5,
+        startTempDessert: 7,
+        finishTempDessert: 6,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant",
+      },
+    ],
     items: [
       mkFCItem({ sku: "400101", desc: "Chicken Tikka Masala", cls: "Economy", qty: 72 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400202", desc: "Vegetable Korma", cls: "Special Meal", qty: 24 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400303", desc: "Garlic Naan", cls: "Economy", qty: 72 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400404", desc: "Mango Lassi", cls: "Special Meal", qty: 24 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
     ],
   },
   foodChecker: {
-    status: "NotStarted",
+    status: "Submitted",
     items: [
       mkFCItem({ sku: "400101", desc: "Chicken Tikka Masala", cls: "Economy", qty: 72 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400202", desc: "Vegetable Korma", cls: "Special Meal", qty: 24 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400303", desc: "Garlic Naan", cls: "Economy", qty: 72 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
       mkFCItem({ sku: "400404", desc: "Mango Lassi", cls: "Special Meal", qty: 24 }, {
-        status: "NotStarted",
+        status: "Submitted",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 5,
+        finishTemp: 4,
+        durationMin: 45,
+        compliance: "Compliant",
       }),
     ],
   },
@@ -1130,7 +1325,15 @@ const FLIGHTS = [
 ];
 
 export function buildSeed() {
-  return [JOB_1, JOB_2, JOB_3, JOB_4, JOB_5, JOB_6, JOB_7, JOB_8, JOB_9, JOB_10, JOB_11, JOB_12, JOB_13, JOB_14, JOB_15, JOB_16, JOB_17, JOB_18, JOB_19, JOB_20, JOB_21, JOB_22, JOB_23, JOB_24];
+  const completedSICC1 = completeJob(JOB_4, ago(60));
+  const completedSICC2 = completeJob(JOB_1, ago(60));
+  return [
+    completedSICC1,
+    completedSICC2,
+    JOB_2, JOB_3, JOB_5, JOB_6, JOB_7, JOB_8, JOB_9, JOB_10,
+    JOB_11, JOB_12, JOB_13, JOB_14, JOB_15, JOB_16, JOB_17, JOB_18,
+    JOB_19, JOB_20, JOB_21, JOB_22, JOB_23, JOB_24,
+  ];
 }
 
 export function seedStaff() {

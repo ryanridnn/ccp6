@@ -31,11 +31,31 @@ body {
 .app {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 24px 72px;
+  padding: 0;
 }
 
 .hidden {
   display: none !important;
+}
+
+.service-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.service-list li {
+  margin-bottom: 4px;
+}
+
+.service-list li:last-child {
+  margin-bottom: 0;
+}
+
+.service-list strong {
+  color: var(--text-primary);
 }
 
 .screen {
@@ -50,6 +70,7 @@ body {
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+  padding: 24px 24px 0;
 }
 
 .page-title {
@@ -69,6 +90,21 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px 16px;
+  flex-wrap: wrap;
+}
+
+.action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* ── Buttons ───────────────────────────────────────────── */
@@ -326,12 +362,108 @@ select.form-input {
   font-size: 15px;
 }
 
-/* ── Top bar ───────────────────────────────────────────── */
-.top-bar {
+/* ── Top bar (legacy, no longer used) ──────────────────── */
+.top-bar,
+.spacer {
+  display: none;
+}
+
+/* ── Main-page header ────────────────────────────────────── */
+.sicc-topbar {
+  background: #ffffff;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  box-sizing: border-box;
+}
+
+.sicc-topbar-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar-left,
+.topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.topbar-nav {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.nav-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.sicc-selector {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.sicc-btn {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.sicc-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.sicc-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
 
 .menu-btn {
@@ -576,6 +708,73 @@ select.form-input {
   border-color: var(--border-hover);
 }
 
+.export-wrapper {
+  position: relative;
+}
+
+.export-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 260px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px #00000014;
+  padding: 16px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+.export-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.export-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.export-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.export-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.export-radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.export-radio input {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.export-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
 /* ── Table panel ───────────────────────────────────────── */
 .table-panel {
   background: var(--bg-surface);
@@ -583,6 +782,8 @@ select.form-input {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 1px 3px #0000000a;
+  margin: 0 24px;
+  padding: 24px 24px 72px;
 }
 
 /* ── Vertical sticky Columns button ────────────────────── */
@@ -605,7 +806,7 @@ select.form-input {
   font-size: 12px;
   font-weight: 600;
   box-shadow: -2px 0 12px #0000000a;
-  z-index: 40;
+  z-index: 60;
   transition: all 0.15s;
 }
 
@@ -694,13 +895,16 @@ select.form-input {
 /* ── Columns panel ──────────────────────────────────────── */
 .columns-panel {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  width: 220px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 260px;
+  max-height: 100vh;
+  overflow-y: auto;
   background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px #00000014;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: -4px 0 20px #00000014;
   padding: 16px;
   z-index: 50;
 }
@@ -710,6 +914,47 @@ select.form-input {
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 12px;
+}
+
+.column-search {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.column-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.columns-panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.col-action-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.col-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .columns-list {

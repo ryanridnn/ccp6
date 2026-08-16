@@ -196,7 +196,6 @@ const VIEWS = {
 
 const SCREEN_IDS = {
   current: "screen-current",
-  all: "screen-all",
   create: "screen-create",
   detail: "screen-detail",
   report: "screen-report",
@@ -576,11 +575,16 @@ function buildLinkedItems(flight, jobId) {
 }
 
 function navigate(screen, opts) {
+  if (screen === "all") {
+    preview.go("pv-kfb8yh");
+    return;
+  }
   const id = SCREEN_IDS[screen] || SCREEN_IDS.current;
   for (const key of Object.keys(SCREEN_IDS)) {
     document.getElementById(SCREEN_IDS[key]).classList.toggle("hidden", key !== screen);
   }
   state.currentScreen = screen;
+  updateTopbarNav();
   if (screen === "detail") {
     state.activeJobId = opts?.jobId || state.activeJobId;
     state.activeTab = opts?.tab || "preset";
@@ -608,6 +612,13 @@ function navigate(screen, opts) {
   if (window.__renderHooks?.[screen]) window.__renderHooks[screen]();
   window.scrollTo({ top: 0 });
 }
+
+function updateTopbarNav() {
+  document.querySelectorAll('.topbar-nav .nav-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.screen === state.currentScreen);
+  });
+}
+window.updateTopbarNav = updateTopbarNav;
 
 function openJob(jobId) {
   navigate("detail", { jobId });
@@ -1557,13 +1568,18 @@ function renderPreset(body, job) {
   const p = job.preset;
   const submitted = p.status === "Submitted";
   const site = job.site || "SICC2";
-  state.presetMethod = state.presetMethod || (site === 'SICC2' ? 'items' : 'services');
-  const tabs = renderPresetTabs(state.presetMethod);
 
-  if (state.presetMethod === 'services') {
-    renderPresetServices(body, job, p, submitted, tabs);
+  if (site === "SICC2") {
+    state.presetMethod = 'items';
+    renderPresetItems(body, job, p, submitted, '');
   } else {
-    renderPresetItems(body, job, p, submitted, tabs);
+    state.presetMethod = state.presetMethod || 'services';
+    const tabs = renderPresetTabs(state.presetMethod);
+    if (state.presetMethod === 'services') {
+      renderPresetServices(body, job, p, submitted, tabs);
+    } else {
+      renderPresetItems(body, job, p, submitted, tabs);
+    }
   }
 }
 
@@ -3001,7 +3017,7 @@ function submitStage(stage) {
   const errId = stage === "preset" ? "preset-error" : stage === "foodchecker" ? "fc-error" : "dispatch-error";
 
   if (stage === "preset") {
-    const presetMethod = state.presetMethod || (job.site === "SICC2" ? 'items' : 'services');
+    const presetMethod = job.site === "SICC2" ? 'items' : (state.presetMethod || 'services');
     const itemsToCheck = presetMethod === 'items'
       ? (job.preset.items || [])
       : (job.preset.services || [{}]);
@@ -3180,17 +3196,7 @@ function tickDetailLive() {
   }
 }
 
-// ── All CCP6 Jobs (S2) ─────────────────────────────────────────────
-const ALL_COLUMNS = [
-  "Job ID", "Flight", "Flight Date", "ETD", "Meal", "Group", "Airline", "Site",
-  "Preset", "Food Checker", "Dispatch", "Overall", "Verification", "Status", "Closed At", "",
-];
-
-const allFilters = {
-  site: "", meal: "", group: "", airline: "", status: "", compliance: "",
-};
-let allSearch = "";
-
+// ── Helpers (shared with report) ────────────────────────────────
 function stageResultText(job, stage) {
   if (stage === "preset") {
     const p = job.preset;
@@ -3218,12 +3224,6 @@ function stageResultText(job, stage) {
   return "";
 }
 
-function allStageSubmitted(job) {
-  const done = [job.preset?.status === "Submitted", job.foodChecker?.status === "Submitted"];
-  if (job.site === "SICC2") done.push(job.dispatch?.status === "Submitted");
-  return done.every(Boolean);
-}
-
 function overallCompliance(job) {
   const stages = ["preset", "foodchecker"];
   if (job.site === "SICC2") stages.push("dispatch");
@@ -3233,119 +3233,6 @@ function overallCompliance(job) {
   if (results.includes("Non-Compliant")) return "Non-Compliant";
   if (results.length === stages.length) return "Compliant";
   return "In Progress";
-}
-
-function filteredJobs() {
-  const q = allSearch.toLowerCase();
-  return state.jobs.filter((j) => {
-    if (allFilters.site && j.site !== allFilters.site) return false;
-    if (allFilters.meal && j.meal_service !== allFilters.meal) return false;
-    if (allFilters.group && j.ta_group !== allFilters.group) return false;
-    if (allFilters.airline && j.airline !== allFilters.airline) return false;
-    if (allFilters.status && (j.job_status || (j.closed ? "Closed" : "Open")) !== allFilters.status) return false;
-    if (allFilters.compliance && overallCompliance(j) !== allFilters.compliance) return false;
-    if (!q) return true;
-    const hay = [j.job_id, j.flight_number, j.airline, j.ta_group, j.meal_service].join(" ").toLowerCase();
-    return hay.includes(q);
-  });
-}
-
-function buildAllFilters() {
-  const wrap = document.getElementById("all-filter-panel");
-  if (!wrap) return;
-  const sel = (id, label, options) =>
-    `<div class="form-group"><label class="form-label">${label}</label><select class="form-input" id="${id}"><option value="">All</option>${options
-      .map((o) => `<option value="${esc(o)}"${allFilters[id.replace("f-", "")]
-      ? o === allFilters[id.replace("f-", "")]
-      ? " selected"
-      : ""
-      : ""}>${esc(o)}</option>`)
-      .join("")}</select></div>`;
-  const siteOpts = [...new Set(state.jobs.map((j) => j.site).filter(Boolean))];
-  const mealOpts = CONFIG.mealServices;
-  const groupOpts = CONFIG.taGroups;
-  const airlineOpts = [...new Set(state.jobs.map((j) => j.airline).filter(Boolean))];
-  const statusOpts = ["Open", "Closed", "Voided"];
-  const complOpts = ["Compliant", "Non-Compliant", "In Progress"];
-  wrap.innerHTML =
-    sel("f-site", "Site", siteOpts) +
-    sel("f-meal", "Meal Service", mealOpts) +
-    sel("f-group", "Group", groupOpts) +
-    sel("f-airline", "Airline", airlineOpts) +
-    sel("f-status", "Status", statusOpts) +
-    sel("f-compliance", "Overall", complOpts);
-  for (const key of Object.keys(allFilters)) {
-    const el = document.getElementById("f-" + key);
-    if (el) el.value = allFilters[key];
-  }
-  wrap.querySelectorAll("select").forEach((s) => {
-    s.addEventListener("change", () => {
-      allFilters[s.id.replace("f-", "")] = s.value;
-      renderAll();
-    });
-  });
-}
-
-function renderAll() {
-  const thead = document.getElementById("all-thead");
-  const tbody = document.getElementById("all-tbody");
-  if (!thead || !tbody) return;
-  thead.innerHTML = `<tr>${ALL_COLUMNS.map((c) => (c ? `<th>${esc(c)}</th>` : `<th></th>`)).join("")}</tr>`;
-  const rows = filteredJobs();
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="${ALL_COLUMNS.length}"><div class="empty-state">No jobs match the current filters.</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows
-    .map((j) => {
-      const overall = overallCompliance(j);
-      const status = j.job_status || (j.closed ? "Closed" : "Open");
-      const closedAt = j.closedAt ? new Date(j.closedAt).toLocaleString() : "—";
-      return `<tr>
-        <td>${esc(j.job_id)}</td>
-        <td>${esc(j.flight_number)}</td>
-        <td>${esc(j.flight_date)}</td>
-        <td>${esc(j.etd)}</td>
-        <td>${esc(j.meal_service)}</td>
-        <td>${esc(j.ta_group)}</td>
-        <td>${esc(j.airline)}</td>
-        <td>${esc(j.site)}</td>
-        <td>${esc(stageResultText(j, "preset"))}</td>
-        <td>${esc(stageResultText(j, "foodchecker"))}</td>
-        <td>${esc(stageResultText(j, "dispatch"))}</td>
-        <td>${esc(overall)}</td>
-        <td>—</td>
-        <td>${esc(status)}</td>
-        <td>${esc(closedAt)}</td>
-        <td><button type="button" class="btn-secondary" style="padding:5px 10px" onclick="openJob('${esc(j.job_id)}')">Open</button> <button type="button" class="btn-secondary" style="padding:5px 10px" onclick="openReport('${esc(j.job_id)}')">Report</button></td>
-      </tr>`;
-    })
-    .join("");
-}
-
-function filterAll() {
-  allSearch = document.getElementById("all-search")?.value.trim() || "";
-  renderAll();
-}
-
-function toggleAllFilters() {
-  const panel = document.getElementById("all-filter-panel");
-  panel.classList.toggle("hidden");
-  if (!panel.classList.contains("hidden")) buildAllFilters();
-}
-
-function exportExcel() {
-  const rows = filteredJobs();
-  const lines = [ALL_COLUMNS.filter(Boolean).join(",")];
-  for (const j of rows) {
-    const status = j.job_status || (j.closed ? "Closed" : "Open");
-    lines.push([
-      j.job_id, j.flight_number, j.flight_date, j.etd, j.meal_service, j.ta_group, j.airline, j.site,
-      stageResultText(j, "preset"), stageResultText(j, "foodchecker"), stageResultText(j, "dispatch"),
-      overallCompliance(j), "—", status, j.closedAt ? new Date(j.closedAt).toLocaleString() : "",
-    ].map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","));
-  }
-  downloadFile("ccp6-all-jobs.csv", lines.join("\n"), "text/csv");
 }
 
 function downloadFile(name, content, type) {
@@ -3441,9 +3328,6 @@ function exportJob(format) {
 window.navigate = navigate;
 window.openJob = openJob;
 window.openReport = openReport;
-window.exportExcel = exportExcel;
-window.toggleAllFilters = toggleAllFilters;
-window.filterAll = filterAll;
 window.submitCreateJob = submitCreateJob;
 window.exportJob = exportJob;
 window.resolveIdentity = resolveIdentity;
@@ -3491,10 +3375,6 @@ function handlePhotoUpload(linkId, input) {
 window.handlePhotoUpload = handlePhotoUpload;
 window.submitStage = submitStage;
 window.selectCreateFlight = selectCreateFlight;
-window.renderAll = renderAll;
-window.filterAll = filterAll;
-window.toggleAllFilters = toggleAllFilters;
-window.exportExcel = exportExcel;
 window.renderReport = renderReport;
 window.exportJob = exportJob;
 
@@ -3503,13 +3383,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     create: renderCreate,
     current: renderCurrent,
     detail: renderDetail,
-    all: renderAll,
     report: renderReport,
   };
   const view = preview.currentViewId();
   const initial =
-    Object.entries(VIEWS).find(([, id]) => id === view)?.[0] ||
-    (view ? "detail" : "current");
+    Object.entries(VIEWS).find(([, id]) => id === view)?.[0] || "current";
 
   // Determine the target job from the record param before data loads, so a
   // deep-linked detail/report view knows which job to show.

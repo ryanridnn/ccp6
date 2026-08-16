@@ -9,16 +9,53 @@
   <body>
     <div class="app">
       <!-- Top bar -->
-      <div class="top-bar">
-        <button type="button" class="menu-btn" aria-label="Menu" onclick="toggleSavedFilters()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-        <div class="date-filter">
+      <div class="sicc-topbar">
+        <div class="sicc-topbar-inner">
+          <div class="topbar-nav">
+            <button type="button" class="nav-btn" data-screen="current" onclick="goToCurrent()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              Current CCP6 Jobs
+            </button>
+            <button type="button" class="nav-btn active" data-screen="all" onclick="renderTable()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              All CCP6 Jobs
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page head -->
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">All CCP6 Jobs</h1>
+          <p class="page-sub">Every job regardless of status</p>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <div class="action-left">
+          <button type="button" class="menu-btn" aria-label="Menu" onclick="toggleSavedFilters()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="date-filter">
           <button type="button" class="date-filter-trigger" onclick="toggleDateFilter()">
             <span id="date-filter-label">Last 3 Months</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -50,16 +87,42 @@
             </div>
           </div>
         </div>
-        <div class="spacer"></div>
-        <button type="button" class="export-btn" onclick="exportExcel()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          Export
-        </button>
+        </div>
+        <div class="export-wrapper">
+          <button type="button" class="export-btn" onclick="toggleExportPopover(event)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Export
+          </button>
+          <div id="export-popover" class="export-popover hidden">
+            <div class="export-form">
+              <label class="export-field-label" for="export-page">Page to Export</label>
+              <select id="export-page" class="export-select">
+                <option value="active">Active Record</option>
+                <option value="all">All Pages</option>
+                <option value="current-jobs">Current CCP6 Jobs</option>
+              </select>
+
+              <label class="export-field-label">File Type</label>
+              <div class="export-radio-group">
+                <label class="export-radio">
+                  <input type="radio" name="export-file-type" value="pdf" checked />
+                  <span>PDF</span>
+                </label>
+                <label class="export-radio">
+                  <input type="radio" name="export-file-type" value="excel" />
+                  <span>Excel</span>
+                </label>
+              </div>
+
+              <button type="button" class="btn-primary export-submit" onclick="exportTable()">Export Table</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Table panel -->
@@ -69,37 +132,127 @@
             <thead>
               <tr class="header-labels">
                 <th data-col="job_id">JOB ID</th>
-                <th data-col="flight_number">FLIGHT</th>
-                <th data-col="flight_date">DATE</th>
+                <th data-col="flight_number">FLIGHT NUMBER</th>
+                <th data-col="flight_date">FLIGHT DATE</th>
                 <th data-col="etd">ETD</th>
-                <th data-col="meal_service">MEAL</th>
+                <th data-col="meal_service">MEAL SERVICE</th>
                 <th data-col="ta_group">GROUP</th>
                 <th data-col="airline">AIRLINE</th>
-                <th data-col="site">SITE</th>
-                <th data-col="preset">PRESET</th>
-                <th data-col="foodchecker">FOOD CHECKER</th>
-                <th data-col="dispatch">DISPATCH</th>
-                <th data-col="overall">OVERALL</th>
-                <th data-col="status">STATUS</th>
-                <th data-col="closedAt">CLOSED AT</th>
-                <th></th>
+                <th data-col="preset">PRESET RESULT</th>
+                <th data-col="foodchecker">FOOD CHECKER SUMMARY</th>
+                <th data-col="dispatch">DISPATCH RESULT</th>
+                <th data-col="overall">OVERALL COMPLIANCE</th>
+                <th data-col="verification_status">VERIFICATION STATUS</th>
+                <th data-col="status">JOB STATUS</th>
+                <th data-col="closedAt">CLOSED TIMESTAMP</th>
+                <th data-col="trays_handled">TRAYS / MEALS HANDLED</th>
+                <th data-col="staff_count">NO OF STAFF</th>
+                <th data-col="preset_svc_start">PRESET SVC START</th>
+                <th data-col="preset_svc_finish">PRESET SVC FINISH</th>
+                <th data-col="preset_svc_hts">PRESET SVC HTS °C</th>
+                <th data-col="preset_svc_htf">PRESET SVC HTF °C</th>
+                <th data-col="preset_svc_dts">PRESET SVC DTS °C</th>
+                <th data-col="preset_svc_dtf">PRESET SVC DTF °C</th>
+                <th data-col="preset_svc_duration">PRESET SVC DURATION</th>
+                <th data-col="preset_svc_status">PRESET SVC STATUS</th>
+                <th data-col="preset_item_sku">PRESET ITEM SKU</th>
+                <th data-col="preset_item_desc">PRESET ITEM DESCRIPTION</th>
+                <th data-col="preset_item_class">PRESET ITEM CLASS</th>
+                <th data-col="preset_item_qty">PRESET ITEM QTY</th>
+                <th data-col="preset_item_start">PRESET ITEM START</th>
+                <th data-col="preset_item_finish">PRESET ITEM FINISH</th>
+                <th data-col="preset_item_start_temp">PRESET ITEM START °C</th>
+                <th data-col="preset_item_finish_temp">PRESET ITEM FINISH °C</th>
+                <th data-col="preset_item_duration">PRESET ITEM DURATION</th>
+                <th data-col="preset_item_status">PRESET ITEM STATUS</th>
+                <th data-col="fc_item_sku">FC ITEM SKU</th>
+                <th data-col="fc_item_desc">FC ITEM DESCRIPTION</th>
+                <th data-col="fc_item_class">FC ITEM CLASS</th>
+                <th data-col="fc_item_qty">FC ITEM QTY</th>
+                <th data-col="fc_item_start">FC ITEM START</th>
+                <th data-col="fc_item_finish">FC ITEM FINISH</th>
+                <th data-col="fc_item_start_temp">FC ITEM START °C</th>
+                <th data-col="fc_item_finish_temp">FC ITEM FINISH °C</th>
+                <th data-col="fc_item_duration">FC ITEM DURATION</th>
+                <th data-col="fc_item_status">FC ITEM STATUS</th>
+                <th data-col="preset_dispatch_start">PRESET DISPATCH COLD SOAK START</th>
+                <th data-col="preset_dispatch_exit">PRESET DISPATCH BEFORE EXIT</th>
+                <th data-col="preset_dispatch_duration">PRESET DISPATCH DURATION</th>
+                <th data-col="preset_dispatch_status">PRESET DISPATCH STATUS</th>
+                <th data-col="preset_dispatch_compliance">PRESET DISPATCH COMPLIANCE</th>
+                <th data-col="preset_dispatch_temps">PRESET DISPATCH TEMPS</th>
+                <th data-col="fc_dispatch_start">FC DISPATCH COLD SOAK START</th>
+                <th data-col="fc_dispatch_exit">FC DISPATCH BEFORE EXIT</th>
+                <th data-col="fc_dispatch_duration">FC DISPATCH DURATION</th>
+                <th data-col="fc_dispatch_status">FC DISPATCH STATUS</th>
+                <th data-col="fc_dispatch_compliance">FC DISPATCH COMPLIANCE</th>
+                <th data-col="fc_dispatch_temps">FC DISPATCH TEMPS</th>
+                <th data-col="preset_signoff_user">PRESET SIGNOFF USER</th>
+                <th data-col="fc_signoff_user">FC SIGNOFF USER</th>
+                <th data-col="dispatch_signoff_user">DISPATCH SIGNOFF USER</th>
+                <th data-col="actions">ACTIONS</th>
               </tr>
               <tr class="header-filters">
-                <th><input type="text" class="col-filter" data-col="job_id" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="flight_number" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="flight_date" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="etd" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="meal_service" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="ta_group" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="airline" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="site" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="preset" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="foodchecker" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="dispatch" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="overall" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="status" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th><input type="text" class="col-filter" data-col="closedAt" placeholder="Filter…" oninput="renderTable()" /></th>
-                <th></th>
+                <th data-col="job_id"><input type="text" class="col-filter" data-col="job_id" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="flight_number"><input type="text" class="col-filter" data-col="flight_number" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="flight_date"><input type="text" class="col-filter" data-col="flight_date" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="etd"><input type="text" class="col-filter" data-col="etd" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="meal_service"><input type="text" class="col-filter" data-col="meal_service" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="ta_group"><input type="text" class="col-filter" data-col="ta_group" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="airline"><input type="text" class="col-filter" data-col="airline" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset"><input type="text" class="col-filter" data-col="preset" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="foodchecker"><input type="text" class="col-filter" data-col="foodchecker" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="dispatch"><input type="text" class="col-filter" data-col="dispatch" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="overall"><input type="text" class="col-filter" data-col="overall" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="verification_status"><input type="text" class="col-filter" data-col="verification_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="status"><input type="text" class="col-filter" data-col="status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="closedAt"><input type="text" class="col-filter" data-col="closedAt" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="trays_handled"><input type="text" class="col-filter" data-col="trays_handled" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="staff_count"><input type="text" class="col-filter" data-col="staff_count" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_start"><input type="text" class="col-filter" data-col="preset_svc_start" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_finish"><input type="text" class="col-filter" data-col="preset_svc_finish" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_hts"><input type="text" class="col-filter" data-col="preset_svc_hts" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_htf"><input type="text" class="col-filter" data-col="preset_svc_htf" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_dts"><input type="text" class="col-filter" data-col="preset_svc_dts" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_dtf"><input type="text" class="col-filter" data-col="preset_svc_dtf" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_duration"><input type="text" class="col-filter" data-col="preset_svc_duration" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_svc_status"><input type="text" class="col-filter" data-col="preset_svc_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_sku"><input type="text" class="col-filter" data-col="preset_item_sku" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_desc"><input type="text" class="col-filter" data-col="preset_item_desc" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_class"><input type="text" class="col-filter" data-col="preset_item_class" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_qty"><input type="text" class="col-filter" data-col="preset_item_qty" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_start"><input type="text" class="col-filter" data-col="preset_item_start" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_finish"><input type="text" class="col-filter" data-col="preset_item_finish" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_start_temp"><input type="text" class="col-filter" data-col="preset_item_start_temp" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_finish_temp"><input type="text" class="col-filter" data-col="preset_item_finish_temp" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_duration"><input type="text" class="col-filter" data-col="preset_item_duration" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_item_status"><input type="text" class="col-filter" data-col="preset_item_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_sku"><input type="text" class="col-filter" data-col="fc_item_sku" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_desc"><input type="text" class="col-filter" data-col="fc_item_desc" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_class"><input type="text" class="col-filter" data-col="fc_item_class" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_qty"><input type="text" class="col-filter" data-col="fc_item_qty" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_start"><input type="text" class="col-filter" data-col="fc_item_start" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_finish"><input type="text" class="col-filter" data-col="fc_item_finish" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_start_temp"><input type="text" class="col-filter" data-col="fc_item_start_temp" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_finish_temp"><input type="text" class="col-filter" data-col="fc_item_finish_temp" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_duration"><input type="text" class="col-filter" data-col="fc_item_duration" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_item_status"><input type="text" class="col-filter" data-col="fc_item_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_start"><input type="text" class="col-filter" data-col="preset_dispatch_start" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_exit"><input type="text" class="col-filter" data-col="preset_dispatch_exit" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_duration"><input type="text" class="col-filter" data-col="preset_dispatch_duration" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_status"><input type="text" class="col-filter" data-col="preset_dispatch_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_compliance"><input type="text" class="col-filter" data-col="preset_dispatch_compliance" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_dispatch_temps"><input type="text" class="col-filter" data-col="preset_dispatch_temps" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_start"><input type="text" class="col-filter" data-col="fc_dispatch_start" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_exit"><input type="text" class="col-filter" data-col="fc_dispatch_exit" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_duration"><input type="text" class="col-filter" data-col="fc_dispatch_duration" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_status"><input type="text" class="col-filter" data-col="fc_dispatch_status" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_compliance"><input type="text" class="col-filter" data-col="fc_dispatch_compliance" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_dispatch_temps"><input type="text" class="col-filter" data-col="fc_dispatch_temps" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="preset_signoff_user"><input type="text" class="col-filter" data-col="preset_signoff_user" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="fc_signoff_user"><input type="text" class="col-filter" data-col="fc_signoff_user" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="dispatch_signoff_user"><input type="text" class="col-filter" data-col="dispatch_signoff_user" placeholder="Filter…" oninput="renderTable()" /></th>
+                <th data-col="actions"></th>
               </tr>
             </thead>
             <tbody id="job-tbody"></tbody>
@@ -123,6 +276,11 @@
     <!-- Column visibility panel -->
     <div id="columns-panel" class="columns-panel hidden">
       <div class="columns-panel-title">Columns</div>
+      <input type="text" id="column-search" class="column-search" placeholder="Search columns…" oninput="renderColumnsPanel()" />
+      <div class="columns-panel-actions">
+        <button type="button" class="col-action-btn" onclick="selectAllColumns()">Select All</button>
+        <button type="button" class="col-action-btn" onclick="deselectAllColumns()">Deselect All</button>
+      </div>
       <div id="columns-list" class="columns-list"></div>
     </div>
 

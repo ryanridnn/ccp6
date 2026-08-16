@@ -28,12 +28,12 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .app {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 24px 72px;
 }
 
 .hidden {
@@ -43,6 +43,15 @@ body {
 /* ── Screens ───────────────────────────────────────────── */
 .screen {
   display: block;
+  padding: 24px 24px 72px;
+}
+
+#screen-current {
+  display: block;
+}
+
+#screen-current .screen-body {
+  padding: 24px 24px 72px;
 }
 
 /* ── Headers ───────────────────────────────────────────── */
@@ -88,7 +97,10 @@ body {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
   border: 1px solid transparent;
 }
 
@@ -113,7 +125,11 @@ body {
 }
 
 .btn-back {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(129, 140, 248, 0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.04) 0%,
+    rgba(129, 140, 248, 0.02) 100%
+  );
   border-color: var(--border);
   color: var(--text-secondary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -125,7 +141,11 @@ body {
 }
 
 .btn-back:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(129, 140, 248, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(129, 140, 248, 0.04) 100%
+  );
   border-color: var(--accent);
   color: var(--text-primary);
   transform: translateY(-1px);
@@ -189,7 +209,6 @@ body {
 .sicc-selector {
   display: inline-flex;
   gap: 4px;
-  margin-bottom: 20px;
   padding: 4px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -222,6 +241,96 @@ body {
 .sicc-btn.active {
   background: var(--accent);
   color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.sicc-topbar {
+  background: #ffffff;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  box-sizing: border-box;
+}
+
+.sicc-topbar-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar-nav {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.nav-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.sicc-topbar .sicc-selector {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.sicc-topbar .sicc-btn {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.sicc-topbar .sicc-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.sicc-topbar .sicc-btn.active {
+  background: #6366f1;
+  color: #ffffff;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
 
@@ -972,53 +1081,53 @@ select.form-input {
   border: 1px solid transparent;
 }
 
-.status-pill.not-started { 
-  background: #f1f5f9; 
+.status-pill.not-started {
+  background: #f1f5f9;
   color: #64748b;
   border-color: #e2e8f0;
 }
-.status-pill.in-progress { 
-  background: rgba(56, 189, 248, 0.12); 
+.status-pill.in-progress {
+  background: rgba(56, 189, 248, 0.12);
   color: var(--info);
   border-color: rgba(56, 189, 248, 0.3);
 }
-.status-pill.warning { 
-  background: rgba(245, 158, 11, 0.12); 
+.status-pill.warning {
+  background: rgba(245, 158, 11, 0.12);
   color: var(--warning);
   border-color: rgba(245, 158, 11, 0.3);
 }
-.status-pill.overtime { 
-  background: rgba(239, 68, 68, 0.12); 
+.status-pill.overtime {
+  background: rgba(239, 68, 68, 0.12);
   color: var(--danger);
   border-color: rgba(239, 68, 68, 0.3);
 }
-.status-pill.compliant { 
-  background: rgba(34, 197, 94, 0.12); 
+.status-pill.compliant {
+  background: rgba(34, 197, 94, 0.12);
   color: var(--success);
   border-color: rgba(34, 197, 94, 0.3);
 }
-.status-pill.nc { 
-  background: rgba(239, 68, 68, 0.12); 
+.status-pill.nc {
+  background: rgba(239, 68, 68, 0.12);
   color: var(--danger);
   border-color: rgba(239, 68, 68, 0.3);
 }
-.status-pill.submitted { 
-  background: rgba(99, 102, 241, 0.08); 
+.status-pill.submitted {
+  background: rgba(99, 102, 241, 0.08);
   color: var(--accent);
   border-color: rgba(99, 102, 241, 0.2);
 }
-.status-pill.cold-soak { 
-  background: rgba(56, 189, 248, 0.10); 
+.status-pill.cold-soak {
+  background: rgba(56, 189, 248, 0.1);
   color: var(--info);
   border-color: rgba(56, 189, 248, 0.25);
 }
-.status-pill.eligible { 
-  background: rgba(34, 197, 94, 0.10); 
+.status-pill.eligible {
+  background: rgba(34, 197, 94, 0.1);
   color: var(--success);
   border-color: rgba(34, 197, 94, 0.25);
 }
-.status-pill.locked { 
-  background: #f1f5f9; 
+.status-pill.locked {
+  background: #f1f5f9;
   color: #64748b;
   border-color: #e2e8f0;
 }
@@ -1325,7 +1434,7 @@ select.form-input {
 }
 
 .create-item-checkbox:checked::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 5px;
   top: 1px;
@@ -1423,9 +1532,18 @@ select.form-input {
 /* ── Responsive preset grid ────────────────────────────── */
 @media (min-width: 769px) {
   /* 3-column: Trays in right col row 2, Dessert temps in row 3 */
-  .field-trays { grid-row: 2; grid-column: 3; }
-  .field-dts   { grid-row: 3; grid-column: 1; }
-  .field-dtf   { grid-row: 3; grid-column: 2; }
+  .field-trays {
+    grid-row: 2;
+    grid-column: 3;
+  }
+  .field-dts {
+    grid-row: 3;
+    grid-column: 1;
+  }
+  .field-dtf {
+    grid-row: 3;
+    grid-column: 2;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1438,12 +1556,30 @@ select.form-input {
   }
 
   /* Explicit placement for all fields */
-  .field-hts { grid-row: 3; grid-column: 1; }  /* Hors d'oeuvre Start */
-  .field-htf { grid-row: 3; grid-column: 2; }  /* Hors d'oeuvre Finish */
-  .field-dts { grid-row: 4; grid-column: 1; }  /* Dessert Start */
-  .field-dtf { grid-row: 4; grid-column: 2; }  /* Dessert Finish */
-  .field-trays { grid-row: 5; grid-column: 1; }  /* Trays Handled */
-  .field-staff { grid-row: 5; grid-column: 2; }  /* Staff Count */
+  .field-hts {
+    grid-row: 3;
+    grid-column: 1;
+  } /* Hors d'oeuvre Start */
+  .field-htf {
+    grid-row: 3;
+    grid-column: 2;
+  } /* Hors d'oeuvre Finish */
+  .field-dts {
+    grid-row: 4;
+    grid-column: 1;
+  } /* Dessert Start */
+  .field-dtf {
+    grid-row: 4;
+    grid-column: 2;
+  } /* Dessert Finish */
+  .field-trays {
+    grid-row: 5;
+    grid-column: 1;
+  } /* Trays Handled */
+  .field-staff {
+    grid-row: 5;
+    grid-column: 2;
+  } /* Staff Count */
 }
 
 @media (max-width: 480px) {
@@ -1457,12 +1593,30 @@ select.form-input {
   }
 
   /* Single column: explicit order with Trays above Staff */
-  .field-hts   { grid-row: 4; grid-column: 1; }
-  .field-htf   { grid-row: 5; grid-column: 1; }
-  .field-dts   { grid-row: 6; grid-column: 1; }
-  .field-dtf   { grid-row: 7; grid-column: 1; }
-  .field-trays { grid-row: 8; grid-column: 1; }
-  .field-staff { grid-row: 9; grid-column: 1; }
+  .field-hts {
+    grid-row: 4;
+    grid-column: 1;
+  }
+  .field-htf {
+    grid-row: 5;
+    grid-column: 1;
+  }
+  .field-dts {
+    grid-row: 6;
+    grid-column: 1;
+  }
+  .field-dtf {
+    grid-row: 7;
+    grid-column: 1;
+  }
+  .field-trays {
+    grid-row: 8;
+    grid-column: 1;
+  }
+  .field-staff {
+    grid-row: 9;
+    grid-column: 1;
+  }
 }
 
 /* ── Responsive metric cards ───────────────────────────── */
@@ -1619,7 +1773,7 @@ select.form-input {
 }
 
 .fc-checkbox:checked::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 5px;
   top: 1px;
