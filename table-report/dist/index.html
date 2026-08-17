@@ -2359,12 +2359,11 @@ var JOB_1 = {
     status: "NotStarted",
     services: [
       {
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2372,12 +2371,35 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2476,12 +2498,23 @@ var JOB_2 = {
     status: "NotStarted",
     services: [
       {
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2544,12 +2577,23 @@ var JOB_3 = {
     status: "NotStarted",
     services: [
       {
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2619,22 +2663,20 @@ var JOB_4 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
     services: [
       {
+        serviceType: "Lunch",
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2642,12 +2684,38 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "Lunch",
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "Lunch",
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "Lunch",
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2771,10 +2839,8 @@ var JOB_5 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
@@ -2839,15 +2905,16 @@ var JOB_6 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}],
+    services: [
+      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
     items: [
       mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
         status: "NotStarted"
@@ -3198,15 +3265,20 @@ var JOB_15 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "150202", desc: "Fresh Fruit Cup", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3238,15 +3310,20 @@ var JOB_16 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "160202", desc: "Pavlova", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3278,15 +3355,20 @@ var JOB_17 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "170202", desc: "Tim Tam", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3318,15 +3400,20 @@ var JOB_18 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, {}),
+      mkFCItem({ sku: "180202", desc: "Coffee", cls: "Economy", qty: 96 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
@@ -3358,15 +3445,20 @@ var JOB_19 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "190202", desc: "Spring Rolls", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3398,15 +3490,20 @@ var JOB_20 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "200202", desc: "Mango Sticky Rice", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3438,15 +3535,20 @@ var JOB_21 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "210202", desc: "Teh Tarik", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3478,15 +3580,20 @@ var JOB_22 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "220202", desc: "Halo-Halo", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3518,15 +3625,20 @@ var JOB_23 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "230202", desc: "Lechon Kawali", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3558,15 +3670,20 @@ var JOB_24 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, {}),
+      mkFCItem({ sku: "240202", desc: "Soft Boiled Eggs", cls: "Economy", qty: 48 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, { status: "NotStarted" }),

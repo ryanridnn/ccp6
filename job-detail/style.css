@@ -1097,6 +1097,18 @@ select.form-input {
 	color: var(--info);
 	border-color: rgba(56, 189, 248, 0.3);
 }
+
+/* ── Timer warning state ─────────────────────────────────── */
+.timer-warning {
+	color: var(--warning) !important;
+	animation: timerPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes timerPulse {
+	from { opacity: 1; }
+	to { opacity: 0.5; }
+}
+
 .status-pill.warning {
 	background: rgba(245, 158, 11, 0.12);
 	color: var(--warning);
@@ -2051,4 +2063,117 @@ select.form-input {
 	.fc-table td {
 		padding: 8px;
 	}
+}
+
+/* ── Selection bar ─────────────────────────────────────── */
+.selection-bar {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.selection-bar button {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.item-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.item-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.item-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.item-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ── Web Report options menu ─────────────────────────────────────── */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.btn-icon:hover {
+  background: var(--bg-surface-hover);
+  color: var(--accent);
+  border-color: var(--border-hover);
+}
+.web-report-popover {
+  position: absolute;
+  z-index: 1000;
+  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.web-report-popover.hidden {
+  display: none;
+}
+.web-report-menu {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+.web-report-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.web-report-menu li svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.web-report-menu li:hover {
+  background: var(--bg-surface-hover);
+  color: var(--accent);
+}
+.web-report-menu li:hover svg {
+  color: var(--accent);
 }

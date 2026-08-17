@@ -83,6 +83,11 @@ var preview = {
 	},
 	go(viewId, extra = {}) {
 		const next = new URLSearchParams();
+		// Preserve d2path parameter if it exists
+		const d2path = this.params.get("d2path");
+		if (d2path) {
+			next.set("d2path", d2path);
+		}
 		next.set("view", viewId);
 		for (const [k, v] of Object.entries(extra)) {
 			if (v == null || v === "") next.delete(k);
@@ -238,7 +243,7 @@ const state = {
 	currentScreen: "current",
 	siccFilter: "SICC1",
 	presetMethod: null,
-	createMode: "manual",
+	createMode: "scheduled",
 	createItems: [],
 	createServices: [],
 	serviceExpanded: null,
@@ -298,7 +303,24 @@ function findJobByRecord(recordId) {
 	);
 }
 
+// ── Localhost detection ─────────────────────────────────────────────
+function isLocalhost() {
+	const host = window.location.hostname;
+	return (
+		host === "localhost" ||
+		host === "127.0.0.1" ||
+		host === "::1" ||
+		!host.includes(".")
+	);
+}
+
 async function loadJobs() {
+	// On localhost, skip API calls and use seed data directly
+	if (isLocalhost()) {
+		state.jobs = buildSeed();
+		return;
+	}
+
 	let jobs = [];
 	try {
 		jobs = normalizeRecords(await store.records("ccp6_jobs"));
@@ -493,11 +515,30 @@ function renderCreate() {
 function updateMealServiceVisibility() {
 	const mealServiceGroup = document.querySelector(".create-meal-service-group");
 	if (mealServiceGroup) {
-		if (state.siccFilter === "SICC1") {
-			mealServiceGroup.classList.remove("hidden");
-		} else {
-			mealServiceGroup.classList.add("hidden");
-		}
+		// Always show meal service field by default
+		mealServiceGroup.classList.remove("hidden");
+	}
+}
+
+function updateLoungeVisibility() {
+	const loungeRow = document.getElementById("create-lounge-row");
+	if (!loungeRow) return;
+
+	const isSICC2 = state.siccFilter === "SICC2";
+	const flight = selectedCreateFlight;
+	let isOAL = false;
+
+	if (flight) {
+		const airline = flight.airline || "";
+		isOAL = airline.includes("Standard / Other Airline") ||
+			airline.includes("Other") ||
+			airline.includes("OAL");
+	}
+
+	if (isSICC2 && isOAL) {
+		loungeRow.classList.remove("hidden");
+	} else {
+		loungeRow.classList.add("hidden");
 	}
 }
 
@@ -530,6 +571,11 @@ function removeServiceRow(index) {
 function updateServiceField(index, field, value) {
 	state.createServices[index][field] = value;
 }
+
+function setServiceDropdown(idx, field, value) {
+	state.createServices[idx][field] = value;
+}
+window.setServiceDropdown = setServiceDropdown;
 
 function renderServicesTable() {
 	const list = document.getElementById("create-services-list");
@@ -564,23 +610,16 @@ function renderServicesTable() {
 				</tr>
 			`;
 		} else {
+			const serviceTypeOpts = ["1st service", "2nd service"];
+			const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
+			const opt = (o, val) =>
+				'<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
+			const select = (field, opts, val, i) =>
+				`<select class="svc-select" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join('')}</select>`;
 			html += `
 				<tr>
-					<td>
-						<select class="form-input" onchange="updateServiceField(${idx}, 'serviceType', this.value)">
-							<option value="">Select...</option>
-							<option value="Breakfast" ${service.serviceType === "Breakfast" ? "selected" : ""}>Breakfast</option>
-							<option value="Lunch" ${service.serviceType === "Lunch" ? "selected" : ""}>Lunch</option>
-							<option value="Dinner" ${service.serviceType === "Dinner" ? "selected" : ""}>Dinner</option>
-						</select>
-					</td>
-					<td>
-						<select class="form-input" onchange="updateServiceField(${idx}, 'itemType', this.value)">
-							<option value="">Select...</option>
-							<option value="Hors d'oeuvre" ${service.itemType === "Hors d'oeuvre" ? "selected" : ""}>Hors d'oeuvre</option>
-							<option value="Dessert" ${service.itemType === "Dessert" ? "selected" : ""}>Dessert</option>
-						</select>
-					</td>
+					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
+					<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
 					<td>
 						<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
 					</td>
@@ -633,6 +672,28 @@ function initCreateModeButtons() {
 function updateCreateModeUI() {
 	const mode = state.createMode;
 	const isScheduled = mode === "scheduled";
+	const hasFlight = !!selectedCreateFlight;
+
+	// Get field groups
+	const etdGroup = document.querySelector(".create-etd-group");
+	const groupGroup = document.querySelector(".create-group-group");
+	const rulesetGroup = document.querySelector(".create-ruleset-group");
+	const mealServiceGroup = document.querySelector(".create-meal-service-group");
+
+	// If in scheduled mode and no flight selected, hide all field groups
+	if (isScheduled && !hasFlight) {
+		etdGroup?.classList.add("hidden");
+		groupGroup?.classList.add("hidden");
+		rulesetGroup?.classList.add("hidden");
+		mealServiceGroup?.classList.add("hidden");
+		return;
+	}
+
+	// Otherwise (manual mode OR scheduled with flight), show field groups
+	etdGroup?.classList.remove("hidden");
+	groupGroup?.classList.remove("hidden");
+	rulesetGroup?.classList.remove("hidden");
+	mealServiceGroup?.classList.remove("hidden");
 
 	// ETD
 	const etdInput = document.getElementById("create-etd");
@@ -678,6 +739,36 @@ function updateCreateModeUI() {
 		} else {
 			mealServiceSelect.classList.remove("hidden");
 			mealServiceReadonly.classList.add("hidden");
+		}
+	}
+
+	// Rule Set
+	const rulesetInput = document.getElementById("create-ruleset");
+	const rulesetReadonly = document.getElementById("create-ruleset-readonly");
+	if (rulesetInput && rulesetReadonly) {
+		if (isScheduled) {
+			rulesetInput.classList.add("hidden");
+			rulesetReadonly.classList.remove("hidden");
+			rulesetReadonly.querySelector(".cr-value").textContent =
+				rulesetInput.value || "—";
+		} else {
+			rulesetInput.classList.remove("hidden");
+			rulesetReadonly.classList.add("hidden");
+		}
+	}
+
+	// Lounge (read-only text in Scheduled mode, input in Manual)
+	const loungeInput = document.getElementById("create-lounge");
+	const loungeReadonly = document.getElementById("create-lounge-readonly");
+	if (loungeInput && loungeReadonly) {
+		if (isScheduled) {
+			loungeInput.classList.add("hidden");
+			loungeReadonly.classList.remove("hidden");
+			loungeReadonly.querySelector(".cr-value").textContent =
+				loungeInput.value || "—";
+		} else {
+			loungeInput.classList.remove("hidden");
+			loungeReadonly.classList.add("hidden");
 		}
 	}
 
@@ -728,7 +819,7 @@ function initCreateFlightDropdown() {
 	const list = document.getElementById("create-flight-list");
 	if (!input || !list) return;
 	const getFilteredFlights = () =>
-		seedFlights().filter((f) => f.site === state.siccFilter);
+		seedFlights().filter((f) => f.site === state.siccFilter && f.airline !== "Standard / Other Airline");
 	const render = (showAll = false) => {
 		const q = (showAll ? "" : input.value.trim()).toLowerCase();
 		const matches = getFilteredFlights().filter(
@@ -812,6 +903,9 @@ function selectCreateFlight(f) {
 		}
 		if (f.meal_service)
 			document.getElementById("create-meal-service").value = f.meal_service;
+		// Lounge: pre-fill from flight data in Scheduled mode
+		const loungeInput = document.getElementById("create-lounge");
+		if (loungeInput) loungeInput.value = f.lounge || "";
 	}
 
 	// For SICC1, populate services based on mode
@@ -822,7 +916,7 @@ function selectCreateFlight(f) {
 			state.createServices = [];
 			for (let i = 0; i < rows; i++) {
 				state.createServices.push({
-					serviceType: f.meal_service,
+					serviceType: i % 2 === 0 ? "1st service" : "2nd service",
 					itemType: i % 2 === 0 ? "Hors d'oeuvre" : "Dessert",
 				});
 			}
@@ -844,6 +938,8 @@ function selectCreateFlight(f) {
 	updateCreateModeUI();
 	// Show/hide services section based on flight + site
 	updateServicesVisibility();
+	// Show/hide lounge field based on SICC2 + OAL
+	updateLoungeVisibility();
 
 	renderCreateItems();
 }
@@ -861,6 +957,11 @@ function clearCreateFlight() {
 		.forEach((b) => b.classList.remove("active"));
 	// Meal Service
 	document.getElementById("create-meal-service").value = "";
+	// Lounge
+	document.getElementById("create-lounge").value = "";
+	const loungeReadonly = document.getElementById("create-lounge-readonly");
+	if (loungeReadonly) loungeReadonly.querySelector(".cr-value").textContent = "";
+	updateLoungeVisibility();
 	// Linked items + ad hoc
 	state.createItems = [];
 	state.adHocEnabled = false;
@@ -1319,6 +1420,8 @@ function submitCreateJob(event) {
 		});
 	}
 
+	const lounge = document.getElementById("create-lounge")?.value || "";
+
 	const job = {
 		job_id: jobId,
 		flight_number: flight.flight_number,
@@ -1327,6 +1430,9 @@ function submitCreateJob(event) {
 		ta_group: group,
 		rule_set: ruleSet,
 		site,
+		airline: flight.airline || "",
+		meal_service: flight.meal_service || "",
+		lounge,
 		job_status: "Open",
 		closed: false,
 		createdAt: now,
@@ -1338,7 +1444,19 @@ function submitCreateJob(event) {
 						items: presetItems,
 						traysHandled: 0,
 						staffCount: 0,
-						services: [{}],
+						services: state.createServices.map((s) => ({
+							serviceType: s.serviceType,
+							itemType: s.itemType,
+							startTime: null,
+							finishTime: null,
+							startTemp: null,
+							finishTemp: null,
+							traysHandled: 0,
+							staffCount: 0,
+							exposureDurationMin: null,
+							maxSurfaceTemp: null,
+							complianceResult: null,
+						})),
 						note: "",
 					}
 				: {
@@ -1353,7 +1471,19 @@ function submitCreateJob(event) {
 						staffCount: 0,
 						exposureDurationMin: null,
 						complianceResult: null,
-						services: [{}],
+						services: state.createServices.map((s) => ({
+							serviceType: s.serviceType,
+							itemType: s.itemType,
+							startTime: null,
+							finishTime: null,
+							startTemp: null,
+							finishTemp: null,
+							traysHandled: 0,
+							staffCount: 0,
+							exposureDurationMin: null,
+							maxSurfaceTemp: null,
+							complianceResult: null,
+						})),
 						items: presetItems,
 						note: "",
 					},
@@ -1399,6 +1529,17 @@ function submitCreateJob(event) {
 	navigate("detail", { jobId });
 }
 
+// ── Loader ─────────────────────────────────────────────────────────
+function showLoader() {
+	const loader = document.getElementById("loader-overlay");
+	if (loader) loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+	const loader = document.getElementById("loader-overlay");
+	if (loader) loader.classList.add("hidden");
+}
+
 // ── Init ────────────────────────────────────────────────────────────
 window.preview = preview;
 window.state = state;
@@ -1430,13 +1571,60 @@ window.navigate = (s, opts) => {
 	if (s === "all") return preview.go(VIEWS.all);
 };
 
+window.showLoader = showLoader;
+window.hideLoader = hideLoader;
+
+function switchCreateSICC(site) {
+	state.siccFilter = site;
+	document.querySelectorAll("#create-sicc-selector .sicc-btn").forEach((btn) => {
+		btn.classList.toggle("active", btn.dataset.sicc === site);
+	});
+	const label = document.getElementById("create-sicc-label");
+	if (label) label.textContent = site;
+	// Reset form state when switching sites
+	clearCreateFlight();
+	renderCreate();
+}
+window.switchCreateSICC = switchCreateSICC;
+
 document.addEventListener("DOMContentLoaded", async () => {
-	if (!state.jobs.length) state.jobs = buildSeed();
+	showLoader();
+	state.jobs = buildSeed();
 	await loadJobs();
-	const siccParam = preview.params.get("sicc");
-	if (siccParam === "SICC1" || siccParam === "SICC2")
-		state.siccFilter = siccParam;
+	// Extract site from d2path, fallback to sicc param
+	const d2path = preview.params.get("d2path");
+	let siteFromD2Path = null;
+	if (d2path) {
+		if (d2path.includes("sats-bd4uhr")) {
+			siteFromD2Path = "SICC1";
+		} else if (d2path.includes("ccp-5-dishing-4q3aak")) {
+			siteFromD2Path = "SICC2";
+		}
+	}
+	// Use d2path if available, otherwise fallback to sicc param
+	if (siteFromD2Path) {
+		state.siccFilter = siteFromD2Path;
+	} else {
+		const siccParam = preview.params.get("sicc");
+		if (siccParam === "SICC1" || siccParam === "SICC2") {
+			state.siccFilter = siccParam;
+		}
+	}
+	// Show/hide SICC toggler based on d2path presence
+	const siccSelector = document.getElementById("create-sicc-selector");
+	if (siccSelector) {
+		if (d2path) {
+			siccSelector.classList.add("hidden");
+		} else {
+			siccSelector.classList.remove("hidden");
+			// Set active button based on current state
+			document.querySelectorAll("#create-sicc-selector .sicc-btn").forEach((btn) => {
+				btn.classList.toggle("active", btn.dataset.sicc === state.siccFilter);
+			});
+		}
+	}
 	const label = document.getElementById("create-sicc-label");
 	if (label) label.textContent = state.siccFilter || "SICC1";
 	renderCreate();
+	hideLoader();
 });

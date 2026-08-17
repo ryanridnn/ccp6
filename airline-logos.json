@@ -1,0 +1,82 @@
+{
+  "AK": {
+    "name": "AirAsia",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png"
+  },
+  "NZ": {
+    "name": "Air New Zealand",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/11/0015_Air-New-Zealand-Logo-500x281-1.jpg"
+  },
+  "5J": {
+    "name": "Cebu Pacific",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/10/Cebu-Pacific-Logo-tumb.jpg"
+  },
+  "CI": {
+    "name": "China Airlines",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/09/China-Airlines-logo-tumb.jpg"
+  },
+  "EK": {
+    "name": "Emirates",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/12/Emirates-Logowww.jpg"
+  },
+  "BR": {
+    "name": "EVA Air",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/10/EVA-Air-Logo-tumb.png"
+  },
+  "JQ": {
+    "name": "Jetstar",
+    "logo": "https://1000logos.net/wp-content/uploads/2021/07/Jetstar-Logo-tumb.png"
+  },
+  "KE": {
+    "name": "Korean Air",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/03/Korean-Air-Logo-thumb.png"
+  },
+  "MH": {
+    "name": "Malaysia Airlines",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/04/Malaysia-Airlines-Logo-thumb.png"
+  },
+  "PR": {
+    "name": "Philippine Airlines",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/12/0022_Philippine-Airlines-Logo.jpg"
+  },
+  "QF": {
+    "name": "Qantas",
+    "logo": "https://1000logos.net/wp-content/uploads/2016/10/eeeeeeee-копия.jpg"
+  },
+  "QR": {
+    "name": "Qatar Airways",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/12/0021_Qatar-Airways-Logo.jpg"
+  },
+  "MI": {
+    "name": "SilkAir",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/05/SilkAir-Logo-tumb.png"
+  },
+  "SQ": {
+    "name": "Singapore Airlines",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/11/0012_Singapore-Airlines-Logo-500x281-1.jpg"
+  },
+  "TG": {
+    "name": "Thai Airways",
+    "logo": "https://1000logos.net/wp-content/uploads/2019/12/0010_Thai-Airways-International-Logo.jpg"
+  },
+  "TT": {
+    "name": "Tiger Airways",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/05/Tigerair-Logo-thumb.png"
+  },
+  "UA": {
+    "name": "United Airlines",
+    "logo": "https://1000logos.net/wp-content/uploads/2017/06/United-logo-tumb.jpg"
+  },
+  "VA": {
+    "name": "Virgin Australia",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/05/Virgin-Australia-Logo-tumb.png"
+  },
+  "OAL": {
+    "name": "Standard / Other Airline",
+    "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236B7280'/%3E%3Ctext x='50' y='58' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3EOAL%3C/text%3E%3C/svg%3E"
+  },
+  "FD": {
+    "name": "Thai AirAsia",
+    "logo": "https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png"
+  }
+}

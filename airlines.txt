@@ -1,0 +1,25 @@
+Airlines in Flight Options (from sample-data.js)
+=================================================
+
+AK - AirAsia
+NZ - Air New Zealand
+5J - Cebu Pacific
+CI - China Airlines
+EK - Emirates
+BR - EVA Air
+JQ - Jetstar
+KE - Korean Air
+MH - Malaysia Airlines
+PR - Philippine Airlines
+QF - Qantas
+QR - Qatar Airways
+MI - SilkAir
+SQ - Singapore Airlines
+-- - Standard / Other Airline (OAL)
+FD - Thai AirAsia
+TG - Thai Airways
+TT - Tiger Airways
+UA - United Airlines
+VA - Virgin Australia
+
+Total: 20 airlines

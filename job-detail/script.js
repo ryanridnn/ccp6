@@ -83,6 +83,11 @@ var preview = {
 	},
 	go(viewId, extra = {}) {
 		const next = new URLSearchParams();
+		// Preserve d2path parameter if it exists
+		const d2path = this.params.get("d2path");
+		if (d2path) {
+			next.set("d2path", d2path);
+		}
 		next.set("view", viewId);
 		for (const [k, v] of Object.entries(extra)) {
 			if (v == null || v === "") next.delete(k);
@@ -249,6 +254,9 @@ const state = {
 		method: "staffid",
 		resolved: null,
 	},
+	presetSelection: [],
+	foodCheckerSelection: [],
+	presetItemsSelection: [],
 };
 
 // ── Routing ─────────────────────────────────────────────────────────
@@ -597,6 +605,12 @@ function renderHeader(job) {
 		["Group", job.ta_group],
 		["Rule Set", job.rule_set],
 	];
+	
+	// Add lounge field for SICC2 OAL flights
+	if (job.site === "SICC2" && job.lounge) {
+		fields.push(["Lounge", job.lounge]);
+	}
+	
 	document.getElementById("detail-header").innerHTML = fields
 		.map(([l, v]) => headerField(l, v))
 		.join("");
@@ -810,6 +824,7 @@ function renderServiceRow(svc, index, submitted, limits, job) {
 
 	let rowHtml = `
     <tr class="${isExpanded ? "selected" : ""}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
+      <td><input type="checkbox" class="item-checkbox" data-table="preset" data-id="service-${index}" onclick="event.stopPropagation(); toggleItemSelection('preset', 'service-${index}')" /></td>
       <td>${index + 1}</td>
       <td><span id="${prefix}-timer-display">${elapsed}</span> <span style="color:var(--text-secondary);font-size:12px">/ ${limits.exposureMax} min</span></td>
       <td>${esc(svc.serviceType ?? "")}</td>
@@ -931,26 +946,79 @@ window.updatePresetRemarks = updatePresetRemarks;
 
 let serviceTimerInterval = null;
 
+
+// ── Timer warning helper ───────────────────────────────────────
+function isTimerWarning(elapsed, exposureMax) {
+	const remaining = exposureMax - elapsed;
+	return remaining <= 10 && remaining > 0;
+}
+
 function startServiceTimerUpdates() {
 	if (serviceTimerInterval) return;
 	serviceTimerInterval = setInterval(() => {
 		const job = currentJob();
-		if (!job || !job.preset.services) return;
-		job.preset.services.forEach((svc, i) => {
-			if (svc.startTime && !svc.finishTime) {
-				const elapsed = fmtElapsed(elapsedMin(svc.startTime));
-				const prefix = `p-s${i}`;
-				const limits = hmLimits(job);
-				const timerEl = document.getElementById(`${prefix}-timer-display`);
-				const timerElExpanded = document.getElementById(
-					`${prefix}-timer-display-expanded`,
-				);
-				if (timerEl) timerEl.textContent = elapsed;
-				if (timerElExpanded)
-					timerElExpanded.textContent =
-						elapsed + ` / ${limits.exposureMax} min`;
-			}
-		});
+		if (!job) return;
+		
+		// Update preset services (Sampled Item tab)
+		if (job.preset?.services) {
+			job.preset.services.forEach((svc, i) => {
+				if (svc.startTime && !svc.finishTime) {
+					const elapsed = elapsedMin(svc.startTime);
+					const prefix = `p-s${i}`;
+					const limits = hmLimits(job);
+					const timerEl = document.getElementById(`${prefix}-timer-display`);
+					const timerElExpanded = document.getElementById(
+						`${prefix}-timer-display-expanded`,
+					);
+					const warning = isTimerWarning(elapsed, limits.exposureMax);
+					if (timerEl) {
+						timerEl.textContent = fmtElapsed(elapsed);
+						timerEl.classList.toggle('timer-warning', warning);
+					}
+					if (timerElExpanded) {
+						timerElExpanded.textContent = fmtElapsed(elapsed) + ` / ${limits.exposureMax} min`;
+						timerElExpanded.classList.toggle('timer-warning', warning);
+					}
+				}
+			});
+		}
+		
+		// Update preset items (Multiple Items tab)
+		if (job.preset?.items) {
+			job.preset.items.forEach((item) => {
+				if (item.startTime && !item.finishTime) {
+					const elapsed = elapsedMin(item.startTime);
+					const limits = hmLimits(job);
+					const elapsedEl = document.getElementById(`preset-elapsed-${item.linkId}`);
+					const timerEl = document.getElementById(`preset-timer-${item.linkId}`);
+					const warning = isTimerWarning(elapsed, limits.exposureMax);
+					if (elapsedEl) {
+						elapsedEl.textContent = fmtElapsed(elapsed);
+						elapsedEl.classList.toggle('timer-warning', warning);
+					}
+					if (timerEl) {
+						timerEl.textContent = fmtElapsed(elapsed) + ` / ${limits.exposureMax} min`;
+						timerEl.classList.toggle('timer-warning', warning);
+					}
+				}
+			});
+		}
+		
+		// Update food checker items
+		if (job.foodChecker?.items) {
+			job.foodChecker.items.forEach((item) => {
+				if (item.startTime && !item.finishTime) {
+					const elapsed = elapsedMin(item.startTime);
+					const limits = hmLimits(job);
+					const elapsedEl = document.getElementById(`fc-elapsed-${item.linkId}`);
+					const warning = isTimerWarning(elapsed, limits.exposureMax);
+					if (elapsedEl) {
+						elapsedEl.textContent = fmtElapsed(elapsed);
+						elapsedEl.classList.toggle('timer-warning', warning);
+					}
+				}
+			});
+		}
 	}, 1000);
 }
 
@@ -1008,16 +1076,28 @@ function renderPresetServices(body, job, p, submitted, tabs) {
 	const limits = hmLimits(job);
 
 	body.innerHTML = `
+    ${tabs}
+
     <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-      <div class="jh-field"><div class="jh-label">Trays / meals handled</div><div class="jh-value">${job.preset.traysHandled ?? "—"}</div></div>
-      <div class="jh-field"><div class="jh-label">No of Staff</div><div class="jh-value">${job.preset.staffCount ?? "—"}</div></div>
+      <div class="jh-field">
+        <div class="jh-label">Trays / meals handled</div>
+        <input type="number" class="form-input" id="preset-trays" value="${job.preset.traysHandled ?? ""}" placeholder="Enter count" onchange="updatePresetField('traysHandled', this.value)" ${submitted ? "readonly" : ""} />
+      </div>
+      <div class="jh-field">
+        <div class="jh-label">No of Staff</div>
+        <input type="number" class="form-input" id="preset-staff" value="${job.preset.staffCount ?? ""}" placeholder="Enter count" onchange="updatePresetField('staffCount', this.value)" ${submitted ? "readonly" : ""} />
+      </div>
     </div>
 
-    ${tabs}
+    <div class="selection-bar" id="preset-selection-actions">
+        <button type="button" class="btn-secondary" onclick="startSelectedItems('preset')">Start All</button>
+        <button type="button" class="btn-secondary" onclick="finishSelectedItems('preset')">Finish All</button>
+      </div>
 
     <div class="table-wrap">
       <table class="fc-table">
         <thead><tr>
+          <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('preset')" /></th>
           <th style="width:40px">#</th>
           <th>TIMER</th>
           <th>SERVICE</th>
@@ -1046,6 +1126,231 @@ function renderPresetServices(body, job, p, submitted, tabs) {
   `;
 }
 
+
+// ── Selection helpers ──────────────────────────────────────────────
+function toggleSelectAll(tableType) {
+	const stateKey = tableType + "Selection";
+	const checkboxes = document.querySelectorAll(".item-checkbox[data-table='" + tableType + "']");
+	const allSelected = state[stateKey]?.length === checkboxes.length && checkboxes.length > 0;
+	
+	if (allSelected) {
+		state[stateKey] = [];
+		checkboxes.forEach(cb => cb.checked = false);
+	} else {
+		state[stateKey] = Array.from(checkboxes).map(cb => cb.dataset.id);
+		checkboxes.forEach(cb => cb.checked = true);
+	}
+	updateSelectionUI(tableType);
+}
+
+function toggleItemSelection(tableType, itemId) {
+	const stateKey = tableType + "Selection";
+	if (!state[stateKey]) state[stateKey] = [];
+	const idx = state[stateKey].indexOf(itemId);
+	if (idx > -1) {
+		state[stateKey].splice(idx, 1);
+	} else {
+		state[stateKey].push(itemId);
+	}
+	const cb = document.querySelector(".item-checkbox[data-table='" + tableType + "'][data-id='" + itemId + "']");
+	if (cb) cb.checked = state[stateKey].includes(itemId);
+	updateSelectionUI(tableType);
+}
+
+function updateSelectionUI(tableType) {
+	const stateKey = tableType + "Selection";
+	const container = document.getElementById(tableType + "-selection-actions");
+	if (!container) return;
+	
+	const hasSelection = state[stateKey] && state[stateKey].length > 0;
+	const btns = container.querySelectorAll("button");
+	
+	btns.forEach(btn => {
+		const isStartBtn = btn.textContent.includes("Start");
+		if (hasSelection) {
+			btn.textContent = isStartBtn ? "Start Selected" : "Finish Selected";
+		} else {
+			btn.textContent = isStartBtn ? "Start All" : "Finish All";
+		}
+	});
+}
+
+function getItemsForTable(tableType, job) {
+	if (tableType === "preset") return job.preset?.services || [];
+	if (tableType === "presetItems") return job.preset?.items || [];
+	if (tableType === "foodchecker") return job.foodChecker?.items || [];
+	return [];
+}
+
+function startSelectedItems(tableType) {
+	const job = currentJob();
+	if (!job) return;
+	
+	const stateKey = tableType + "Selection";
+	const items = getItemsForTable(tableType, job);
+	const now = Date.now();
+	
+	let targetItems;
+	if (state[stateKey] && state[stateKey].length > 0) {
+		// Handle both service-* and linkId identifiers
+		if (tableType === "preset") {
+			targetItems = items.filter((item, idx) => {
+				const serviceId = "service-" + idx;
+				return state[stateKey].includes(serviceId) && !item.startTime;
+			});
+		} else if (tableType === "presetItems") {
+			targetItems = items.filter(item => state[stateKey].includes(item.linkId) && !item.startTime);
+		} else {
+			targetItems = items.filter(item => state[stateKey].includes(item.linkId) && !item.startTime);
+		}
+	} else {
+		targetItems = items.filter(item => !item.startTime);
+	}
+	
+	if (targetItems.length === 0) {
+		const msg = state[stateKey]?.length > 0 
+			? "Selected items are already started." 
+			: "No items available to start.";
+		showToast(msg, "warning");
+		return;
+	}
+	
+	// Validation: Check if start temperature is required and filled
+	// For preset (services), check startTemp; for foodchecker and dispatch, check startTemp
+	const missingTemps = targetItems.filter(item => {
+		const temp = item.startTemp ?? item.startTempC;
+		return temp === undefined || temp === null || temp === "";
+	});
+	
+	if (missingTemps.length > 0) {
+		showToast("Please enter the START temperature before starting the timer.", "warning");
+		return;
+	}
+	
+	targetItems.forEach(item => {
+		item.startTime = now;
+		item.status = "InProgress";
+	});
+	
+	if (state[stateKey]) state[stateKey] = [];
+	
+	persistJob(job);
+	renderCurrentJob();
+	
+	// Start timer updates for preset services or items
+	if (tableType === "preset" || tableType === "presetItems") {
+		startServiceTimerUpdates();
+	}
+	
+	showToast(`Started ${targetItems.length} item(s)`, "success");
+}
+
+function finishSelectedItems(tableType) {
+	const job = currentJob();
+	if (!job) return;
+	
+	const stateKey = tableType + "Selection";
+	const items = getItemsForTable(tableType, job);
+	const now = Date.now();
+	
+	let targetItems;
+	if (state[stateKey] && state[stateKey].length > 0) {
+		// Handle both service-* and linkId identifiers
+		if (tableType === "preset") {
+			targetItems = items.filter((item, idx) => {
+				const serviceId = "service-" + idx;
+				return state[stateKey].includes(serviceId) && item.startTime && !item.finishTime;
+			});
+		} else if (tableType === "presetItems") {
+			targetItems = items.filter(item => state[stateKey].includes(item.linkId) && item.startTime && !item.finishTime);
+		} else {
+			targetItems = items.filter(item => state[stateKey].includes(item.linkId) && item.startTime && !item.finishTime);
+		}
+	} else {
+		targetItems = items.filter(item => item.startTime && !item.finishTime);
+	}
+	
+	if (targetItems.length === 0) {
+		const msg = state[stateKey]?.length > 0 
+			? "Selected items are already finished or not started." 
+			: "No items available to finish.";
+		showToast(msg, "warning");
+		return;
+	}
+	
+	// Validation: Check if finish temperature is required and filled
+	const missingTemps = targetItems.filter(item => {
+		const temp = item.finishTemp ?? item.finishTempC;
+		return temp === undefined || temp === null || temp === "";
+	});
+	
+	if (missingTemps.length > 0) {
+		showToast("Please enter the FINISH temperature before finishing.", "warning");
+		return;
+	}
+	
+	targetItems.forEach(item => {
+		item.finishTime = now;
+		item.status = "Finished";
+		
+		// Calculate compliance result like finishItem does
+		const limits = hmLimits(job);
+		const maxTemp = Math.max(item.startTemp || 0, item.finishTemp || 0);
+		item.durationMin = Math.round((now - new Date(item.startTime).getTime()) / 60000);
+		item.complianceResult = item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+	});
+	
+	if (state[stateKey]) state[stateKey] = [];
+	
+	persistJob(job);
+	renderCurrentJob();
+	showToast(`Finished ${targetItems.length} item(s)`, "success");
+}
+
+// Toast notification helper
+function showToast(message, type = "info") {
+	const existing = document.querySelector(".toast-notification");
+	if (existing) existing.remove();
+	
+	const toast = document.createElement("div");
+	toast.className = "toast-notification toast-" + type;
+	toast.style.cssText = `
+		position: fixed;
+		bottom: 24px;
+		right: 24px;
+		padding: 12px 20px;
+		background: var(--bg-surface);
+		border: 1px solid var(--${type === "success" ? "success" : type === "warning" ? "warning" : "accent"});
+		border-radius: 8px;
+		color: var(--text-primary);
+		font-size: 14px;
+		z-index: 9999;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		animation: toastIn 0.3s ease;
+	`;
+	toast.textContent = message;
+	
+	if (!document.getElementById("toast-styles")) {
+		const style = document.createElement("style");
+		style.id = "toast-styles";
+		style.textContent = "@keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }";
+		document.head.appendChild(style);
+	}
+	
+	document.body.appendChild(toast);
+	setTimeout(() => {
+		toast.style.opacity = "0";
+		toast.style.transition = "opacity 0.3s";
+		setTimeout(() => toast.remove(), 300);
+	}, 3000);
+}
+
+window.toggleSelectAll = toggleSelectAll;
+window.toggleItemSelection = toggleItemSelection;
+window.startSelectedItems = startSelectedItems;
+window.finishSelectedItems = finishSelectedItems;
+window.showToast = showToast;
+
 function renderPresetItems(body, job, p, submitted, tabs) {
 	const items = p.items || [];
 	const notStartedCount = items.filter((it) => !it.startTime).length;
@@ -1054,12 +1359,18 @@ function renderPresetItems(body, job, p, submitted, tabs) {
 	).length;
 
 	body.innerHTML = `
-    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-      <div class="jh-field"><div class="jh-label">Trays / meals handled</div><div class="jh-value">${p.traysHandled ?? "—"}</div></div>
-      <div class="jh-field"><div class="jh-label">No of Staff</div><div class="jh-value">${p.staffCount ?? "—"}</div></div>
-    </div>
-
     ${tabs}
+
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="jh-field">
+        <div class="jh-label">Trays / meals handled</div>
+        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled ?? ""}" placeholder="Enter count" onchange="updatePresetField('traysHandled', this.value)" ${submitted ? "readonly" : ""} />
+      </div>
+      <div class="jh-field">
+        <div class="jh-label">No of Staff</div>
+        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount ?? ""}" placeholder="Enter count" onchange="updatePresetField('staffCount', this.value)" ${submitted ? "readonly" : ""} />
+      </div>
+    </div>
 
     <div class="fc-header">
       <div>
@@ -1069,9 +1380,15 @@ function renderPresetItems(body, job, p, submitted, tabs) {
       <div class="fc-mandatory-badge">${activeCount} active · ${notStartedCount} not started</div>
     </div>
 
+    <div class="selection-bar" id="presetItems-selection-actions">
+      <button type="button" class="btn-secondary" onclick="startSelectedItems('presetItems')">Start All</button>
+      <button type="button" class="btn-secondary" onclick="finishSelectedItems('presetItems')">Finish All</button>
+    </div>
+
     <div class="table-wrap">
       <table class="fc-table">
         <thead><tr>
+          <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('presetItems')" /></th>
           <th style="width:40px">#</th>
           <th>CLASS</th>
           <th>ITEM DESCRIPTION</th>
@@ -1129,8 +1446,10 @@ function renderPresetSICC2Row(item, i, submitted, job) {
 		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
 	}
 
+	let isItemSelected = (state.presetItemsSelection || []).includes(item.linkId);
 	let rowHtml = `
     <tr class="${isExpanded ? "selected" : ""}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
+      <td><input type="checkbox" class="item-checkbox" data-table="presetItems" data-id="${item.linkId}" onclick="event.stopPropagation(); toggleItemSelection('presetItems', '${item.linkId}')" ${isItemSelected ? 'checked' : ''} /></td>
       <td>${i + 1}</td>
       <td>${esc(item.class)}</td>
       <td>${esc(item.item_description)}</td>
@@ -1556,21 +1875,10 @@ function renderFoodChecker(body, job) {
       </div>
     </div>
 
-    ${
-			site !== "SICC1" && selectedCount > 0
-				? `
-      <div class="fc-selection-bar">
-        <div class="fc-selection-count">${selectedCount} row(s) selected</div>
-        <div class="fc-selection-actions">
-          <button type="button" class="btn-secondary" onclick="fcStartSelected()" ${submitted ? "disabled" : ""}>Start selected</button>
-          <button type="button" class="btn-secondary" onclick="fcFinishSelected()" ${submitted ? "disabled" : ""}>Finish selected</button>
-          <button type="button" class="btn-ghost" onclick="fcClearSelection()">Clear</button>
-        </div>
+    <div class="selection-bar" id="foodchecker-selection-actions">
+        <button type="button" class="btn-secondary" onclick="startSelectedItems('foodchecker')" ${submitted ? "disabled" : ""}>Start All</button>
+        <button type="button" class="btn-secondary" onclick="finishSelectedItems('foodchecker')" ${submitted ? "disabled" : ""}>Finish All</button>
       </div>
-      <div class="fc-selection-note">One timestamp for several rows, data still stored per item — as the paper form is filled</div>
-    `
-				: ""
-		}
 
     <div class="table-wrap">
       <table class="fc-table">
@@ -1578,6 +1886,7 @@ function renderFoodChecker(body, job) {
           ${
 						site === "SICC1"
 							? `
+            <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>CLASS</th>
             <th>ITEM DESCRIPTION</th>
@@ -1590,6 +1899,7 @@ function renderFoodChecker(body, job) {
             <th>ACTION</th>
           `
 							: `
+            <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>CLASS</th>
             <th>ITEM DESCRIPTION</th>
@@ -1622,7 +1932,7 @@ function renderFCRow(job, item, i, submitted) {
 	const site = job.site || "SICC2";
 	const st = itemStatus(item, job);
 	const dis = submitted ? "disabled" : "";
-	const isSelected = (state.fcSelected || []).includes(item.linkId);
+	const isSelected = (state.foodCheckerSelection || []).includes(item.linkId);
 	const isInProgress = st.cls === "in-progress";
 	const isFinished = !!item.complianceResult;
 
@@ -1651,7 +1961,8 @@ function renderFCRow(job, item, i, submitted) {
 
 	let rowHtml = `
     <tr class="${isSelected ? "selected" : ""}" onclick="toggleFCExpand('${item.linkId}')" style="cursor: pointer;">
-      ${site !== "SICC1" ? `<td><input type="checkbox" class="fc-checkbox" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); fcToggleSelect('${item.linkId}')" /></td>` : `<td>${i + 1}</td>`}
+      <td><input type="checkbox" class="item-checkbox" data-table="foodchecker" data-id="${item.linkId}" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); toggleItemSelection('foodchecker', '${item.linkId}')" /></td>
+      <td>${i + 1}</td>
       <td>${esc(item.class)}</td>
       <td>${esc(item.item_description)}</td>
       <td>${esc(item.sku)}</td>
@@ -1839,124 +2150,14 @@ function toggleFCExpand(linkId) {
 	renderDetail();
 }
 
-function fcToggleSelect(linkId) {
-	if (!state.fcSelected) state.fcSelected = [];
-	const idx = state.fcSelected.indexOf(linkId);
-	if (idx >= 0) {
-		state.fcSelected.splice(idx, 1);
-	} else {
-		state.fcSelected.push(linkId);
-	}
-	renderDetail();
-}
 
-function fcClearSelection() {
-	state.fcSelected = [];
-	renderDetail();
-}
 
-function fcStartSelected() {
-	const job = currentJob();
-	const items = job.foodChecker.items || [];
-	const selected = (state.fcSelected || []).filter((id) => {
-		const item = items.find((it) => it.linkId === id);
-		return item && !item.startTime && !item.complianceResult;
-	});
 
-	if (selected.length === 0) {
-		showErr("fc-error", "No selectable items in selection.");
-		return;
-	}
 
-	const now = new Date().toISOString();
-	for (const linkId of selected) {
-		const item = items.find((it) => it.linkId === linkId);
-		if (!item) continue;
-		const st = document.getElementById(`fc-st-temp-${linkId}`)?.value;
-		if (st === "" || st == null) {
-			showErr(
-				"fc-error",
-				`Start temperature required for ${item.item_description}.`,
-			);
-			return;
-		}
-		item.startTemp = parseFloat(st);
-		item.startTime = now;
-		job.history.push({
-			at: now,
-			actor: "Food Checker",
-			field: "fc.item",
-			from: "NotStarted",
-			to: "InProgress",
-			stage: "foodchecker",
-			version: 1,
-		});
-	}
-
-	state.fcSelected = [];
-	renderDetail();
-	checkAndStartFCTimer();
-}
-
-function fcFinishSelected() {
-	const job = currentJob();
-	const items = job.foodChecker.items || [];
-	const selected = (state.fcSelected || []).filter((id) => {
-		const item = items.find((it) => it.linkId === id);
-		return item && item.startTime && !item.complianceResult;
-	});
-
-	if (selected.length === 0) {
-		showErr("fc-error", "No finishable items in selection.");
-		return;
-	}
-
-	const now = new Date().toISOString();
-	for (const linkId of selected) {
-		const item = items.find((it) => it.linkId === linkId);
-		if (!item) continue;
-		const ft = document.getElementById(`fc-ft-temp-${linkId}`)?.value;
-		if (ft === "" || ft == null) {
-			showErr(
-				"fc-error",
-				`Finish temperature required for ${item.item_description}.`,
-			);
-			return;
-		}
-		item.finishTemp = parseFloat(ft);
-		item.finishTime = now;
-		const limits = hmLimits(job);
-		item.durationMin = Math.round(
-			(new Date(now) - new Date(item.startTime)) / 60000,
-		);
-		const maxTemp = Math.max(item.startTemp, item.finishTemp);
-		item.complianceResult =
-			item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax
-				? "Non-Compliant"
-				: "Compliant";
-		job.history.push({
-			at: now,
-			actor: "Food Checker",
-			field: "fc.item",
-			from: "InProgress",
-			to: item.complianceResult,
-			stage: "foodchecker",
-			version: 1,
-		});
-	}
-
-	state.fcSelected = [];
-	state.fcExpanded = null;
-	renderDetail();
-	checkAndStartFCTimer();
-}
 
 // ── Attach FC functions to window ──────────────────────────────────
 window.toggleFCExpand = toggleFCExpand;
-window.fcToggleSelect = fcToggleSelect;
-window.fcClearSelection = fcClearSelection;
-window.fcStartSelected = fcStartSelected;
-window.fcFinishSelected = fcFinishSelected;
+
 
 function renderItemRow(job, item, i, submitted) {
 	const st = itemStatus(item, job);
@@ -2376,7 +2577,7 @@ function dispatchLive(job) {
 	return { label: "Locked", cls: "locked", el: null };
 }
 
-function renderDispatchPanel(dispatch, items, type) {
+function renderDispatchPanel(dispatch, items, type, prereqFinished = true) {
 	const submitted = dispatch?.status === "Submitted";
 	const limits = hmLimits(currentJob());
 	const min = limits.coldSoakMin;
@@ -2396,7 +2597,8 @@ function renderDispatchPanel(dispatch, items, type) {
 				minute: "2-digit",
 			})
 		: "—";
-	const dis = submitted ? "disabled" : "";
+	const dis = submitted || !prereqFinished ? "disabled" : "";
+	const canEdit = !submitted && prereqFinished;
 	const hasExitTime = !!dispatch?.beforeExitTime;
 	const allTempsEntered =
 		items.length > 0 &&
@@ -2405,6 +2607,7 @@ function renderDispatchPanel(dispatch, items, type) {
 	const exitTimeDisabled = dis || (!allTempsEntered ? "disabled" : "");
 
 	return `
+    ${!prereqFinished ? `<div class="empty-state" style="margin-bottom:12px">Waiting for ${type === 'preset' ? 'preset' : 'food checker'} to finish \u2014 all timers must be complete before dispatch.</div>` : ''}
     <div class="fc-timer-bar" style="margin-bottom:16px">
       <div class="fc-timer-display">
         <div class="fc-timer-value" id="dispatch-timer-value-${type}" style="font-size:48px;font-weight:700">${el != null ? (dispatch?.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el)) : "—"}</div>
@@ -2429,12 +2632,12 @@ function renderDispatchPanel(dispatch, items, type) {
         <label class="form-label required">Before-exit time (24h)</label>
         <div style="display:flex;gap:8px">
           <input type="time" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? "Enter all temps first" : ""}" />
-          ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
+          ${canEdit ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
         </div>
       </div>
     </div>
     
-    <div class="table-wrap" style="margin-top:20px">
+<div class="table-wrap" style="margin-top:20px">
       <table class="fc-table">
         <thead>
           <tr>
@@ -2456,7 +2659,7 @@ function renderDispatchPanel(dispatch, items, type) {
 										? "Compliant"
 										: "Non-Compliant"
 									: null;
-							return `<tr>
+							return `<tr data-linkid="${item.linkId}">
               <td>${i + 1}</td>
               <td>${esc(item.class)}</td>
               <td>${esc(item.item_description)}</td>
@@ -2470,7 +2673,7 @@ function renderDispatchPanel(dispatch, items, type) {
       </table>
     </div>
     
-    ${!submitted ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
+    ${canEdit ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : !prereqFinished ? '<div class="empty-state" style="margin-top:16px">Waiting for ' + (type === 'preset' ? 'preset' : 'food checker') + ' to finish (all timers complete).</div>' : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
   `;
 }
 
@@ -2524,15 +2727,22 @@ function renderDispatch(body, job) {
 	const presetItems = job.preset.items || [];
 	const fcItems = job.foodChecker.items || [];
 
+	const presetFinished =
+		job.preset?.status === "Submitted" &&
+		presetItems.every((it) => !it.startTime || it.finishTime);
+	const fcFinished =
+		job.foodChecker?.status === "Submitted" &&
+		fcItems.every((it) => !it.startTime || it.finishTime);
+
 	body.innerHTML = `
     <div class="dispatch-panels">
       <div class="dispatch-panel">
         <h3 class="panel-title">Preset Dispatch</h3>
-        ${renderDispatchPanel(job.dispatchPreset, presetItems, "preset")}
+        ${renderDispatchPanel(job.dispatchPreset, presetItems, "preset", presetFinished)}
       </div>
       <div class="dispatch-panel">
         <h3 class="panel-title">Food Checker Dispatch</h3>
-        ${renderDispatchPanel(job.dispatchFC, fcItems, "fc")}
+        ${renderDispatchPanel(job.dispatchFC, fcItems, "fc", fcFinished)}
       </div>
     </div>
   `;
@@ -2921,6 +3131,19 @@ window.submitStage = submitStage;
 window.resolveIdentity = resolveIdentity;
 window.confirmSignoff = confirmSignoff;
 window.closeSignoff = closeSignoff;
+
+// Selection helper functions
+window.toggleSelectAll = toggleSelectAll;
+window.toggleItemSelection = toggleItemSelection;
+window.startSelectedItems = startSelectedItems;
+window.finishSelectedItems = finishSelectedItems;
+window.showToast = showToast;
+window.getItemsForTable = getItemsForTable;
+// Wrapper for backward compatibility
+window.renderCurrentJob = function() { renderDetail(); };
+window.currentJob = currentJob;
+window.persistJob = persistJob;
+
 window.navigate = (s) => {
 	if (s === "current") preview.go(VIEWS.current);
 	if (s === "report") {
@@ -2931,6 +3154,34 @@ window.navigate = (s) => {
 		);
 	}
 };
+
+// ── Web Report popover ───────────────────────────────────────────────
+function toggleWebReportPopover(e) {
+	const pop = document.getElementById("web-report-popover");
+	if (!pop) return;
+	const willOpen = pop.classList.contains("hidden");
+	if (willOpen) {
+		const btn =
+			(e && e.currentTarget) ||
+			document.querySelector('[onclick*="toggleWebReportPopover"]');
+		if (btn) {
+			const r = btn.getBoundingClientRect();
+			pop.style.right = document.documentElement.clientWidth - r.right + "px";
+			pop.style.top = r.bottom + window.scrollY + 8 + "px";
+		}
+	}
+	pop.classList.toggle("hidden", !willOpen);
+}
+window.toggleWebReportPopover = toggleWebReportPopover;
+
+function goToWebReport() {
+	const j = currentJob();
+	preview.openRecord(
+		VIEWS.report,
+		(j && j.job_id) || state.activeJobId || "",
+	);
+}
+window.goToWebReport = goToWebReport;
 
 const IS_LOCAL = ["localhost", "127.0.0.1", ""].includes(location.hostname);
 
@@ -2951,4 +3202,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	state.currentScreen = "detail";
 	renderDetail();
 	startTicker();
+
+	// Close web-report popover when clicking outside it or its trigger button
+	document.addEventListener("click", (ev) => {
+		const pop = document.getElementById("web-report-popover");
+		if (!pop || pop.classList.contains("hidden")) return;
+		const trigger = ev.target.closest('[onclick*="toggleWebReportPopover"]');
+		if (trigger && pop.contains(trigger)) return;
+		if (!pop.contains(ev.target) && !trigger) {
+			pop.classList.add("hidden");
+		}
+	});
 });

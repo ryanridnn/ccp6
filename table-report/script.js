@@ -10,6 +10,11 @@ var preview = {
 	params: new URLSearchParams(location.search),
 	go(viewId, extra = {}) {
 		const next = new URLSearchParams();
+		// Preserve d2path parameter if it exists
+		const d2path = this.params.get("d2path");
+		if (d2path) {
+			next.set("d2path", d2path);
+		}
 		next.set("view", viewId);
 		for (const [k, v] of Object.entries(extra)) {
 			if (v == null || v === "") next.delete(k);

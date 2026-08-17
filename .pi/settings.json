@@ -1,0 +1,7 @@
+{
+  "enabledModels": [
+    "accounts/fireworks/models/minimax-m2p7",
+    "accounts/fireworks/routers/glm-5p2-fast",
+    "accounts/fireworks/models/qwen3p7-plus"
+  ]
+}

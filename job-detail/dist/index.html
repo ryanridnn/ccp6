@@ -902,20 +902,19 @@ body {
 .job-header {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   border-radius: 12px;
-  flex-wrap: wrap;
   gap: 14px 20px;
   margin-bottom: 16px;
   padding: 16px 20px;
 }
 
-.job-header-field {
-  flex: 170px;
-  min-width: 150px;
+.jh-field {
+  min-width: 0;
 }
 
-.job-header-field .form-label {
+.jh-label {
   text-transform: uppercase;
   letter-spacing: .04em;
   color: var(--text-secondary);
@@ -923,18 +922,25 @@ body {
   font-size: 11px;
 }
 
-.job-header-field .form-input {
-  background: var(--bg-page);
-  width: 100%;
+.jh-value {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.job-header-field .form-input.accent {
-  color: var(--accent-hover);
+.fc-meal-service .jh-field {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 
-.job-header-field .form-input:disabled {
-  opacity: .85;
-  cursor: not-allowed;
+.fc-meal-service .jh-label {
+  color: var(--text-secondary);
+}
+
+.fc-meal-service .jh-value {
+  color: #0f193c;
 }
 
 .tab-bar {
@@ -1057,6 +1063,21 @@ body {
   color: var(--info);
   background: #38bdf81f;
   border-color: #38bdf84d;
+}
+
+.timer-warning {
+  animation: timerPulse 1s ease-in-out infinite alternate;
+  color: var(--warning) !important;
+}
+
+@keyframes timerPulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: .5;
+  }
 }
 
 .status-pill.warning {
@@ -2007,6 +2028,125 @@ body {
     padding: 8px;
   }
 }
+
+.selection-bar {
+  display: flex;
+  border: 1px solid var(--border);
+  background: #6366f10a;
+  border-radius: 8px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+}
+
+.selection-bar button {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.item-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  cursor: pointer;
+  position: relative;
+  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  transition: all .2s;
+}
+
+.item-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.item-checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.item-checkbox:checked:after {
+  content: "";
+  position: absolute;
+  border: 2px solid #fff;
+  border-width: 0 2px 2px 0;
+  width: 5px;
+  height: 10px;
+  top: 1px;
+  left: 5px;
+  transform: rotate(45deg);
+}
+
+.btn-icon {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  justify-content: center;
+  align-items:  center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.btn-icon:hover {
+  background: var(--bg-surface-hover);
+  color: var(--accent);
+  border-color: var(--border-hover);
+}
+
+.web-report-popover {
+  position: absolute;
+  z-index: 1000;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  display: flex;
+  overflow: hidden;
+  border-radius: 10px;
+  flex-direction: column;
+  min-width: 180px;
+  box-shadow: 0 12px 32px #00000040;
+}
+
+.web-report-popover.hidden {
+  display: none;
+}
+
+.web-report-menu {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.web-report-menu li {
+  display: flex;
+  cursor: pointer;
+  color: var(--text-primary);
+  border-radius: 8px;
+  align-items:  center;
+  gap: 10px;
+  padding: 10px 12px;
+  transition: background .15s, color .15s;
+  font-size: 14px;
+}
+
+.web-report-menu li svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.web-report-menu li:hover {
+  background: var(--bg-surface-hover);
+  color: var(--accent);
+}
+
+.web-report-menu li:hover svg {
+  color: var(--accent);
+}
 </style></head>
   <body>
     <div class="app">
@@ -2019,11 +2159,45 @@ body {
           <div class="page-actions">
             <button
               type="button"
-              class="btn-secondary"
-              onclick="navigate('report')"
+              class="btn-icon"
+              onclick="toggleWebReportPopover(event)"
+              aria-label="Web Report options"
             >
-              Web Report
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="5" r="1" />
+                <circle cx="12" cy="12" r="1" />
+                <circle cx="12" cy="19" r="1" />
+              </svg>
             </button>
+            <div id="web-report-popover" class="web-report-popover hidden">
+              <ul class="web-report-menu" role="menu">
+                <li role="menuitem" onclick="goToWebReport()">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  <span class="wr-menu-label">Web Report</span>
+                </li>
+              </ul>
+            </div>
             <button
               type="button"
               class="btn-back"
@@ -2231,12 +2405,12 @@ var JOB_1 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2244,12 +2418,38 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2348,12 +2548,25 @@ var JOB_2 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2401,7 +2614,7 @@ var JOB_3 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "C",
-  airline: "Standard / Other Airline",
+  airline: "Singapore Airlines (SQ)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2416,12 +2629,25 @@ var JOB_3 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2477,7 +2703,7 @@ var JOB_4 = {
   etd: HEADER.etd,
   meal_service: "Lunch",
   ta_group: "D",
-  airline: "Standard / Other Airline",
+  airline: "Emirates (EK)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2491,22 +2717,20 @@ var JOB_4 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2514,12 +2738,38 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2629,7 +2879,7 @@ var JOB_5 = {
   etd: HEADER.etd,
   meal_service: "Breakfast",
   ta_group: "A",
-  airline: "Standard / Other Airline",
+  airline: "Qatar Airways (QR)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2643,10 +2893,8 @@ var JOB_5 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
@@ -2697,7 +2945,7 @@ var JOB_6 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "B",
-  airline: "Standard / Other Airline",
+  airline: "Malaysia Airlines (MH)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2711,15 +2959,16 @@ var JOB_6 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}],
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
     items: [
       mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
         status: "NotStarted"
@@ -3070,15 +3319,20 @@ var JOB_15 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "150202", desc: "Fresh Fruit Cup", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3110,15 +3364,20 @@ var JOB_16 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "160202", desc: "Pavlova", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3150,15 +3409,20 @@ var JOB_17 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "170202", desc: "Tim Tam", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3190,15 +3454,20 @@ var JOB_18 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, {}),
+      mkFCItem({ sku: "180202", desc: "Coffee", cls: "Economy", qty: 96 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
@@ -3230,15 +3499,20 @@ var JOB_19 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "190202", desc: "Spring Rolls", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3270,15 +3544,20 @@ var JOB_20 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "200202", desc: "Mango Sticky Rice", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3310,15 +3589,20 @@ var JOB_21 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "210202", desc: "Teh Tarik", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3350,15 +3634,20 @@ var JOB_22 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "220202", desc: "Halo-Halo", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3390,15 +3679,20 @@ var JOB_23 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "230202", desc: "Lechon Kawali", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3430,15 +3724,20 @@ var JOB_24 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, {}),
+      mkFCItem({ sku: "240202", desc: "Soft Boiled Eggs", cls: "Economy", qty: 48 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, { status: "NotStarted" }),
@@ -3453,6 +3752,7 @@ var STAFF = [
   { staffId: "ryan22", staffName: "Ryan", role: "FAA" },
   { staffId: "faa11", staffName: "Noor Aisyah", role: "FAA" },
   { staffId: "faa04", staffName: "Maya Tan", role: "FAA" },
+  { staffId: "kin21", staffName: "Kinan", role: "FAA" },
   { staffId: "fc07", staffName: "Ravi Kumar", role: "Food Checker" },
   { staffId: "fc02", staffName: "Siti Rahayu", role: "Food Checker" },
   { staffId: "cts09", staffName: "Boon Seng", role: "CTS" }
@@ -3705,7 +4005,10 @@ var state = {
     jobId: null,
     method: "staffid",
     resolved: null
-  }
+  },
+  presetSelection: [],
+  foodCheckerSelection: [],
+  presetItemsSelection: []
 };
 function normalizeRecords(res) {
   const arr = Array.isArray(res) ? res : res?.records || [];
@@ -3791,15 +4094,6 @@ function hmLimits(job) {
     coldSoakMin: r.coldSoakMin,
     dispatchTempMax: r.dispatchTempMax
   };
-}
-function calcTPMH(svc) {
-  if (svc.traysHandled == null || svc.staffCount == null || svc.startTime == null || svc.finishTime == null)
-    return "—";
-  const hours = (new Date(svc.finishTime) - new Date(svc.startTime)) / (60 * 60 * 1000);
-  if (hours <= 0 || svc.staffCount <= 0)
-    return "—";
-  const tpmh = svc.traysHandled / (svc.staffCount * hours);
-  return tpmh.toFixed(1);
 }
 function num(id) {
   const v = document.getElementById(id)?.value;
@@ -3933,25 +4227,23 @@ function renderDetail() {
   } else if (state.activeTab === "dispatch")
     renderDispatch(body, job);
 }
-function headerField(label, control) {
-  return `<div class="form-group job-header-field">
-    <label class="form-label">${esc(label)}</label>${control}
+function headerField(label, value) {
+  return `<div class="jh-field">
+    <div class="jh-label">${esc(label)}</div>
+    <div class="jh-value">${esc(value ?? "—")}</div>
   </div>`;
 }
-function headerControls(job, editable) {
-  const dis = editable ? "" : "disabled";
-  const sel = (id, value, options) => `<select class="form-input" id="${id}" ${dis}>${options.map((o) => `<option ${o === value ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
-  const txt = (id, value, extra = "") => `<input type="text" class="form-input ${extra}" id="${id}" value="${esc(value ?? "")}" ${dis} />`;
-  const fields = [
-    ["Flight Number", txt("h-flight", editable ? "" : job.flight_number)],
-    ["ETD (24h)", txt("h-etd", editable ? "" : job.etd)],
-    ["Group", sel("h-group", editable ? "" : job.ta_group, CONFIG.taGroups)],
-    ["Rule Set", txt("h-rule-set", editable ? "" : job.rule_set, "readonly")]
-  ];
-  return fields.map(([label, control]) => headerField(label, control)).join("");
-}
 function renderHeader(job) {
-  document.getElementById("detail-header").innerHTML = headerControls(job, false);
+  const fields = [
+    ["Flight Number", job.flight_number],
+    ["ETD (24h)", job.etd],
+    ["Group", job.ta_group],
+    ["Rule Set", job.rule_set]
+  ];
+  if (job.site === "SICC2" && job.lounge) {
+    fields.push(["Lounge", job.lounge]);
+  }
+  document.getElementById("detail-header").innerHTML = fields.map(([l, v]) => headerField(l, v)).join("");
 }
 function renderTabs(job) {
   const el = document.getElementById("detail-tabs");
@@ -4079,32 +4371,28 @@ function dispatchLiveState(job) {
 function renderServiceRow(svc, index, submitted, limits, job) {
   const prefix = `p-s${index}`;
   const isExpanded = state.serviceExpanded === index;
-  const elapsed = svc.startTime ? fmtElapsed(elapsedMin(svc.startTime)) : "00:00";
+  const elapsed = svc.finishTime ? fmtElapsed((new Date(svc.finishTime) - new Date(svc.startTime)) / 60000) : svc.startTime ? fmtElapsed(elapsedMin(svc.startTime)) : "00:00";
   const showStart = !submitted && !svc.startTime;
   const showFinish = !submitted && svc.startTime && !svc.finishTime;
-  const canRemove = !svc.startTime && index > 0;
-  const htStartField = isExpanded ? `<div class="form-input-static">${svc.startTempHorsDoeuvre != null ? svc.startTempHorsDoeuvre + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-hts" value="${svc.startTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" />`;
-  const htFinishField = isExpanded ? `<div class="form-input-static">${svc.finishTempHorsDoeuvre != null ? svc.finishTempHorsDoeuvre + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-htf" value="${svc.finishTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" />`;
-  const dtStartField = isExpanded ? `<div class="form-input-static">${svc.startTempDessert != null ? svc.startTempDessert + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dts" value="${svc.startTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" />`;
-  const dtFinishField = isExpanded ? `<div class="form-input-static">${svc.finishTempDessert != null ? svc.finishTempDessert + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-dtf" value="${svc.finishTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" />`;
+  const startTempField = isExpanded ? `<div class="form-input-static">${svc.startTemp != null ? svc.startTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-startTemp" value="${svc.startTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTemp', this.value)" />`;
+  const finishTempField = isExpanded ? `<div class="form-input-static">${svc.finishTemp != null ? svc.finishTemp + " °C" : "—"}</div>` : `<input type="number" step="0.1" class="form-input" style="width:90px" id="${prefix}-finishTemp" value="${svc.finishTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTemp', this.value)" />`;
   let actionBtn;
   if (showStart) {
     actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startService(${index})">Start</button>`;
   } else if (showFinish) {
     actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish</button>`;
-  } else if (canRemove) {
-    actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); removeService(${index})">Remove</button>`;
   } else {
     actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); toggleServiceExpand(${index})">${isExpanded ? "Close" : "View"}</button>`;
   }
   let rowHtml = `
     <tr class="${isExpanded ? "selected" : ""}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
+      <td><input type="checkbox" class="item-checkbox" data-table="preset" data-id="service-${index}" onclick="event.stopPropagation(); toggleItemSelection('preset', 'service-${index}')" /></td>
       <td>${index + 1}</td>
       <td><span id="${prefix}-timer-display">${elapsed}</span> <span style="color:var(--text-secondary);font-size:12px">/ ${limits.exposureMax} min</span></td>
-      <td>${htStartField}</td>
-      <td>${htFinishField}</td>
-      <td>${dtStartField}</td>
-      <td>${dtFinishField}</td>
+      <td>${esc(svc.serviceType ?? "")}</td>
+      <td>${esc(svc.itemType ?? "")}</td>
+      <td>${startTempField}</td>
+      <td>${finishTempField}</td>
       <td>${actionBtn}</td>
     </tr>
   `;
@@ -4124,14 +4412,10 @@ function renderServiceRow(svc, index, submitted, limits, job) {
                   <div class="timer-display" id="${prefix}-timer-display-expanded">${elapsed} <span>/ ${limits.exposureMax} min</span></div>
                 </div>
               </div>
-              <div class="form-group field-hts"><label class="form-label required">Hors d'oeuvre Start (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="${prefix}-hts-expanded" value="${svc.startTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempHorsDoeuvre', this.value)" /></div>
-              <div class="form-group field-htf"><label class="form-label required">Hors d'oeuvre Finish (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="${prefix}-htf-expanded" value="${svc.finishTempHorsDoeuvre ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempHorsDoeuvre', this.value)" /></div>
-              <div class="form-group field-dts"><label class="form-label required">Dessert Start (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="${prefix}-dts-expanded" value="${svc.startTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTempDessert', this.value)" /></div>
-              <div class="form-group field-dtf"><label class="form-label required">Dessert Finish (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="${prefix}-dtf-expanded" value="${svc.finishTempDessert ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTempDessert', this.value)" /></div>
+              <div class="form-group field-hts"><label class="form-label required">Item Start (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-startTemp-expanded" value="${svc.startTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTemp', this.value)" /></div>
+              <div class="form-group field-htf"><label class="form-label required">Item Finish (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="${prefix}-finishTemp-expanded" value="${svc.finishTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTemp', this.value)" /></div>
             </div>
 
             <div class="metric-cards">
@@ -4151,11 +4435,6 @@ function renderServiceRow(svc, index, submitted, limits, job) {
                 ${svc.complianceResult === "Compliant" ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
                 ${svc.complianceResult === "NonCompliant" ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
                 ${svc.complianceResult == null ? `<div class="metric-hint">Calculated on finish</div>` : ""}
-              </div>
-              <div class="metric-card">
-                <div class="metric-label">TPMH</div>
-                <div class="metric-value">${calcTPMH(svc)}</div>
-                <div class="metric-hint">Hours-worked basis — OQ-10</div>
               </div>
             </div>
             <div id="${prefix}-error" class="badge-error hidden" style="margin-top:12px"></div>
@@ -4215,35 +4494,71 @@ function updatePresetRemarks(value) {
   }
 }
 window.updatePresetRemarks = updatePresetRemarks;
-function updatePresetNote(value) {
-  const job = currentJob();
-  if (job) {
-    job.preset.note = value;
-    persistJob(job);
-  }
-}
-window.updatePresetNote = updatePresetNote;
 var serviceTimerInterval = null;
+function isTimerWarning(elapsed, exposureMax) {
+  const remaining = exposureMax - elapsed;
+  return remaining <= 10 && remaining > 0;
+}
 function startServiceTimerUpdates() {
   if (serviceTimerInterval)
     return;
   serviceTimerInterval = setInterval(() => {
     const job = currentJob();
-    if (!job || !job.preset.services)
+    if (!job)
       return;
-    job.preset.services.forEach((svc, i) => {
-      if (svc.startTime && !svc.finishTime) {
-        const elapsed = fmtElapsed(elapsedMin(svc.startTime));
-        const prefix = `p-s${i}`;
-        const limits = hmLimits(job);
-        const timerEl = document.getElementById(`${prefix}-timer-display`);
-        const timerElExpanded = document.getElementById(`${prefix}-timer-display-expanded`);
-        if (timerEl)
-          timerEl.textContent = elapsed;
-        if (timerElExpanded)
-          timerElExpanded.textContent = elapsed + ` / ${limits.exposureMax} min`;
-      }
-    });
+    if (job.preset?.services) {
+      job.preset.services.forEach((svc, i) => {
+        if (svc.startTime && !svc.finishTime) {
+          const elapsed = elapsedMin(svc.startTime);
+          const prefix = `p-s${i}`;
+          const limits = hmLimits(job);
+          const timerEl = document.getElementById(`${prefix}-timer-display`);
+          const timerElExpanded = document.getElementById(`${prefix}-timer-display-expanded`);
+          const warning = isTimerWarning(elapsed, limits.exposureMax);
+          if (timerEl) {
+            timerEl.textContent = fmtElapsed(elapsed);
+            timerEl.classList.toggle("timer-warning", warning);
+          }
+          if (timerElExpanded) {
+            timerElExpanded.textContent = fmtElapsed(elapsed) + ` / ${limits.exposureMax} min`;
+            timerElExpanded.classList.toggle("timer-warning", warning);
+          }
+        }
+      });
+    }
+    if (job.preset?.items) {
+      job.preset.items.forEach((item) => {
+        if (item.startTime && !item.finishTime) {
+          const elapsed = elapsedMin(item.startTime);
+          const limits = hmLimits(job);
+          const elapsedEl = document.getElementById(`preset-elapsed-${item.linkId}`);
+          const timerEl = document.getElementById(`preset-timer-${item.linkId}`);
+          const warning = isTimerWarning(elapsed, limits.exposureMax);
+          if (elapsedEl) {
+            elapsedEl.textContent = fmtElapsed(elapsed);
+            elapsedEl.classList.toggle("timer-warning", warning);
+          }
+          if (timerEl) {
+            timerEl.textContent = fmtElapsed(elapsed) + ` / ${limits.exposureMax} min`;
+            timerEl.classList.toggle("timer-warning", warning);
+          }
+        }
+      });
+    }
+    if (job.foodChecker?.items) {
+      job.foodChecker.items.forEach((item) => {
+        if (item.startTime && !item.finishTime) {
+          const elapsed = elapsedMin(item.startTime);
+          const limits = hmLimits(job);
+          const elapsedEl = document.getElementById(`fc-elapsed-${item.linkId}`);
+          const warning = isTimerWarning(elapsed, limits.exposureMax);
+          if (elapsedEl) {
+            elapsedEl.textContent = fmtElapsed(elapsed);
+            elapsedEl.classList.toggle("timer-warning", warning);
+          }
+        }
+      });
+    }
   }, 1000);
 }
 function stopServiceTimerUpdates() {
@@ -4257,8 +4572,8 @@ window.stopServiceTimerUpdates = stopServiceTimerUpdates;
 function renderPresetTabs(activeMethod) {
   return `
     <div class="preset-tabs">
-      <button type="button" class="preset-tab ${activeMethod === "services" ? "active" : ""}" onclick="togglePresetMethod('services')">Services</button>
-      <button type="button" class="preset-tab ${activeMethod === "items" ? "active" : ""}" onclick="togglePresetMethod('items')">Items</button>
+      <button type="button" class="preset-tab ${activeMethod === "services" ? "active" : ""}" onclick="togglePresetMethod('services')">Sampled Item</button>
+      <button type="button" class="preset-tab ${activeMethod === "items" ? "active" : ""}" onclick="togglePresetMethod('items')">Multiple Items</button>
     </div>
   `;
 }
@@ -4294,28 +4609,34 @@ function renderPresetServices(body, job, p, submitted, tabs) {
   const services = p.services;
   const limits = hmLimits(job);
   body.innerHTML = `
+    ${tabs}
+
     <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-      <div class="form-group">
-        <label class="form-label">Trays / meals handled</label>
-        <input type="number" class="form-input" id="preset-trays" value="${job.preset.traysHandled || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('traysHandled', this.value)" />
+      <div class="jh-field">
+        <div class="jh-label">Trays / meals handled</div>
+        <input type="number" class="form-input" id="preset-trays" value="${job.preset.traysHandled ?? ""}" placeholder="Enter count" onchange="updatePresetField('traysHandled', this.value)" ${submitted ? "readonly" : ""} />
       </div>
-      <div class="form-group">
-        <label class="form-label">No of Staff</label>
-        <input type="number" class="form-input" id="preset-staff" value="${job.preset.staffCount || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('staffCount', this.value)" />
+      <div class="jh-field">
+        <div class="jh-label">No of Staff</div>
+        <input type="number" class="form-input" id="preset-staff" value="${job.preset.staffCount ?? ""}" placeholder="Enter count" onchange="updatePresetField('staffCount', this.value)" ${submitted ? "readonly" : ""} />
       </div>
     </div>
 
-    ${tabs}
+    <div class="selection-bar" id="preset-selection-actions">
+        <button type="button" class="btn-secondary" onclick="startSelectedItems('preset')">Start All</button>
+        <button type="button" class="btn-secondary" onclick="finishSelectedItems('preset')">Finish All</button>
+      </div>
 
     <div class="table-wrap">
       <table class="fc-table">
         <thead><tr>
+          <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('preset')" /></th>
           <th style="width:40px">#</th>
           <th>TIMER</th>
-          <th>HORS D'OEUVRE START °C *</th>
-          <th>HORS D'OEUVRE FINISH °C *</th>
-          <th>DESSERT START °C *</th>
-          <th>DESSERT FINISH °C *</th>
+          <th>SERVICE</th>
+          <th>TYPE</th>
+          <th>ITEM START °C *</th>
+          <th>ITEM FINISH °C</th>
           <th>ACTION</th>
         </tr></thead>
         <tbody>
@@ -4323,8 +4644,6 @@ function renderPresetServices(body, job, p, submitted, tabs) {
         </tbody>
       </table>
     </div>
-
-    <button type="button" class="add-service-btn" onclick="addService()">+ Add service (${ordinal(services.length + 1)} service)</button>
 
     <div class="form-group" style="margin-top:16px">
       <label class="form-label">Remarks</label>
@@ -4339,27 +4658,212 @@ function renderPresetServices(body, job, p, submitted, tabs) {
     </div>
   `;
 }
+function toggleSelectAll(tableType) {
+  const stateKey = tableType + "Selection";
+  const checkboxes = document.querySelectorAll(".item-checkbox[data-table='" + tableType + "']");
+  const allSelected = state[stateKey]?.length === checkboxes.length && checkboxes.length > 0;
+  if (allSelected) {
+    state[stateKey] = [];
+    checkboxes.forEach((cb) => cb.checked = false);
+  } else {
+    state[stateKey] = Array.from(checkboxes).map((cb) => cb.dataset.id);
+    checkboxes.forEach((cb) => cb.checked = true);
+  }
+  updateSelectionUI(tableType);
+}
+function toggleItemSelection(tableType, itemId) {
+  const stateKey = tableType + "Selection";
+  if (!state[stateKey])
+    state[stateKey] = [];
+  const idx = state[stateKey].indexOf(itemId);
+  if (idx > -1) {
+    state[stateKey].splice(idx, 1);
+  } else {
+    state[stateKey].push(itemId);
+  }
+  const cb = document.querySelector(".item-checkbox[data-table='" + tableType + "'][data-id='" + itemId + "']");
+  if (cb)
+    cb.checked = state[stateKey].includes(itemId);
+  updateSelectionUI(tableType);
+}
+function updateSelectionUI(tableType) {
+  const stateKey = tableType + "Selection";
+  const container = document.getElementById(tableType + "-selection-actions");
+  if (!container)
+    return;
+  const hasSelection = state[stateKey] && state[stateKey].length > 0;
+  const btns = container.querySelectorAll("button");
+  btns.forEach((btn) => {
+    const isStartBtn = btn.textContent.includes("Start");
+    if (hasSelection) {
+      btn.textContent = isStartBtn ? "Start Selected" : "Finish Selected";
+    } else {
+      btn.textContent = isStartBtn ? "Start All" : "Finish All";
+    }
+  });
+}
+function getItemsForTable(tableType, job) {
+  if (tableType === "preset")
+    return job.preset?.services || [];
+  if (tableType === "presetItems")
+    return job.preset?.items || [];
+  if (tableType === "foodchecker")
+    return job.foodChecker?.items || [];
+  return [];
+}
+function startSelectedItems(tableType) {
+  const job = currentJob();
+  if (!job)
+    return;
+  const stateKey = tableType + "Selection";
+  const items = getItemsForTable(tableType, job);
+  const now = Date.now();
+  let targetItems;
+  if (state[stateKey] && state[stateKey].length > 0) {
+    if (tableType === "preset") {
+      targetItems = items.filter((item, idx) => {
+        const serviceId = "service-" + idx;
+        return state[stateKey].includes(serviceId) && !item.startTime;
+      });
+    } else if (tableType === "presetItems") {
+      targetItems = items.filter((item) => state[stateKey].includes(item.linkId) && !item.startTime);
+    } else {
+      targetItems = items.filter((item) => state[stateKey].includes(item.linkId) && !item.startTime);
+    }
+  } else {
+    targetItems = items.filter((item) => !item.startTime);
+  }
+  if (targetItems.length === 0) {
+    const msg = state[stateKey]?.length > 0 ? "Selected items are already started." : "No items available to start.";
+    showToast(msg, "warning");
+    return;
+  }
+  const missingTemps = targetItems.filter((item) => {
+    const temp = item.startTemp ?? item.startTempC;
+    return temp === undefined || temp === null || temp === "";
+  });
+  if (missingTemps.length > 0) {
+    showToast("Please enter the START temperature before starting the timer.", "warning");
+    return;
+  }
+  targetItems.forEach((item) => {
+    item.startTime = now;
+    item.status = "InProgress";
+  });
+  if (state[stateKey])
+    state[stateKey] = [];
+  persistJob(job);
+  renderCurrentJob();
+  if (tableType === "preset" || tableType === "presetItems") {
+    startServiceTimerUpdates();
+  }
+  showToast(`Started ${targetItems.length} item(s)`, "success");
+}
+function finishSelectedItems(tableType) {
+  const job = currentJob();
+  if (!job)
+    return;
+  const stateKey = tableType + "Selection";
+  const items = getItemsForTable(tableType, job);
+  const now = Date.now();
+  let targetItems;
+  if (state[stateKey] && state[stateKey].length > 0) {
+    if (tableType === "preset") {
+      targetItems = items.filter((item, idx) => {
+        const serviceId = "service-" + idx;
+        return state[stateKey].includes(serviceId) && item.startTime && !item.finishTime;
+      });
+    } else if (tableType === "presetItems") {
+      targetItems = items.filter((item) => state[stateKey].includes(item.linkId) && item.startTime && !item.finishTime);
+    } else {
+      targetItems = items.filter((item) => state[stateKey].includes(item.linkId) && item.startTime && !item.finishTime);
+    }
+  } else {
+    targetItems = items.filter((item) => item.startTime && !item.finishTime);
+  }
+  if (targetItems.length === 0) {
+    const msg = state[stateKey]?.length > 0 ? "Selected items are already finished or not started." : "No items available to finish.";
+    showToast(msg, "warning");
+    return;
+  }
+  const missingTemps = targetItems.filter((item) => {
+    const temp = item.finishTemp ?? item.finishTempC;
+    return temp === undefined || temp === null || temp === "";
+  });
+  if (missingTemps.length > 0) {
+    showToast("Please enter the FINISH temperature before finishing.", "warning");
+    return;
+  }
+  targetItems.forEach((item) => {
+    item.finishTime = now;
+    item.status = "Finished";
+    const limits = hmLimits(job);
+    const maxTemp = Math.max(item.startTemp || 0, item.finishTemp || 0);
+    item.durationMin = Math.round((now - new Date(item.startTime).getTime()) / 60000);
+    item.complianceResult = item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
+  });
+  if (state[stateKey])
+    state[stateKey] = [];
+  persistJob(job);
+  renderCurrentJob();
+  showToast(`Finished ${targetItems.length} item(s)`, "success");
+}
+function showToast(message, type = "info") {
+  const existing = document.querySelector(".toast-notification");
+  if (existing)
+    existing.remove();
+  const toast = document.createElement("div");
+  toast.className = "toast-notification toast-" + type;
+  toast.style.cssText = `
+		position: fixed;
+		bottom: 24px;
+		right: 24px;
+		padding: 12px 20px;
+		background: var(--bg-surface);
+		border: 1px solid var(--${type === "success" ? "success" : type === "warning" ? "warning" : "accent"});
+		border-radius: 8px;
+		color: var(--text-primary);
+		font-size: 14px;
+		z-index: 9999;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		animation: toastIn 0.3s ease;
+	`;
+  toast.textContent = message;
+  if (!document.getElementById("toast-styles")) {
+    const style = document.createElement("style");
+    style.id = "toast-styles";
+    style.textContent = "@keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }";
+    document.head.appendChild(style);
+  }
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transition = "opacity 0.3s";
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+window.toggleSelectAll = toggleSelectAll;
+window.toggleItemSelection = toggleItemSelection;
+window.startSelectedItems = startSelectedItems;
+window.finishSelectedItems = finishSelectedItems;
+window.showToast = showToast;
 function renderPresetItems(body, job, p, submitted, tabs) {
   const items = p.items || [];
   const notStartedCount = items.filter((it) => !it.startTime).length;
   const activeCount = items.filter((it) => it.startTime && !it.finishTime).length;
   body.innerHTML = `
-    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
-      <div class="form-group">
-        <label class="form-label">Trays / meals handled</label>
-        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('traysHandled', this.value)" />
+    ${tabs}
+
+    <div class="fc-sicc1-footer" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-surface);border-radius:8px">
+      <div class="jh-field">
+        <div class="jh-label">Trays / meals handled</div>
+        <input type="number" class="form-input" id="preset-trays" value="${p.traysHandled ?? ""}" placeholder="Enter count" onchange="updatePresetField('traysHandled', this.value)" ${submitted ? "readonly" : ""} />
       </div>
-      <div class="form-group">
-        <label class="form-label">No of Staff</label>
-        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount || ""}" ${submitted ? "disabled" : ""} oninput="updatePresetField('staffCount', this.value)" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Note</label>
-        <textarea class="form-input" id="preset-note" placeholder="Note" rows="3" oninput="updatePresetNote(this.value)">${job.preset.note || ""}</textarea>
+      <div class="jh-field">
+        <div class="jh-label">No of Staff</div>
+        <input type="number" class="form-input" id="preset-staff" value="${p.staffCount ?? ""}" placeholder="Enter count" onchange="updatePresetField('staffCount', this.value)" ${submitted ? "readonly" : ""} />
       </div>
     </div>
-
-    ${tabs}
 
     <div class="fc-header">
       <div>
@@ -4369,9 +4873,15 @@ function renderPresetItems(body, job, p, submitted, tabs) {
       <div class="fc-mandatory-badge">${activeCount} active · ${notStartedCount} not started</div>
     </div>
 
+    <div class="selection-bar" id="presetItems-selection-actions">
+      <button type="button" class="btn-secondary" onclick="startSelectedItems('presetItems')">Start All</button>
+      <button type="button" class="btn-secondary" onclick="finishSelectedItems('presetItems')">Finish All</button>
+    </div>
+
     <div class="table-wrap">
       <table class="fc-table">
         <thead><tr>
+          <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('presetItems')" /></th>
           <th style="width:40px">#</th>
           <th>CLASS</th>
           <th>ITEM DESCRIPTION</th>
@@ -4410,8 +4920,10 @@ function renderPresetSICC2Row(item, i, submitted, job) {
   } else {
     actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
   }
+  let isItemSelected = (state.presetItemsSelection || []).includes(item.linkId);
   let rowHtml = `
     <tr class="${isExpanded ? "selected" : ""}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
+      <td><input type="checkbox" class="item-checkbox" data-table="presetItems" data-id="${item.linkId}" onclick="event.stopPropagation(); toggleItemSelection('presetItems', '${item.linkId}')" ${isItemSelected ? "checked" : ""} /></td>
       <td>${i + 1}</td>
       <td>${esc(item.class)}</td>
       <td>${esc(item.item_description)}</td>
@@ -4562,11 +5074,6 @@ function showErr(id, msg) {
   e.textContent = msg;
   e.classList.toggle("hidden", !msg);
 }
-function ordinal(n) {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
 function addService() {
   const job = currentJob();
   const p = job.preset;
@@ -4601,14 +5108,12 @@ function startService(index) {
   const prefix = `p-s${index}`;
   if (svc.startTime)
     return;
-  const hts = getServiceField(prefix, "hts");
-  const dts = getServiceField(prefix, "dts");
-  if (hts == null && dts == null) {
-    showErr(`${prefix}-error`, "At least one start temperature is required before starting the timer.");
+  const startTemp = getServiceField(prefix, "startTemp");
+  if (startTemp == null) {
+    showErr(`${prefix}-error`, "Item start temperature is required before starting the timer.");
     return;
   }
-  svc.startTempHorsDoeuvre = hts;
-  svc.startTempDessert = dts;
+  svc.startTemp = startTemp;
   svc.traysHandled = getServiceField(prefix, "trays") ?? 0;
   svc.staffCount = getServiceField(prefix, "staff") ?? 0;
   svc.startTime = new Date().toISOString();
@@ -4631,22 +5136,16 @@ function finishService(index) {
   const prefix = `p-s${index}`;
   if (!svc.startTime || svc.finishTime)
     return;
-  const htf = getServiceField(prefix, "htf");
-  const dtf = getServiceField(prefix, "dtf");
-  if (svc.startTempHorsDoeuvre != null && htf == null) {
-    showErr(`${prefix}-error`, "Hors d'oeuvre finish temperature is required to finish the timer.");
+  const finishTemp = getServiceField(prefix, "finishTemp");
+  if (finishTemp == null) {
+    showErr(`${prefix}-error`, "Item finish temperature is required to finish the timer.");
     return;
   }
-  if (svc.startTempDessert != null && dtf == null) {
-    showErr(`${prefix}-error`, "Dessert finish temperature is required to finish the timer.");
-    return;
-  }
-  svc.finishTempHorsDoeuvre = htf;
-  svc.finishTempDessert = dtf;
+  svc.finishTemp = finishTemp;
   svc.finishTime = new Date().toISOString();
   const limits = hmLimits(job);
   svc.exposureDurationMin = Math.round((new Date(svc.finishTime) - new Date(svc.startTime)) / 60000);
-  const maxTemp = Math.max(svc.startTempHorsDoeuvre, svc.finishTempHorsDoeuvre, svc.startTempDessert, svc.finishTempDessert);
+  const maxTemp = Math.max(svc.startTemp, svc.finishTemp);
   svc.maxSurfaceTemp = maxTemp;
   svc.complianceResult = svc.exposureDurationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
   job.history.push({
@@ -4670,14 +5169,12 @@ function startPreset() {
   const p = job.preset;
   if (p.startTime)
     return;
-  const hts = num("p-hts");
-  const dts = num("p-dts");
-  if (hts == null || dts == null) {
-    showErr("preset-error", "Both start temperatures are required before starting the timer.");
+  const startTemp = num("p-startTemp");
+  if (startTemp == null) {
+    showErr("preset-error", "Item start temperature is required before starting the timer.");
     return;
   }
-  p.startTempHorsDoeuvre = hts;
-  p.startTempDessert = dts;
+  p.startTemp = startTemp;
   p.traysHandled = num("p-trays") ?? 0;
   p.staffCount = num("p-staff") ?? 0;
   p.startTime = new Date().toISOString();
@@ -4698,18 +5195,16 @@ function finishPreset() {
   const p = job.preset;
   if (!p.startTime || p.finishTime)
     return;
-  const htf = num("p-htf");
-  const dtf = num("p-dtf");
-  if (htf == null || dtf == null) {
-    showErr("preset-error", "Both finish temperatures are required before finishing.");
+  const finishTemp = num("p-finishTemp");
+  if (finishTemp == null) {
+    showErr("preset-error", "Item finish temperature is required before finishing.");
     return;
   }
-  p.finishTempHorsDoeuvre = htf;
-  p.finishTempDessert = dtf;
+  p.finishTemp = finishTemp;
   p.finishTime = new Date().toISOString();
   const limits = hmLimits(job);
   p.exposureDurationMin = Math.round((new Date(p.finishTime) - new Date(p.startTime)) / 60000);
-  const maxTemp = Math.max(p.startTempHorsDoeuvre, p.finishTempHorsDoeuvre, p.startTempDessert, p.finishTempDessert);
+  const maxTemp = Math.max(p.startTemp, p.finishTemp);
   p.maxSurfaceTemp = maxTemp;
   p.complianceResult = p.exposureDurationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
   job.history.push({
@@ -4759,31 +5254,22 @@ function renderFoodChecker(body, job) {
     </div>
 
     <div class="fc-meal-service">
-      <label class="form-label required" for="fc-meal-service">Meal Service</label>
-      <select class="form-input" id="fc-meal-service" ${submitted ? "disabled" : ""}>
-        <option value="Breakfast" ${job.meal_service === "Breakfast" ? "selected" : ""}>Breakfast</option>
-        <option value="Lunch" ${job.meal_service === "Lunch" ? "selected" : ""}>Lunch</option>
-        <option value="Dinner" ${job.meal_service === "Dinner" ? "selected" : ""}>Dinner</option>
-      </select>
-      <div class="fc-selection-note">C1: free text on paper, so a dropdown here</div>
+      <div class="jh-field">
+        <div class="jh-label">Meal Service</div>
+        <div class="jh-value">${esc(job.meal_service ?? "—")}</div>
+      </div>
     </div>
 
-    ${site !== "SICC1" && selectedCount > 0 ? `
-      <div class="fc-selection-bar">
-        <div class="fc-selection-count">${selectedCount} row(s) selected</div>
-        <div class="fc-selection-actions">
-          <button type="button" class="btn-secondary" onclick="fcStartSelected()" ${submitted ? "disabled" : ""}>Start selected</button>
-          <button type="button" class="btn-secondary" onclick="fcFinishSelected()" ${submitted ? "disabled" : ""}>Finish selected</button>
-          <button type="button" class="btn-ghost" onclick="fcClearSelection()">Clear</button>
-        </div>
+    <div class="selection-bar" id="foodchecker-selection-actions">
+        <button type="button" class="btn-secondary" onclick="startSelectedItems('foodchecker')" ${submitted ? "disabled" : ""}>Start All</button>
+        <button type="button" class="btn-secondary" onclick="finishSelectedItems('foodchecker')" ${submitted ? "disabled" : ""}>Finish All</button>
       </div>
-      <div class="fc-selection-note">One timestamp for several rows, data still stored per item — as the paper form is filled</div>
-    ` : ""}
 
     <div class="table-wrap">
       <table class="fc-table">
         <thead><tr>
           ${site === "SICC1" ? `
+            <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>CLASS</th>
             <th>ITEM DESCRIPTION</th>
@@ -4795,6 +5281,7 @@ function renderFoodChecker(body, job) {
             <th>ITEM STATUS</th>
             <th>ACTION</th>
           ` : `
+            <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>CLASS</th>
             <th>ITEM DESCRIPTION</th>
@@ -4825,7 +5312,7 @@ function renderFCRow(job, item, i, submitted) {
   const site = job.site || "SICC2";
   const st = itemStatus(item, job);
   const dis = submitted ? "disabled" : "";
-  const isSelected = (state.fcSelected || []).includes(item.linkId);
+  const isSelected = (state.foodCheckerSelection || []).includes(item.linkId);
   const isInProgress = st.cls === "in-progress";
   const isFinished = !!item.complianceResult;
   let actionBtn = "";
@@ -4847,7 +5334,8 @@ function renderFCRow(job, item, i, submitted) {
   const statusBadge = isInProgress ? `<span class="fc-status-badge in-progress"><span class="fc-status-dot"></span>In Progress</span>` : isFinished ? `<span class="fc-status-badge ${item.complianceResult === "Compliant" ? "compliant" : "non-compliant"}"><span class="fc-status-dot"></span>${item.complianceResult}</span>` : `<span class="fc-status-badge not-started"><span class="fc-status-dot"></span>Not started</span>`;
   let rowHtml = `
     <tr class="${isSelected ? "selected" : ""}" onclick="toggleFCExpand('${item.linkId}')" style="cursor: pointer;">
-      ${site !== "SICC1" ? `<td><input type="checkbox" class="fc-checkbox" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); fcToggleSelect('${item.linkId}')" /></td>` : `<td>${i + 1}</td>`}
+      <td><input type="checkbox" class="item-checkbox" data-table="foodchecker" data-id="${item.linkId}" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); toggleItemSelection('foodchecker', '${item.linkId}')" /></td>
+      <td>${i + 1}</td>
       <td>${esc(item.class)}</td>
       <td>${esc(item.item_description)}</td>
       <td>${esc(item.sku)}</td>
@@ -5009,105 +5497,7 @@ function toggleFCExpand(linkId) {
   state.fcExpanded = state.fcExpanded === linkId ? null : linkId;
   renderDetail();
 }
-function fcToggleSelect(linkId) {
-  if (!state.fcSelected)
-    state.fcSelected = [];
-  const idx = state.fcSelected.indexOf(linkId);
-  if (idx >= 0) {
-    state.fcSelected.splice(idx, 1);
-  } else {
-    state.fcSelected.push(linkId);
-  }
-  renderDetail();
-}
-function fcClearSelection() {
-  state.fcSelected = [];
-  renderDetail();
-}
-function fcStartSelected() {
-  const job = currentJob();
-  const items = job.foodChecker.items || [];
-  const selected = (state.fcSelected || []).filter((id) => {
-    const item = items.find((it) => it.linkId === id);
-    return item && !item.startTime && !item.complianceResult;
-  });
-  if (selected.length === 0) {
-    showErr("fc-error", "No selectable items in selection.");
-    return;
-  }
-  const now = new Date().toISOString();
-  for (const linkId of selected) {
-    const item = items.find((it) => it.linkId === linkId);
-    if (!item)
-      continue;
-    const st = document.getElementById(`fc-st-temp-${linkId}`)?.value;
-    if (st === "" || st == null) {
-      showErr("fc-error", `Start temperature required for ${item.item_description}.`);
-      return;
-    }
-    item.startTemp = parseFloat(st);
-    item.startTime = now;
-    job.history.push({
-      at: now,
-      actor: "Food Checker",
-      field: "fc.item",
-      from: "NotStarted",
-      to: "InProgress",
-      stage: "foodchecker",
-      version: 1
-    });
-  }
-  state.fcSelected = [];
-  renderDetail();
-  checkAndStartFCTimer();
-}
-function fcFinishSelected() {
-  const job = currentJob();
-  const items = job.foodChecker.items || [];
-  const selected = (state.fcSelected || []).filter((id) => {
-    const item = items.find((it) => it.linkId === id);
-    return item && item.startTime && !item.complianceResult;
-  });
-  if (selected.length === 0) {
-    showErr("fc-error", "No finishable items in selection.");
-    return;
-  }
-  const now = new Date().toISOString();
-  for (const linkId of selected) {
-    const item = items.find((it) => it.linkId === linkId);
-    if (!item)
-      continue;
-    const ft = document.getElementById(`fc-ft-temp-${linkId}`)?.value;
-    if (ft === "" || ft == null) {
-      showErr("fc-error", `Finish temperature required for ${item.item_description}.`);
-      return;
-    }
-    item.finishTemp = parseFloat(ft);
-    item.finishTime = now;
-    const limits = hmLimits(job);
-    item.durationMin = Math.round((new Date(now) - new Date(item.startTime)) / 60000);
-    const maxTemp = Math.max(item.startTemp, item.finishTemp);
-    item.complianceResult = item.durationMin > limits.exposureMax || maxTemp > limits.presetTempMax ? "Non-Compliant" : "Compliant";
-    job.history.push({
-      at: now,
-      actor: "Food Checker",
-      field: "fc.item",
-      from: "InProgress",
-      to: item.complianceResult,
-      stage: "foodchecker",
-      version: 1
-    });
-  }
-  state.fcSelected = [];
-  state.fcExpanded = null;
-  renderDetail();
-  checkAndStartFCTimer();
-}
 window.toggleFCExpand = toggleFCExpand;
-window.fcToggleSelect = fcToggleSelect;
-window.fcClearSelection = fcClearSelection;
-window.fcStartSelected = fcStartSelected;
-window.fcFinishSelected = fcFinishSelected;
 function updateItemGate(linkId) {
   const btn = document.getElementById("fc-st-" + linkId);
   if (!btn)
@@ -5408,7 +5798,7 @@ function dispatchLive(job) {
   }
   return { label: "Locked", cls: "locked", el: null };
 }
-function renderDispatchPanel(dispatch, items, type) {
+function renderDispatchPanel(dispatch, items, type, prereqFinished = true) {
   const submitted = dispatch?.status === "Submitted";
   const limits = hmLimits(currentJob());
   const min = limits.coldSoakMin;
@@ -5420,12 +5810,14 @@ function renderDispatchPanel(dispatch, items, type) {
     hour: "2-digit",
     minute: "2-digit"
   }) : "—";
-  const dis = submitted ? "disabled" : "";
+  const dis = submitted || !prereqFinished ? "disabled" : "";
+  const canEdit = !submitted && prereqFinished;
   const hasExitTime = !!dispatch?.beforeExitTime;
   const allTempsEntered = items.length > 0 && items.every((item) => dispatch?.beforeExitTemps?.[item.linkId] != null);
   const tempDisabled = dis;
   const exitTimeDisabled = dis || (!allTempsEntered ? "disabled" : "");
   return `
+    ${!prereqFinished ? `<div class="empty-state" style="margin-bottom:12px">Waiting for ${type === "preset" ? "preset" : "food checker"} to finish — all timers must be complete before dispatch.</div>` : ""}
     <div class="fc-timer-bar" style="margin-bottom:16px">
       <div class="fc-timer-display">
         <div class="fc-timer-value" id="dispatch-timer-value-${type}" style="font-size:48px;font-weight:700">${el != null ? dispatch?.beforeExitTime ? fmtElapsedShort(el) : fmtElapsed(el) : "—"}</div>
@@ -5450,12 +5842,12 @@ function renderDispatchPanel(dispatch, items, type) {
         <label class="form-label required">Before-exit time (24h)</label>
         <div style="display:flex;gap:8px">
           <input type="time" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? "Enter all temps first" : ""}" />
-          ${!submitted ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
+          ${canEdit ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
         </div>
       </div>
     </div>
     
-    <div class="table-wrap" style="margin-top:20px">
+<div class="table-wrap" style="margin-top:20px">
       <table class="fc-table">
         <thead>
           <tr>
@@ -5471,7 +5863,7 @@ function renderDispatchPanel(dispatch, items, type) {
           ${items.map((item, i) => {
     const itemTemp = dispatch?.beforeExitTemps?.[item.linkId] ?? "";
     const itemResult = itemTemp !== "" && itemTemp != null ? parseFloat(itemTemp) <= limits.dispatchTempMax ? "Compliant" : "Non-Compliant" : null;
-    return `<tr>
+    return `<tr data-linkid="${item.linkId}">
               <td>${i + 1}</td>
               <td>${esc(item.class)}</td>
               <td>${esc(item.item_description)}</td>
@@ -5484,7 +5876,7 @@ function renderDispatchPanel(dispatch, items, type) {
       </table>
     </div>
     
-    ${!submitted ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
+    ${canEdit ? `<div style="display:flex;justify-content:flex-end;margin-top:16px"><button type="button" class="btn-primary" onclick="submitDispatch('${type}')">Submit Dispatch</button></div>` : !prereqFinished ? '<div class="empty-state" style="margin-top:16px">Waiting for ' + (type === "preset" ? "preset" : "food checker") + " to finish (all timers complete).</div>" : '<div class="status-pill submitted" style="margin-top:16px">Submitted</div>'}
   `;
 }
 var dispatchTimerIntervals = {};
@@ -5525,15 +5917,17 @@ function renderDispatch(body, job) {
   }
   const presetItems = job.preset.items || [];
   const fcItems = job.foodChecker.items || [];
+  const presetFinished = job.preset?.status === "Submitted" && presetItems.every((it) => !it.startTime || it.finishTime);
+  const fcFinished = job.foodChecker?.status === "Submitted" && fcItems.every((it) => !it.startTime || it.finishTime);
   body.innerHTML = `
     <div class="dispatch-panels">
       <div class="dispatch-panel">
         <h3 class="panel-title">Preset Dispatch</h3>
-        ${renderDispatchPanel(job.dispatchPreset, presetItems, "preset")}
+        ${renderDispatchPanel(job.dispatchPreset, presetItems, "preset", presetFinished)}
       </div>
       <div class="dispatch-panel">
         <h3 class="panel-title">Food Checker Dispatch</h3>
-        ${renderDispatchPanel(job.dispatchFC, fcItems, "fc")}
+        ${renderDispatchPanel(job.dispatchFC, fcItems, "fc", fcFinished)}
       </div>
     </div>
   `;
@@ -5805,6 +6199,17 @@ window.submitStage = submitStage;
 window.resolveIdentity = resolveIdentity;
 window.confirmSignoff = confirmSignoff;
 window.closeSignoff = closeSignoff;
+window.toggleSelectAll = toggleSelectAll;
+window.toggleItemSelection = toggleItemSelection;
+window.startSelectedItems = startSelectedItems;
+window.finishSelectedItems = finishSelectedItems;
+window.showToast = showToast;
+window.getItemsForTable = getItemsForTable;
+window.renderCurrentJob = function() {
+  renderDetail();
+};
+window.currentJob = currentJob;
+window.persistJob = persistJob;
 window.navigate = (s) => {
   if (s === "current")
     preview.go(VIEWS.current);
@@ -5813,13 +6218,37 @@ window.navigate = (s) => {
     preview.openRecord(VIEWS.report, j && j.job_id || state.activeJobId || "");
   }
 };
+function toggleWebReportPopover(e) {
+  const pop = document.getElementById("web-report-popover");
+  if (!pop)
+    return;
+  const willOpen = pop.classList.contains("hidden");
+  if (willOpen) {
+    const btn = e && e.currentTarget || document.querySelector('[onclick*="toggleWebReportPopover"]');
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      pop.style.right = document.documentElement.clientWidth - r.right + "px";
+      pop.style.top = r.bottom + window.scrollY + 8 + "px";
+    }
+  }
+  pop.classList.toggle("hidden", !willOpen);
+}
+window.toggleWebReportPopover = toggleWebReportPopover;
+function goToWebReport() {
+  const j = currentJob();
+  preview.openRecord(VIEWS.report, j && j.job_id || state.activeJobId || "");
+}
+window.goToWebReport = goToWebReport;
+var IS_LOCAL = ["localhost", "127.0.0.1", ""].includes(location.hostname);
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!state.jobs.length)
-    state.jobs = buildSeed();
   const recordId = preview.recordId();
-  if (recordId)
-    state.activeJobId = recordId;
-  await loadJobs();
+  if (IS_LOCAL) {
+    state.jobs = buildSeed();
+  } else {
+    if (!state.jobs.length)
+      state.jobs = buildSeed();
+    await loadJobs();
+  }
   if (recordId) {
     const m = findJobByRecord(recordId);
     if (m)
@@ -5830,6 +6259,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   state.currentScreen = "detail";
   renderDetail();
   startTicker();
+  document.addEventListener("click", (ev) => {
+    const pop = document.getElementById("web-report-popover");
+    if (!pop || pop.classList.contains("hidden"))
+      return;
+    const trigger = ev.target.closest('[onclick*="toggleWebReportPopover"]');
+    if (trigger && pop.contains(trigger))
+      return;
+    if (!pop.contains(ev.target) && !trigger) {
+      pop.classList.add("hidden");
+    }
+  });
 });
 </script></body>
 </html>

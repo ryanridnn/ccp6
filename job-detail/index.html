@@ -17,11 +17,45 @@
           <div class="page-actions">
             <button
               type="button"
-              class="btn-secondary"
-              onclick="navigate('report')"
+              class="btn-icon"
+              onclick="toggleWebReportPopover(event)"
+              aria-label="Web Report options"
             >
-              Web Report
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="5" r="1" />
+                <circle cx="12" cy="12" r="1" />
+                <circle cx="12" cy="19" r="1" />
+              </svg>
             </button>
+            <div id="web-report-popover" class="web-report-popover hidden">
+              <ul class="web-report-menu" role="menu">
+                <li role="menuitem" onclick="goToWebReport()">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  <span class="wr-menu-label">Web Report</span>
+                </li>
+              </ul>
+            </div>
             <button
               type="button"
               class="btn-back"

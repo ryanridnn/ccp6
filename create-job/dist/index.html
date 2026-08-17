@@ -46,6 +46,68 @@ body {
   display: none !important;
 }
 
+.error-list {
+  display: flex;
+  border: 1px solid var(--danger);
+  background: #ef44440d;
+  border-radius: 8px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+}
+
+.error-badge {
+  display: flex;
+  background: var(--danger);
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  align-items:  center;
+  gap: 8px;
+  padding: 8px 12px;
+  transition: all .2s;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.error-badge:hover {
+  background: #dc2626;
+  transform: translateX(2px);
+}
+
+.error-badge svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.form-group.has-error .form-input, .form-group.has-error .searchable-dropdown input {
+  border-color: var(--danger);
+  background: #ef44440d;
+}
+
+.form-group.has-error .segmented-buttons {
+  border-color: var(--danger);
+}
+
+.create-readonly-text {
+  min-width: 0;
+}
+
+.create-readonly-text .cr-value {
+  color: var(--text-primary);
+  min-height: 20px;
+  font-size: 15px;
+  font-weight: normal;
+}
+
+.dest-text, .svc-text {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: normal;
+}
+
 .screen {
   display: block;
   padding: 24px 24px 72px;
@@ -871,6 +933,11 @@ body {
   background: var(--bg-page);
 }
 
+.dropdown-meta {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
 .dropdown-empty {
   color: var(--text-secondary);
   padding: 12px;
@@ -1309,24 +1376,43 @@ body {
 }
 
 .create-flight-group {
-  flex: 2;
+  flex: 0 0 50%;
   min-width: 280px;
+  max-width: 50%;
 }
 
-.create-etd-group {
-  flex: 1;
-  min-width: 140px;
+.create-fields-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.create-group-group {
-  flex: 1.5;
-  min-width: 200px;
+@media (width <= 768px) {
+  .create-fields-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.create-lounge-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.create-lounge-group {
+  grid-column: span 1;
+}
+
+.create-lounge-group .form-input {
+  width: 100%;
 }
 
 #create-items-container {
   border-top: 1px solid var(--border);
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 24px;
+  padding-top: 24px;
 }
 
 .create-items-header {
@@ -1349,7 +1435,11 @@ body {
 }
 
 .create-items-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 10px;
   width: 100%;
 }
 
@@ -1371,10 +1461,15 @@ body {
   vertical-align: middle;
   padding: 12px;
   font-size: 13px;
+  font-weight: normal;
 }
 
 .create-items-table tbody tr:hover {
   background: var(--bg-surface-hover);
+}
+
+.create-items-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .create-item-checkbox {
@@ -2007,15 +2102,159 @@ body {
     padding: 8px;
   }
 }
+
+.create-mode-header {
+  margin-bottom: 16px;
+}
+
+#create-mode-buttons {
+  display: inline-flex;
+  width: auto;
+  padding: 3px;
+}
+
+#create-mode-buttons .segment-btn {
+  flex: none;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.create-mode-divider {
+  background: var(--border);
+  height: 1px;
+  margin: 16px 0;
+}
+
+.create-ruleset-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.create-ruleset-group .form-input[readonly] {
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.create-services-section {
+  margin-bottom: 24px;
+}
+
+.create-services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items:  center;
+  margin-bottom: 12px;
+}
+
+.create-services-title {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.services-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.services-table thead th {
+  text-align: left;
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  border-bottom: 2px solid var(--border);
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.services-table tbody td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.services-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.loader-overlay {
+  position: fixed;
+  background: var(--bg-page);
+  display: flex;
+  z-index: 9999;
+  justify-content: center;
+  align-items:  center;
+  inset: 0;
+}
+
+.loader-overlay.hidden {
+  display: none;
+}
+
+.loader-content {
+  display: flex;
+  color: var(--text-secondary);
+  flex-direction: column;
+  align-items:  center;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.loader-spinner {
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: loader-spin .8s linear infinite;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.services-table .svc-select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+}
 </style></head>
   <body>
     <div class="app">
+      <!-- Loading overlay -->
+      <div id="loader-overlay" class="loader-overlay">
+        <div class="loader-content">
+          <div class="loader-spinner"></div>
+          <span>Loading CCP6...</span>
+        </div>
+      </div>
       <section class="screen" id="screen-create">
         <div class="page-head">
           <div>
             <h1 class="page-title">
               Create CCP6 Job — <span id="create-sicc-label">SICC1</span>
             </h1>
+            <div class="sicc-selector" id="create-sicc-selector" style="margin-top: 8px;">
+              <button type="button" class="sicc-btn active" data-sicc="SICC1" onclick="switchCreateSICC('SICC1')">SICC1</button>
+              <button type="button" class="sicc-btn" data-sicc="SICC2" onclick="switchCreateSICC('SICC2')">SICC2</button>
+            </div>
           </div>
           <button type="button" class="btn-back" onclick="navigate('current')">
             <svg
@@ -2037,6 +2276,29 @@ body {
         <div class="form-card">
           <form id="create-form" onsubmit="submitCreateJob(event)">
             <div class="form-section">
+              <div class="create-mode-header">
+                <div class="form-group">
+                  <div class="segmented-buttons" id="create-mode-buttons">
+                    <button
+                      type="button"
+                      class="segment-btn active"
+                      data-value="scheduled"
+                    >
+                      Scheduled
+                    </button>
+                    <button
+                      type="button"
+                      class="segment-btn"
+                      data-value="manual"
+                    >
+                      Manual
+                    </button>
+                  </div>
+                  <input type="hidden" id="create-mode" value="scheduled" />
+                </div>
+              </div>
+              <div class="create-mode-divider"></div>
+
               <div class="create-header-row">
                 <div class="form-group create-flight-group">
                   <label class="form-label required" for="create-flight"
@@ -2066,7 +2328,9 @@ body {
                     ></div>
                   </div>
                 </div>
+              </div>
 
+              <div class="create-fields-row">
                 <div class="form-group create-etd-group">
                   <label class="form-label required" for="create-etd"
                     >ETD (24h)</label
@@ -2077,6 +2341,12 @@ body {
                     class="form-input"
                     required
                   />
+                  <div
+                    id="create-etd-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
                 </div>
 
                 <div class="form-group create-group-group">
@@ -2096,70 +2366,148 @@ body {
                     </button>
                   </div>
                   <input type="hidden" id="create-group" required />
-                </div>
-              </div>
-
-              <div id="create-items-container" class="hidden">
-                <div class="create-items-header">
-                  <h3 class="create-items-title">Linked Items</h3>
-                  <span class="create-items-count" id="create-items-count"
-                    >0 items selected</span
+                  <div
+                    id="create-group-readonly"
+                    class="create-readonly-text hidden"
                   >
+                    <div class="cr-value"></div>
+                  </div>
                 </div>
-                <div class="create-items-list" id="create-items-list"></div>
-              </div>
 
-              <div
-                id="ad-hoc-toggle"
-                class="ad-hoc-toggle hidden"
-                style="margin-top: 16px"
-              >
-                <label
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    cursor: pointer;
-                  "
-                >
+                <div class="form-group create-ruleset-group">
+                  <label class="form-label">Rule Set</label>
                   <input
-                    type="checkbox"
-                    id="ad-hoc-checkbox"
-                    onchange="toggleAdHocMode()"
+                    type="text"
+                    id="create-ruleset"
+                    class="form-input"
+                    readonly
+                    placeholder="—"
                   />
-                  <span>Add Ad Hoc items manually</span>
-                </label>
-              </div>
-
-              <div
-                id="ad-hoc-container"
-                class="hidden"
-                style="margin-top: 16px"
-              >
-                <div class="create-items-header">
-                  <h3 class="create-items-title">Ad Hoc Items</h3>
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    onclick="addAdHocItem()"
-                    style="padding: 6px 12px; font-size: 12px"
+                  <div
+                    id="create-ruleset-readonly"
+                    class="create-readonly-text hidden"
                   >
-                    + Add Item
-                  </button>
+                    <div class="cr-value"></div>
+                  </div>
                 </div>
-                <div id="ad-hoc-list"></div>
+
+                <div class="form-group create-meal-service-group">
+                  <label class="form-label" for="create-meal-service"
+                    >Meal Service</label
+                  >
+                  <select id="create-meal-service" class="form-input">
+                    <option value="">Select...</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                  </select>
+                  <div
+                    id="create-meal-service-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
+                </div>
               </div>
 
-              <div class="form-actions" style="margin-top: 24px">
+              <div class="create-lounge-row hidden" id="create-lounge-row">
+                <div class="form-group create-lounge-group">
+                  <label class="form-label" for="create-lounge">Lounge</label>
+                  <input
+                    type="text"
+                    id="create-lounge"
+                    class="form-input"
+                    placeholder="Enter lounge name"
+                  />
+                  <div
+                    id="create-lounge-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+
+            <div
+              class="create-services-section hidden"
+              id="create-services-section"
+            >
+              <div class="create-services-header">
+                <h3 class="create-services-title">Services</h3>
                 <button
                   type="button"
                   class="btn-secondary"
-                  onclick="navigate('current')"
+                  onclick="addServiceRow()"
                 >
-                  Cancel
+                  + Add Service
                 </button>
-                <button type="submit" class="btn-primary">Create job</button>
               </div>
+              <div class="create-services-list" id="create-services-list"></div>
+            </div>
+
+            <div id="create-items-container" class="hidden">
+              <div class="create-items-header">
+                <h3 class="create-items-title">Linked Items</h3>
+                <span class="create-items-count" id="create-items-count"
+                  >0 items selected</span
+                >
+              </div>
+              <div class="create-items-list" id="create-items-list"></div>
+            </div>
+
+            <div
+              id="ad-hoc-toggle"
+              class="ad-hoc-toggle hidden"
+              style="margin-top: 24px"
+            >
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="ad-hoc-checkbox"
+                  onchange="toggleAdHocMode()"
+                />
+                <span>Add Ad Hoc items manually</span>
+              </label>
+            </div>
+
+            <div id="ad-hoc-container" class="hidden" style="margin-top: 24px">
+              <div class="create-items-header">
+                <h3 class="create-items-title">Ad Hoc Items</h3>
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="addAdHocItem()"
+                  style="padding: 6px 12px; font-size: 12px"
+                >
+                  + Add Item
+                </button>
+              </div>
+              <div id="ad-hoc-list"></div>
+            </div>
+
+            <div id="error-list" class="error-list hidden"></div>
+
+            <div class="form-actions" style="margin-top: 24px">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="navigate('current')"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Create job</button>
+            </div>
+
             </div>
           </form>
         </div>
@@ -2279,12 +2627,12 @@ var JOB_1 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2292,12 +2640,38 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2396,12 +2770,25 @@ var JOB_2 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2449,7 +2836,7 @@ var JOB_3 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "C",
-  airline: "Standard / Other Airline",
+  airline: "Singapore Airlines (SQ)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2464,12 +2851,25 @@ var JOB_3 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
-        startTempHorsDoeuvre: null,
-        finishTempHorsDoeuvre: null,
-        startTempDessert: null,
-        finishTempDessert: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: null,
@@ -2525,7 +2925,7 @@ var JOB_4 = {
   etd: HEADER.etd,
   meal_service: "Lunch",
   ta_group: "D",
-  airline: "Standard / Other Airline",
+  airline: "Emirates (EK)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2539,22 +2939,20 @@ var JOB_4 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
     services: [
       {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
-        startTempHorsDoeuvre: 5,
-        finishTempHorsDoeuvre: 4,
-        startTempDessert: 6,
-        finishTempDessert: 5,
+        startTemp: 5,
+        finishTemp: 4,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 45,
@@ -2562,12 +2960,38 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(120),
+        finishTime: ago(110),
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 45,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "1st service",
+        itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
-        startTempHorsDoeuvre: 6,
-        finishTempHorsDoeuvre: 5,
-        startTempDessert: 7,
-        finishTempDessert: 6,
+        startTemp: 6,
+        finishTemp: 5,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: 50,
+        maxSurfaceTemp: null,
+        complianceResult: "Compliant"
+      },
+      {
+        serviceType: "2nd service",
+        itemType: "Dessert",
+        startTime: ago(90),
+        finishTime: ago(80),
+        startTemp: 7,
+        finishTemp: 6,
         traysHandled: 0,
         staffCount: 0,
         exposureDurationMin: 50,
@@ -2677,7 +3101,7 @@ var JOB_5 = {
   etd: HEADER.etd,
   meal_service: "Breakfast",
   ta_group: "A",
-  airline: "Standard / Other Airline",
+  airline: "Qatar Airways (QR)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2691,10 +3115,8 @@ var JOB_5 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
@@ -2745,7 +3167,7 @@ var JOB_6 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "B",
-  airline: "Standard / Other Airline",
+  airline: "Malaysia Airlines (MH)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2759,15 +3181,16 @@ var JOB_6 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}],
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
     items: [
       mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
         status: "NotStarted"
@@ -3118,15 +3541,20 @@ var JOB_15 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "150202", desc: "Fresh Fruit Cup", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3158,15 +3586,20 @@ var JOB_16 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "160202", desc: "Pavlova", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3198,15 +3631,20 @@ var JOB_17 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "170202", desc: "Tim Tam", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3238,15 +3676,20 @@ var JOB_18 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, {}),
+      mkFCItem({ sku: "180202", desc: "Coffee", cls: "Economy", qty: 96 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, { status: "NotStarted" }),
@@ -3278,15 +3721,20 @@ var JOB_19 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "190202", desc: "Spring Rolls", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3318,15 +3766,20 @@ var JOB_20 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, {}),
+      mkFCItem({ sku: "200202", desc: "Mango Sticky Rice", cls: "Economy", qty: 84 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, { status: "NotStarted" }),
@@ -3358,15 +3811,20 @@ var JOB_21 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "210202", desc: "Teh Tarik", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3398,15 +3856,20 @@ var JOB_22 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, {}),
+      mkFCItem({ sku: "220202", desc: "Halo-Halo", cls: "Economy", qty: 72 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, { status: "NotStarted" }),
@@ -3438,15 +3901,20 @@ var JOB_23 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, {}),
+      mkFCItem({ sku: "230202", desc: "Lechon Kawali", cls: "Economy", qty: 60 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, { status: "NotStarted" }),
@@ -3478,15 +3946,20 @@ var JOB_24 = {
     status: "NotStarted",
     startTime: null,
     finishTime: null,
-    startTempHorsDoeuvre: null,
-    finishTempHorsDoeuvre: null,
-    startTempDessert: null,
-    finishTempDessert: null,
+    startTemp: null,
+    finishTemp: null,
     traysHandled: 0,
     staffCount: 0,
     exposureDurationMin: null,
     complianceResult: null,
-    services: [{}]
+    services: [
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
+    ],
+    items: [
+      mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, {}),
+      mkFCItem({ sku: "240202", desc: "Soft Boiled Eggs", cls: "Economy", qty: 48 }, {})
+    ]
   },
   foodChecker: { status: "NotStarted", items: [
     mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, { status: "NotStarted" }),
@@ -3498,30 +3971,33 @@ var JOB_24 = {
   history: [{ at: ago(10), actor: "FAA", field: "job", from: "", to: "created", stage: "header", version: 1 }]
 };
 var FLIGHTS = [
-  { flight_number: "QF12", meal_service: "Lunch", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "14:30", count: 3, site: "SICC2" },
-  { flight_number: "UA24", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "06:15", count: 2, site: "SICC2" },
-  { flight_number: "SQ-ORD-31", meal_service: "Dinner", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "22:45", count: 3, site: "SICC2" },
-  { flight_number: "NH7", meal_service: "Breakfast", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "07:30", count: 2, site: "SICC2" },
-  { flight_number: "EK215", meal_service: "Dinner", airline: "Emirates (EK)", flight_date: "2026-08-07", etd: "23:10", count: 4, site: "SICC2" },
-  { flight_number: "QR908", meal_service: "Lunch", airline: "Qatar Airways (QR)", flight_date: "2026-08-07", etd: "13:20", count: 3, site: "SICC2" },
-  { flight_number: "SQ12", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "08:00", count: 3, site: "SICC2" },
-  { flight_number: "TG476", meal_service: "Dinner", airline: "Thai Airways (TG)", flight_date: "2026-08-07", etd: "21:30", count: 2, site: "SICC2" },
-  { flight_number: "MH67", meal_service: "Lunch", airline: "Malaysia Airlines (MH)", flight_date: "2026-08-07", etd: "12:45", count: 3, site: "SICC2" },
-  { flight_number: "CI75", meal_service: "Breakfast", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "09:15", count: 2, site: "SICC2" },
-  { flight_number: "BR18", meal_service: "Dinner", airline: "EVA Air (BR)", flight_date: "2026-08-07", etd: "20:00", count: 3, site: "SICC2" },
-  { flight_number: "KE65", meal_service: "Lunch", airline: "Korean Air (KE)", flight_date: "2026-08-07", etd: "11:30", count: 4, site: "SICC2" },
-  { flight_number: "BA5", meal_service: "Lunch", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1" },
-  { flight_number: "CX88", meal_service: "Dinner", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1" },
-  { flight_number: "QF1", meal_service: "Breakfast", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1" },
-  { flight_number: "NZ5", meal_service: "Lunch", airline: "Air New Zealand (NZ)", flight_date: "2026-08-07", etd: "12:15", count: 2, site: "SICC1" },
-  { flight_number: "VA43", meal_service: "Dinner", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "18:30", count: 3, site: "SICC1" },
-  { flight_number: "JQ7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:45", count: 2, site: "SICC1" },
-  { flight_number: "TT29", meal_service: "Lunch", airline: "Tiger Airways (TT)", flight_date: "2026-08-07", etd: "13:00", count: 2, site: "SICC1" },
-  { flight_number: "FD31", meal_service: "Dinner", airline: "Thai AirAsia (FD)", flight_date: "2026-08-07", etd: "20:15", count: 3, site: "SICC1" },
-  { flight_number: "AK15", meal_service: "Breakfast", airline: "AirAsia (AK)", flight_date: "2026-08-07", etd: "08:30", count: 2, site: "SICC1" },
-  { flight_number: "5J12", meal_service: "Lunch", airline: "Cebu Pacific (5J)", flight_date: "2026-08-07", etd: "11:45", count: 3, site: "SICC1" },
-  { flight_number: "PR73", meal_service: "Dinner", airline: "Philippine Airlines (PR)", flight_date: "2026-08-07", etd: "21:00", count: 2, site: "SICC1" },
-  { flight_number: "MI41", meal_service: "Breakfast", airline: "SilkAir (MI)", flight_date: "2026-08-07", etd: "09:30", count: 2, site: "SICC1" }
+  { flight_number: "QF12", meal_service: "Lunch", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "14:30", count: 3, site: "SICC2", ta_group: "A", trays: 240, staff: 6 },
+  { flight_number: "UA24", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "06:15", count: 2, site: "SICC2", ta_group: "B", trays: 150, staff: 4 },
+  { flight_number: "UA45", meal_service: "Lunch", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "12:30", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
+  { flight_number: "UA78", meal_service: "Dinner", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "19:00", count: 2, site: "SICC2", ta_group: "D", trays: 180, staff: 5 },
+  { flight_number: "UA91", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "07:00", count: 2, site: "SICC2", ta_group: "A", trays: 160, staff: 4 },
+  { flight_number: "SQ-ORD-31", meal_service: "Dinner", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "22:45", count: 3, site: "SICC2", ta_group: "C", trays: 280, staff: 7, lounge: "SICC2 Main Lounge" },
+  { flight_number: "NH7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:30", count: 2, site: "SICC2", ta_group: "A", trays: 140, staff: 4, lounge: "SICC2 Main Lounge" },
+  { flight_number: "EK215", meal_service: "Dinner", airline: "Emirates (EK)", flight_date: "2026-08-07", etd: "23:10", count: 4, site: "SICC2", ta_group: "D", trays: 320, staff: 8 },
+  { flight_number: "QR908", meal_service: "Lunch", airline: "Qatar Airways (QR)", flight_date: "2026-08-07", etd: "13:20", count: 3, site: "SICC2", ta_group: "B", trays: 220, staff: 6 },
+  { flight_number: "SQ12", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "08:00", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
+  { flight_number: "TG476", meal_service: "Dinner", airline: "Thai Airways (TG)", flight_date: "2026-08-07", etd: "21:30", count: 2, site: "SICC2", ta_group: "A", trays: 170, staff: 5 },
+  { flight_number: "MH67", meal_service: "Lunch", airline: "Malaysia Airlines (MH)", flight_date: "2026-08-07", etd: "12:45", count: 3, site: "SICC2", ta_group: "D", trays: 210, staff: 6 },
+  { flight_number: "CI75", meal_service: "Breakfast", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "09:15", count: 2, site: "SICC2", ta_group: "B", trays: 130, staff: 4 },
+  { flight_number: "BR18", meal_service: "Dinner", airline: "EVA Air (BR)", flight_date: "2026-08-07", etd: "20:00", count: 3, site: "SICC2", ta_group: "C", trays: 260, staff: 7 },
+  { flight_number: "KE65", meal_service: "Lunch", airline: "Korean Air (KE)", flight_date: "2026-08-07", etd: "11:30", count: 4, site: "SICC2", ta_group: "A", trays: 300, staff: 8 },
+  { flight_number: "BA5", meal_service: "Lunch", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
+  { flight_number: "CX88", meal_service: "Dinner", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "B", trays: 190, staff: 5 },
+  { flight_number: "QF1", meal_service: "Breakfast", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "A", trays: 240, staff: 6 },
+  { flight_number: "NZ5", meal_service: "Lunch", airline: "Air New Zealand (NZ)", flight_date: "2026-08-07", etd: "12:15", count: 2, site: "SICC1", ta_group: "C", trays: 160, staff: 4 },
+  { flight_number: "VA43", meal_service: "Dinner", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "18:30", count: 3, site: "SICC1", ta_group: "D", trays: 250, staff: 7 },
+  { flight_number: "JQ7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:45", count: 2, site: "SICC1", ta_group: "B", trays: 140, staff: 4 },
+  { flight_number: "TT29", meal_service: "Lunch", airline: "Tiger Airways (TT)", flight_date: "2026-08-07", etd: "13:00", count: 2, site: "SICC1", ta_group: "C", trays: 170, staff: 5 },
+  { flight_number: "FD31", meal_service: "Dinner", airline: "Thai AirAsia (FD)", flight_date: "2026-08-07", etd: "20:15", count: 3, site: "SICC1", ta_group: "A", trays: 230, staff: 6 },
+  { flight_number: "AK15", meal_service: "Breakfast", airline: "AirAsia (AK)", flight_date: "2026-08-07", etd: "08:30", count: 2, site: "SICC1", ta_group: "D", trays: 150, staff: 4 },
+  { flight_number: "5J12", meal_service: "Lunch", airline: "Cebu Pacific (5J)", flight_date: "2026-08-07", etd: "11:45", count: 3, site: "SICC1", ta_group: "B", trays: 210, staff: 6 },
+  { flight_number: "PR73", meal_service: "Dinner", airline: "Philippine Airlines (PR)", flight_date: "2026-08-07", etd: "21:00", count: 2, site: "SICC1", ta_group: "C", trays: 180, staff: 5 },
+  { flight_number: "MI41", meal_service: "Breakfast", airline: "SilkAir (MI)", flight_date: "2026-08-07", etd: "09:30", count: 2, site: "SICC1", ta_group: "A", trays: 160, staff: 4 }
 ];
 function buildSeed() {
   const completedSICC1 = completeJob(JOB_4, ago(60));
@@ -3614,6 +4090,10 @@ var preview = {
   },
   go(viewId, extra = {}) {
     const next = new URLSearchParams;
+    const d2path = this.params.get("d2path");
+    if (d2path) {
+      next.set("d2path", d2path);
+    }
     next.set("view", viewId);
     for (const [k, v] of Object.entries(extra)) {
       if (v == null || v === "")
@@ -3722,6 +4202,38 @@ var VIEWS = {
   detail: "pv-0gnlo8",
   report: "pv-rnop2z"
 };
+var CONFIG = {
+  mealServices: ["Breakfast", "Lunch", "Dinner"],
+  taGroups: ["A", "B", "C", "D"],
+  airlines: [
+    { code: "QF", name: "Qantas (QF)" },
+    { code: "UA", name: "United Airlines (UA)" },
+    { code: "OAL", name: "Standard / Other Airline" }
+  ],
+  defaultAirline: "OAL",
+  ruleSets: {
+    STANDARD: {
+      exposureMax: 45,
+      presetTempMax: 15,
+      coldSoakMin: 120,
+      dispatchTempMax: 15
+    },
+    UA: {
+      exposureMax: 30,
+      presetTempMax: 15,
+      coldSoakMin: 120,
+      dispatchTempMax: 4
+    },
+    QF: {
+      exposureMax: 45,
+      presetTempMax: 15,
+      coldSoakMin: 180,
+      dispatchTempMax: 5
+    }
+  },
+  airlineRule: { QF: "QF", UA: "UA", OAL: "STANDARD" },
+  warningThresholdMin: 5
+};
 var state = {
   jobs: [],
   activeJobId: null,
@@ -3729,7 +4241,9 @@ var state = {
   currentScreen: "current",
   siccFilter: "SICC1",
   presetMethod: null,
+  createMode: "scheduled",
   createItems: [],
+  createServices: [],
   serviceExpanded: null,
   adHocEnabled: false,
   adHocItems: [],
@@ -3756,7 +4270,15 @@ function normalizeRecords(res) {
     return r;
   }).filter((r) => r && typeof r === "object" && (r.job_id || r.linkedItems));
 }
+function isLocalhost() {
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "::1" || !host.includes(".");
+}
 async function loadJobs() {
+  if (isLocalhost()) {
+    state.jobs = buildSeed();
+    return;
+  }
   let jobs = [];
   try {
     jobs = normalizeRecords(await store.records("ccp6_jobs"));
@@ -3784,8 +4306,235 @@ function persistJob(job) {
 var selectedCreateFlight = null;
 var createInitDone = false;
 function renderCreate() {
+  initCreateModeButtons();
   initGroupButtons();
   initCreateFlightDropdown();
+  updateMealServiceVisibility();
+  updateServicesVisibility();
+}
+function updateMealServiceVisibility() {
+  const mealServiceGroup = document.querySelector(".create-meal-service-group");
+  if (mealServiceGroup) {
+    mealServiceGroup.classList.remove("hidden");
+  }
+}
+function updateLoungeVisibility() {
+  const loungeRow = document.getElementById("create-lounge-row");
+  if (!loungeRow)
+    return;
+  const isSICC2 = state.siccFilter === "SICC2";
+  const flight = selectedCreateFlight;
+  let isOAL = false;
+  if (flight) {
+    const airline = flight.airline || "";
+    isOAL = airline.includes("Standard / Other Airline") || airline.includes("Other") || airline.includes("OAL");
+  }
+  if (isSICC2 && isOAL) {
+    loungeRow.classList.remove("hidden");
+  } else {
+    loungeRow.classList.add("hidden");
+  }
+}
+function updateServicesVisibility() {
+  const servicesSection = document.getElementById("create-services-section");
+  if (!servicesSection)
+    return;
+  const isSICC1 = state.siccFilter === "SICC1";
+  const hasFlight = !!selectedCreateFlight;
+  if (isSICC1 && hasFlight) {
+    servicesSection.classList.remove("hidden");
+    renderServicesTable();
+  } else {
+    servicesSection.classList.add("hidden");
+  }
+}
+function addServiceRow() {
+  state.createServices.push({
+    serviceType: "",
+    itemType: ""
+  });
+  renderServicesTable();
+}
+function removeServiceRow(index) {
+  state.createServices.splice(index, 1);
+  renderServicesTable();
+}
+function updateServiceField(index, field, value) {
+  state.createServices[index][field] = value;
+}
+function setServiceDropdown(idx, field, value) {
+  state.createServices[idx][field] = value;
+}
+window.setServiceDropdown = setServiceDropdown;
+function renderServicesTable() {
+  const list = document.getElementById("create-services-list");
+  if (!list)
+    return;
+  const isScheduled = state.createMode === "scheduled";
+  const addBtn = document.querySelector("#create-services-section .btn-secondary");
+  if (addBtn)
+    addBtn.classList.toggle("hidden", isScheduled);
+  let html = `
+		<table class="services-table">
+			<thead>
+				<tr>
+					<th>Service Type</th>
+					<th>Item Type</th>
+					<th style="width: 60px;"></th>
+				</tr>
+			</thead>
+			<tbody>
+	`;
+  state.createServices.forEach((service, idx) => {
+    if (isScheduled) {
+      html += `
+				<tr>
+					<td><span class="svc-text">${esc(service.serviceType || "—")}</span></td>
+					<td><span class="svc-text">${esc(service.itemType || "—")}</span></td>
+					<td></td>
+				</tr>
+			`;
+    } else {
+      const serviceTypeOpts = ["1st service", "2nd service"];
+      const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
+      const opt = (o, val) => '<option value="' + o + '"' + (val === o ? " selected" : "") + ">" + o + "</option>";
+      const select = (field, opts, val, i) => `<select class="svc-select" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join("")}</select>`;
+      html += `
+				<tr>
+					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
+					<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
+					<td>
+						<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
+					</td>
+				</tr>
+			`;
+    }
+  });
+  html += `</tbody></table>`;
+  list.innerHTML = html;
+}
+function initCreateModeButtons() {
+  const container = document.getElementById("create-mode-buttons");
+  const hiddenInput = document.getElementById("create-mode");
+  if (!container || !hiddenInput)
+    return;
+  const currentMode = state.createMode;
+  if (!currentMode) {
+    state.createMode = "manual";
+  }
+  hiddenInput.value = state.createMode;
+  container.querySelectorAll(".segment-btn").forEach((b) => b.classList.remove("active"));
+  const activeBtn = container.querySelector(".segment-btn[data-value='" + state.createMode + "']");
+  if (activeBtn)
+    activeBtn.classList.add("active");
+  container.querySelectorAll(".segment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (state.createMode === btn.dataset.value)
+        return;
+      container.querySelectorAll(".segment-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      hiddenInput.value = btn.dataset.value;
+      state.createMode = btn.dataset.value;
+      clearCreateFlight();
+      updateCreateModeUI();
+    });
+  });
+}
+function updateCreateModeUI() {
+  const mode = state.createMode;
+  const isScheduled = mode === "scheduled";
+  const hasFlight = !!selectedCreateFlight;
+  const etdGroup = document.querySelector(".create-etd-group");
+  const groupGroup = document.querySelector(".create-group-group");
+  const rulesetGroup = document.querySelector(".create-ruleset-group");
+  const mealServiceGroup = document.querySelector(".create-meal-service-group");
+  if (isScheduled && !hasFlight) {
+    etdGroup?.classList.add("hidden");
+    groupGroup?.classList.add("hidden");
+    rulesetGroup?.classList.add("hidden");
+    mealServiceGroup?.classList.add("hidden");
+    return;
+  }
+  etdGroup?.classList.remove("hidden");
+  groupGroup?.classList.remove("hidden");
+  rulesetGroup?.classList.remove("hidden");
+  mealServiceGroup?.classList.remove("hidden");
+  const etdInput = document.getElementById("create-etd");
+  const etdReadonly = document.getElementById("create-etd-readonly");
+  if (etdInput && etdReadonly) {
+    if (isScheduled) {
+      etdInput.classList.add("hidden");
+      etdReadonly.classList.remove("hidden");
+      etdReadonly.querySelector(".cr-value").textContent = etdInput.value || "—";
+    } else {
+      etdInput.classList.remove("hidden");
+      etdReadonly.classList.add("hidden");
+    }
+  }
+  const groupButtons = document.getElementById("create-group-buttons");
+  const groupReadonly = document.getElementById("create-group-readonly");
+  if (groupButtons && groupReadonly) {
+    if (isScheduled) {
+      groupButtons.classList.add("hidden");
+      groupReadonly.classList.remove("hidden");
+      groupReadonly.querySelector(".cr-value").textContent = document.getElementById("create-group")?.value || "—";
+    } else {
+      groupButtons.classList.remove("hidden");
+      groupReadonly.classList.add("hidden");
+    }
+  }
+  const mealServiceSelect = document.getElementById("create-meal-service");
+  const mealServiceReadonly = document.getElementById("create-meal-service-readonly");
+  if (mealServiceSelect && mealServiceReadonly) {
+    if (isScheduled) {
+      mealServiceSelect.classList.add("hidden");
+      mealServiceReadonly.classList.remove("hidden");
+      mealServiceReadonly.querySelector(".cr-value").textContent = mealServiceSelect.value || "—";
+    } else {
+      mealServiceSelect.classList.remove("hidden");
+      mealServiceReadonly.classList.add("hidden");
+    }
+  }
+  const rulesetInput = document.getElementById("create-ruleset");
+  const rulesetReadonly = document.getElementById("create-ruleset-readonly");
+  if (rulesetInput && rulesetReadonly) {
+    if (isScheduled) {
+      rulesetInput.classList.add("hidden");
+      rulesetReadonly.classList.remove("hidden");
+      rulesetReadonly.querySelector(".cr-value").textContent = rulesetInput.value || "—";
+    } else {
+      rulesetInput.classList.remove("hidden");
+      rulesetReadonly.classList.add("hidden");
+    }
+  }
+  const loungeInput = document.getElementById("create-lounge");
+  const loungeReadonly = document.getElementById("create-lounge-readonly");
+  if (loungeInput && loungeReadonly) {
+    if (isScheduled) {
+      loungeInput.classList.add("hidden");
+      loungeReadonly.classList.remove("hidden");
+      loungeReadonly.querySelector(".cr-value").textContent = loungeInput.value || "—";
+    } else {
+      loungeInput.classList.remove("hidden");
+      loungeReadonly.classList.add("hidden");
+    }
+  }
+  if (selectedCreateFlight) {
+    renderCreateItems();
+  }
+  const adHocToggle = document.getElementById("ad-hoc-toggle");
+  const adHocContainer = document.getElementById("ad-hoc-container");
+  if (isScheduled) {
+    adHocToggle?.classList.add("hidden");
+    adHocContainer?.classList.add("hidden");
+    state.adHocEnabled = false;
+    state.adHocItems = [];
+    const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
+    if (adHocCheckbox)
+      adHocCheckbox.checked = false;
+  } else if (selectedCreateFlight) {
+    adHocToggle?.classList.remove("hidden");
+  }
 }
 function initGroupButtons() {
   const container = document.getElementById("create-group-buttons");
@@ -3809,13 +4558,14 @@ function initCreateFlightDropdown() {
   const list = document.getElementById("create-flight-list");
   if (!input || !list)
     return;
-  const getFilteredFlights = () => seedFlights().filter((f) => f.site === state.siccFilter);
-  const render = () => {
-    const q = input.value.trim().toLowerCase();
+  const getFilteredFlights = () => seedFlights().filter((f) => f.site === state.siccFilter && f.airline !== "Standard / Other Airline");
+  const render = (showAll = false) => {
+    const q = (showAll ? "" : input.value.trim()).toLowerCase();
     const matches = getFilteredFlights().filter((f) => !q || f.flight_number.toLowerCase().includes(q) || f.airline.toLowerCase().includes(q));
     list.innerHTML = matches.length ? matches.map((f) => `<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc(f.airline)} · ${esc(f.meal_service)} · ETD ${esc(f.etd)} · ${esc(f.site)}</span></div>`).join("") : `<div class="dropdown-empty">No matching flights</div>`;
     list.classList.toggle("hidden", matches.length === 0);
   };
+  render.all = () => render(true);
   if (!createInitDone) {
     createInitDone = true;
     input.addEventListener("input", () => {
@@ -3823,10 +4573,11 @@ function initCreateFlightDropdown() {
       document.getElementById("create-flight-clear").classList.add("hidden");
       render();
     });
-    input.addEventListener("focus", render);
+    input.addEventListener("focus", () => render(true));
     input.addEventListener("blur", () => {
       setTimeout(() => list.classList.add("hidden"), 150);
     });
+    list.addEventListener("mousedown", (e) => e.preventDefault());
     list.addEventListener("click", (e) => {
       const item = e.target.closest(".dropdown-item");
       if (!item)
@@ -3847,19 +4598,76 @@ function selectCreateFlight(f) {
   if (!f)
     return;
   selectedCreateFlight = f;
-  document.getElementById("create-flight").value = f.flight_number;
-  if (f.etd)
-    document.getElementById("create-etd").value = f.etd;
+  const label = `${f.flight_number} ${f.airline || ""} · ${f.meal_service || ""} · ETD ${f.etd || ""} · ${f.site || ""}`;
+  document.getElementById("create-flight").value = label;
   document.getElementById("create-flight-clear").classList.remove("hidden");
+  const airline = f.airline || "Standard / Other Airline";
+  const airlineCode = airline.includes("Qantas") ? "QF" : airline.includes("United") ? "UA" : "OAL";
+  const ruleSet = CONFIG.airlineRule[airlineCode] || "STANDARD";
+  document.getElementById("create-ruleset").value = ruleSet;
+  if (state.createMode === "scheduled") {
+    if (f.etd)
+      document.getElementById("create-etd").value = f.etd;
+    if (f.ta_group) {
+      document.getElementById("create-group").value = f.ta_group;
+      document.querySelectorAll("#create-group-buttons .segment-btn").forEach((b) => b.classList.toggle("active", b.dataset.value === f.ta_group));
+    }
+    if (f.meal_service)
+      document.getElementById("create-meal-service").value = f.meal_service;
+    const loungeInput = document.getElementById("create-lounge");
+    if (loungeInput)
+      loungeInput.value = f.lounge || "";
+  }
+  if (f.site === "SICC1") {
+    if (state.createMode === "scheduled" && f.meal_service) {
+      const rows = Math.min(Math.max(f.count * 2, 2), 10);
+      state.createServices = [];
+      for (let i = 0;i < rows; i++) {
+        state.createServices.push({
+          serviceType: i % 2 === 0 ? "1st service" : "2nd service",
+          itemType: i % 2 === 0 ? "Hors d'oeuvre" : "Dessert"
+        });
+      }
+    } else {
+      state.createServices = [{ serviceType: "", itemType: "" }];
+    }
+    renderServicesTable();
+  }
+  if (f.site === "SICC1") {
+    if (f.meal_service)
+      document.getElementById("create-meal-service").value = f.meal_service;
+    updateMealServiceVisibility();
+  }
+  updateCreateModeUI();
+  updateServicesVisibility();
+  updateLoungeVisibility();
   renderCreateItems();
 }
 function clearCreateFlight() {
   selectedCreateFlight = null;
   document.getElementById("create-flight").value = "";
   document.getElementById("create-etd").value = "";
+  document.getElementById("create-ruleset").value = "";
   document.getElementById("create-flight-clear").classList.add("hidden");
+  document.getElementById("create-group").value = "";
+  document.querySelectorAll("#create-group-buttons .segment-btn").forEach((b) => b.classList.remove("active"));
+  document.getElementById("create-meal-service").value = "";
+  document.getElementById("create-lounge").value = "";
+  const loungeReadonly = document.getElementById("create-lounge-readonly");
+  if (loungeReadonly)
+    loungeReadonly.querySelector(".cr-value").textContent = "";
+  updateLoungeVisibility();
   state.createItems = [];
+  state.adHocEnabled = false;
+  state.adHocItems = [];
+  const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
+  if (adHocCheckbox)
+    adHocCheckbox.checked = false;
+  document.getElementById("ad-hoc-toggle").classList.add("hidden");
+  document.getElementById("ad-hoc-container").classList.add("hidden");
   document.getElementById("create-items-container").classList.add("hidden");
+  state.createServices = [];
+  updateServicesVisibility();
 }
 window.clearCreateFlight = clearCreateFlight;
 function renderCreateItems() {
@@ -3874,13 +4682,15 @@ function renderCreateItems() {
     document.getElementById("ad-hoc-container").classList.add("hidden");
     return;
   }
-  document.getElementById("ad-hoc-toggle").classList.remove("hidden");
+  document.getElementById("ad-hoc-toggle").classList.toggle("hidden", state.createMode === "scheduled");
   const classes = ["Economy", "Premium Economy", "Business"];
   const n = flight.count || 1;
   const existingItems = state.createItems;
+  const isScheduled = state.createMode === "scheduled";
   const items = [];
   for (let i = 0;i < n; i++) {
     const existing = existingItems.find((item) => item.index === i);
+    const destination = isScheduled ? i < Math.ceil(n / 2) ? "preset" : "foodchecker" : existing ? existing.destination : "foodchecker";
     items.push({
       index: i,
       sku: String(1e5 + i),
@@ -3888,7 +4698,7 @@ function renderCreateItems() {
       class: classes[i % classes.length],
       quantity: 24 + i * 12,
       checked: existing ? existing.checked : true,
-      destination: existing ? existing.destination : "foodchecker"
+      destination
     });
   }
   state.createItems = items;
@@ -3898,7 +4708,6 @@ function renderCreateItems() {
     <table class="create-items-table">
       <thead>
         <tr>
-          <th style="width:40px"></th>
           <th>SKU</th>
           <th>Description</th>
           <th>Class</th>
@@ -3909,43 +4718,31 @@ function renderCreateItems() {
       <tbody>
   `;
   items.forEach((item, idx) => {
-    html += `
-      <tr>
-        <td>
-          <input type="checkbox" class="create-item-checkbox"
-            ${item.checked ? "checked" : ""}
-            onchange="toggleCreateItem(${idx})" />
-        </td>
-        <td>${esc(item.sku)}</td>
-        <td>${esc(item.item_description)}</td>
-        <td>${esc(item.class)}</td>
-        <td>${item.quantity}</td>
-        <td>
-          <div class="create-item-destination">
+    const destinationCell = isScheduled ? `<span class="dest-text">${item.destination === "preset" ? "Preset" : "Food Check"}</span>` : `<div class="create-item-destination">
             <button type="button" class="create-dest-btn ${item.destination === "preset" ? "active" : ""}"
               onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
             <button type="button" class="create-dest-btn ${item.destination === "foodchecker" ? "active" : ""}"
               onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
-          </div>
-        </td>
+          </div>`;
+    html += `
+      <tr>
+        <td>${esc(item.sku)}</td>
+        <td>${esc(item.item_description)}</td>
+        <td>${esc(item.class)}</td>
+        <td>${item.quantity}</td>
+        <td>${destinationCell}</td>
       </tr>
     `;
   });
   html += `</tbody></table>`;
   list.innerHTML = html;
-  const checkedCount = items.filter((i) => i.checked).length;
-  countEl.textContent = `${checkedCount} item${checkedCount !== 1 ? "s" : ""} selected`;
-}
-function toggleCreateItem(index) {
-  state.createItems[index].checked = !state.createItems[index].checked;
-  const checkedCount = state.createItems.filter((i) => i.checked).length;
-  document.getElementById("create-items-count").textContent = `${checkedCount} item${checkedCount !== 1 ? "s" : ""} selected`;
+  const itemCount = items.length;
+  countEl.textContent = `${itemCount} item${itemCount !== 1 ? "s" : ""}`;
 }
 function setCreateItemDestination(index, destination) {
   state.createItems[index].destination = destination;
   renderCreateItems();
 }
-window.toggleCreateItem = toggleCreateItem;
 window.setCreateItemDestination = setCreateItemDestination;
 function toggleAdHocMode() {
   state.adHocEnabled = document.getElementById("ad-hoc-checkbox").checked;
@@ -4045,29 +4842,113 @@ function nextJobId(flightDate) {
   }
   return "CCP6-" + stamp + "-" + String(max + 1).padStart(2, "0");
 }
+function validateCreateForm() {
+  const errors = [];
+  if (!selectedCreateFlight) {
+    errors.push({
+      fieldId: "create-flight",
+      message: "Please select a flight number"
+    });
+  }
+  const etd = document.getElementById("create-etd")?.value;
+  if (!etd) {
+    errors.push({ fieldId: "create-etd", message: "Please select an ETD" });
+  }
+  const group = document.getElementById("create-group")?.value;
+  if (!group) {
+    errors.push({
+      fieldId: "create-group-buttons",
+      message: "Please select a group"
+    });
+  }
+  if (state.siccFilter === "SICC1") {
+    if (state.createServices.length === 0) {
+      errors.push({
+        fieldId: "create-services-section",
+        message: "Please add at least one service"
+      });
+    } else {
+      const invalidServices = state.createServices.filter((s) => !s.serviceType || !s.itemType);
+      if (invalidServices.length > 0) {
+        errors.push({
+          fieldId: "create-services-list",
+          message: "Please select both Service Type and Item Type for all services"
+        });
+      }
+    }
+  }
+  if (state.createItems.length === 0) {
+    errors.push({
+      fieldId: "create-items-container",
+      message: "Please select at least one linked item"
+    });
+  }
+  return errors;
+}
+function showErrors(errors) {
+  clearErrors();
+  if (errors.length === 0)
+    return;
+  const errorList = document.getElementById("error-list");
+  errorList.classList.remove("hidden");
+  errors.forEach((error) => {
+    const field = document.getElementById(error.fieldId);
+    if (field) {
+      const formGroup = field.closest(".form-group");
+      if (formGroup) {
+        formGroup.classList.add("has-error");
+      }
+    }
+  });
+  errorList.innerHTML = errors.map((error) => `
+		<div class="error-badge" onclick="focusField('${error.fieldId}')">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<circle cx="12" cy="12" r="10"/>
+				<line x1="12" y1="8" x2="12" y2="12"/>
+				<line x1="12" y1="16" x2="12.01" y2="16"/>
+			</svg>
+			<span>${error.message}</span>
+		</div>
+	`).join("");
+}
+function clearErrors() {
+  const errorList = document.getElementById("error-list");
+  errorList.classList.add("hidden");
+  errorList.innerHTML = "";
+  document.querySelectorAll(".form-group.has-error").forEach((el) => {
+    el.classList.remove("has-error");
+  });
+}
+function focusField(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (field) {
+    field.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (field.tagName === "INPUT" || field.tagName === "SELECT" || field.tagName === "TEXTAREA") {
+      field.focus();
+    } else if (field.classList.contains("segmented-buttons")) {
+      const firstBtn = field.querySelector(".segment-btn");
+      if (firstBtn)
+        firstBtn.focus();
+    }
+  }
+}
 function submitCreateJob(event) {
   event.preventDefault();
+  const errors = validateCreateForm();
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+  clearErrors();
   const flight = selectedCreateFlight;
   const etd = document.getElementById("create-etd")?.value;
   const group = document.getElementById("create-group")?.value;
-  if (!flight) {
-    alert("Select a flight number first.");
-    return;
-  }
-  if (!etd) {
-    alert("ETD is required.");
-    return;
-  }
-  if (!group) {
-    alert("Group is required.");
-    return;
-  }
   const ruleSet = "STANDARD";
   const site = flight.site || "SICC2";
   const flightDate = flight.flight_date;
   const jobId = nextJobId(flightDate);
   const now = new Date().toISOString();
-  const selectedItems = state.createItems.filter((i) => i.checked);
+  const selectedItems = state.createItems;
   const linkedItems = selectedItems.map((item, i) => ({
     link_id: "LINK-" + jobId + "-" + (i + 1),
     ccp5_record_id: "CP5-" + flight.flight_number + "-" + (item.index + 1),
@@ -4133,6 +5014,7 @@ function submitCreateJob(event) {
       }
     });
   }
+  const lounge = document.getElementById("create-lounge")?.value || "";
   const job = {
     job_id: jobId,
     flight_number: flight.flight_number,
@@ -4141,6 +5023,9 @@ function submitCreateJob(event) {
     ta_group: group,
     rule_set: ruleSet,
     site,
+    airline: flight.airline || "",
+    meal_service: flight.meal_service || "",
+    lounge,
     job_status: "Open",
     closed: false,
     createdAt: now,
@@ -4150,7 +5035,19 @@ function submitCreateJob(event) {
       items: presetItems,
       traysHandled: 0,
       staffCount: 0,
-      services: [{}],
+      services: state.createServices.map((s) => ({
+        serviceType: s.serviceType,
+        itemType: s.itemType,
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      })),
       note: ""
     } : {
       status: "NotStarted",
@@ -4164,7 +5061,19 @@ function submitCreateJob(event) {
       staffCount: 0,
       exposureDurationMin: null,
       complianceResult: null,
-      services: [{}],
+      services: state.createServices.map((s) => ({
+        serviceType: s.serviceType,
+        itemType: s.itemType,
+        startTime: null,
+        finishTime: null,
+        startTemp: null,
+        finishTemp: null,
+        traysHandled: 0,
+        staffCount: 0,
+        exposureDurationMin: null,
+        maxSurfaceTemp: null,
+        complianceResult: null
+      })),
       items: presetItems,
       note: ""
     },
@@ -4203,17 +5112,36 @@ function submitCreateJob(event) {
   persistJob(job);
   navigate("detail", { jobId });
 }
+function showLoader() {
+  const loader = document.getElementById("loader-overlay");
+  if (loader)
+    loader.classList.remove("hidden");
+}
+function hideLoader() {
+  const loader = document.getElementById("loader-overlay");
+  if (loader)
+    loader.classList.add("hidden");
+}
 window.preview = preview;
+window.state = state;
 window.submitCreateJob = submitCreateJob;
 window.selectCreateFlight = selectCreateFlight;
 window.clearCreateFlight = clearCreateFlight;
-window.toggleCreateItem = toggleCreateItem;
 window.setCreateItemDestination = setCreateItemDestination;
 window.toggleAdHocMode = toggleAdHocMode;
 window.renderAdHocItems = renderAdHocItems;
 window.addAdHocItem = addAdHocItem;
 window.removeAdHocItem = removeAdHocItem;
 window.updateAdHocItem = updateAdHocItem;
+window.initCreateModeButtons = initCreateModeButtons;
+window.updateCreateModeUI = updateCreateModeUI;
+window.addServiceRow = addServiceRow;
+window.removeServiceRow = removeServiceRow;
+window.updateServiceField = updateServiceField;
+window.validateCreateForm = validateCreateForm;
+window.showErrors = showErrors;
+window.clearErrors = clearErrors;
+window.focusField = focusField;
 window.navigate = (s, opts) => {
   if (s === "current")
     return preview.go(VIEWS.current);
@@ -4222,17 +5150,57 @@ window.navigate = (s, opts) => {
   if (s === "all")
     return preview.go(VIEWS.all);
 };
+window.showLoader = showLoader;
+window.hideLoader = hideLoader;
+function switchCreateSICC(site) {
+  state.siccFilter = site;
+  document.querySelectorAll("#create-sicc-selector .sicc-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.sicc === site);
+  });
+  const label = document.getElementById("create-sicc-label");
+  if (label)
+    label.textContent = site;
+  clearCreateFlight();
+  renderCreate();
+}
+window.switchCreateSICC = switchCreateSICC;
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!state.jobs.length)
-    state.jobs = buildSeed();
+  showLoader();
+  state.jobs = buildSeed();
   await loadJobs();
-  const siccParam = preview.params.get("sicc");
-  if (siccParam === "SICC1" || siccParam === "SICC2")
-    state.siccFilter = siccParam;
+  const d2path = preview.params.get("d2path");
+  let siteFromD2Path = null;
+  if (d2path) {
+    if (d2path.includes("sats-bd4uhr")) {
+      siteFromD2Path = "SICC1";
+    } else if (d2path.includes("ccp-5-dishing-4q3aak")) {
+      siteFromD2Path = "SICC2";
+    }
+  }
+  if (siteFromD2Path) {
+    state.siccFilter = siteFromD2Path;
+  } else {
+    const siccParam = preview.params.get("sicc");
+    if (siccParam === "SICC1" || siccParam === "SICC2") {
+      state.siccFilter = siccParam;
+    }
+  }
+  const siccSelector = document.getElementById("create-sicc-selector");
+  if (siccSelector) {
+    if (d2path) {
+      siccSelector.classList.add("hidden");
+    } else {
+      siccSelector.classList.remove("hidden");
+      document.querySelectorAll("#create-sicc-selector .sicc-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.sicc === state.siccFilter);
+      });
+    }
+  }
   const label = document.getElementById("create-sicc-label");
   if (label)
     label.textContent = state.siccFilter || "SICC1";
   renderCreate();
+  hideLoader();
 });
 </script></body>
 </html>

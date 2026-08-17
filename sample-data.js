@@ -125,6 +125,7 @@ const JOB_1 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
@@ -137,6 +138,7 @@ const JOB_1 = {
         complianceResult: "Compliant",
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(120),
         finishTime: ago(110),
@@ -149,6 +151,7 @@ const JOB_1 = {
         complianceResult: "Compliant",
       },
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
@@ -161,6 +164,7 @@ const JOB_1 = {
         complianceResult: "Compliant",
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(90),
         finishTime: ago(80),
@@ -265,6 +269,7 @@ const JOB_2 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
@@ -277,6 +282,7 @@ const JOB_2 = {
         complianceResult: null,
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: null,
         finishTime: null,
@@ -330,7 +336,7 @@ const JOB_3 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "C",
-  airline: "Standard / Other Airline",
+  airline: "Singapore Airlines (SQ)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -345,6 +351,7 @@ const JOB_3 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
@@ -357,6 +364,7 @@ const JOB_3 = {
         complianceResult: null,
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: null,
         finishTime: null,
@@ -418,7 +426,7 @@ const JOB_4 = {
   etd: HEADER.etd,
   meal_service: "Lunch",
   ta_group: "D",
-  airline: "Standard / Other Airline",
+  airline: "Emirates (EK)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -440,8 +448,7 @@ const JOB_4 = {
     complianceResult: null,
     services: [
       {
-        serviceType: "Lunch",
-        itemType: "Hors d'oeuvre",
+        serviceType: "1st service", itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
         startTemp: 5,
@@ -453,8 +460,7 @@ const JOB_4 = {
         complianceResult: "Compliant",
       },
       {
-        serviceType: "Lunch",
-        itemType: "Dessert",
+        serviceType: "2nd service", itemType: "Dessert",
         startTime: ago(120),
         finishTime: ago(110),
         startTemp: 6,
@@ -466,8 +472,7 @@ const JOB_4 = {
         complianceResult: "Compliant",
       },
       {
-        serviceType: "Lunch",
-        itemType: "Hors d'oeuvre",
+        serviceType: "1st service", itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
         startTemp: 6,
@@ -479,8 +484,7 @@ const JOB_4 = {
         complianceResult: "Compliant",
       },
       {
-        serviceType: "Lunch",
-        itemType: "Dessert",
+        serviceType: "2nd service", itemType: "Dessert",
         startTime: ago(90),
         finishTime: ago(80),
         startTemp: 7,
@@ -607,7 +611,7 @@ const JOB_5 = {
   etd: HEADER.etd,
   meal_service: "Breakfast",
   ta_group: "A",
-  airline: "Standard / Other Airline",
+  airline: "Qatar Airways (QR)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -674,7 +678,7 @@ const JOB_6 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "B",
-  airline: "Standard / Other Airline",
+  airline: "Malaysia Airlines (MH)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -695,8 +699,8 @@ const JOB_6 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
@@ -1044,8 +1048,8 @@ const JOB_15 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, {}),
@@ -1083,8 +1087,8 @@ const JOB_16 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, {}),
@@ -1122,8 +1126,8 @@ const JOB_17 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, {}),
@@ -1161,8 +1165,8 @@ const JOB_18 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, {}),
@@ -1200,8 +1204,8 @@ const JOB_19 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, {}),
@@ -1239,8 +1243,8 @@ const JOB_20 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, {}),
@@ -1278,8 +1282,8 @@ const JOB_21 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, {}),
@@ -1317,8 +1321,8 @@ const JOB_22 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, {}),
@@ -1356,8 +1360,8 @@ const JOB_23 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, {}),
@@ -1395,8 +1399,8 @@ const JOB_24 = {
     startTemp: null, finishTemp: null,
     traysHandled: 0, staffCount: 0, exposureDurationMin: null, complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, {}),
@@ -1416,6 +1420,7 @@ const STAFF = [
   { staffId: "ryan22", staffName: "Ryan", role: "FAA" },
   { staffId: "faa11", staffName: "Noor Aisyah", role: "FAA" },
   { staffId: "faa04", staffName: "Maya Tan", role: "FAA" },
+  { staffId: "kin21", staffName: "Kinan", role: "FAA" },
   { staffId: "fc07", staffName: "Ravi Kumar", role: "Food Checker" },
   { staffId: "fc02", staffName: "Siti Rahayu", role: "Food Checker" },
   { staffId: "cts09", staffName: "Boon Seng", role: "CTS" },
@@ -1425,8 +1430,11 @@ const FLIGHTS = [
   // SICC2 Flights (10+)
   { flight_number: "QF12", meal_service: "Lunch", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "14:30", count: 3, site: "SICC2", ta_group: "A", trays: 240, staff: 6 },
   { flight_number: "UA24", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "06:15", count: 2, site: "SICC2", ta_group: "B", trays: 150, staff: 4 },
-  { flight_number: "SQ-ORD-31", meal_service: "Dinner", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "22:45", count: 3, site: "SICC2", ta_group: "C", trays: 280, staff: 7 },
-  { flight_number: "NH7", meal_service: "Breakfast", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "07:30", count: 2, site: "SICC2", ta_group: "A", trays: 140, staff: 4 },
+  { flight_number: "UA45", meal_service: "Lunch", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "12:30", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
+  { flight_number: "UA78", meal_service: "Dinner", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "19:00", count: 2, site: "SICC2", ta_group: "D", trays: 180, staff: 5 },
+  { flight_number: "UA91", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "07:00", count: 2, site: "SICC2", ta_group: "A", trays: 160, staff: 4 },
+  { flight_number: "SQ-ORD-31", meal_service: "Dinner", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "22:45", count: 3, site: "SICC2", ta_group: "C", trays: 280, staff: 7, lounge: "SICC2 Main Lounge" },
+  { flight_number: "NH7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:30", count: 2, site: "SICC2", ta_group: "A", trays: 140, staff: 4, lounge: "SICC2 Main Lounge" },
   { flight_number: "EK215", meal_service: "Dinner", airline: "Emirates (EK)", flight_date: "2026-08-07", etd: "23:10", count: 4, site: "SICC2", ta_group: "D", trays: 320, staff: 8 },
   { flight_number: "QR908", meal_service: "Lunch", airline: "Qatar Airways (QR)", flight_date: "2026-08-07", etd: "13:20", count: 3, site: "SICC2", ta_group: "B", trays: 220, staff: 6 },
   { flight_number: "SQ12", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "08:00", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
@@ -1437,8 +1445,8 @@ const FLIGHTS = [
   { flight_number: "KE65", meal_service: "Lunch", airline: "Korean Air (KE)", flight_date: "2026-08-07", etd: "11:30", count: 4, site: "SICC2", ta_group: "A", trays: 300, staff: 8 },
 
   // SICC1 Flights (10+)
-  { flight_number: "BA5", meal_service: "Lunch", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
-  { flight_number: "CX88", meal_service: "Dinner", airline: "Standard / Other Airline", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "B", trays: 190, staff: 5 },
+  { flight_number: "BA5", meal_service: "Lunch", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
+  { flight_number: "CX88", meal_service: "Dinner", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "B", trays: 190, staff: 5 },
   { flight_number: "QF1", meal_service: "Breakfast", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "A", trays: 240, staff: 6 },
   { flight_number: "NZ5", meal_service: "Lunch", airline: "Air New Zealand (NZ)", flight_date: "2026-08-07", etd: "12:15", count: 2, site: "SICC1", ta_group: "C", trays: 160, staff: 4 },
   { flight_number: "VA43", meal_service: "Dinner", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "18:30", count: 3, site: "SICC1", ta_group: "D", trays: 250, staff: 7 },

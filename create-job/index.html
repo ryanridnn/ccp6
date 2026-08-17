@@ -8,12 +8,23 @@
   </head>
   <body>
     <div class="app">
+      <!-- Loading overlay -->
+      <div id="loader-overlay" class="loader-overlay">
+        <div class="loader-content">
+          <div class="loader-spinner"></div>
+          <span>Loading CCP6...</span>
+        </div>
+      </div>
       <section class="screen" id="screen-create">
         <div class="page-head">
           <div>
             <h1 class="page-title">
               Create CCP6 Job — <span id="create-sicc-label">SICC1</span>
             </h1>
+            <div class="sicc-selector" id="create-sicc-selector" style="margin-top: 8px;">
+              <button type="button" class="sicc-btn active" data-sicc="SICC1" onclick="switchCreateSICC('SICC1')">SICC1</button>
+              <button type="button" class="sicc-btn" data-sicc="SICC2" onclick="switchCreateSICC('SICC2')">SICC2</button>
+            </div>
           </div>
           <button type="button" class="btn-back" onclick="navigate('current')">
             <svg
@@ -41,19 +52,19 @@
                     <button
                       type="button"
                       class="segment-btn active"
-                      data-value="manual"
-                    >
-                      Manual
-                    </button>
-                    <button
-                      type="button"
-                      class="segment-btn"
                       data-value="scheduled"
                     >
                       Scheduled
                     </button>
+                    <button
+                      type="button"
+                      class="segment-btn"
+                      data-value="manual"
+                    >
+                      Manual
+                    </button>
                   </div>
-                  <input type="hidden" id="create-mode" value="manual" />
+                  <input type="hidden" id="create-mode" value="scheduled" />
                 </div>
               </div>
               <div class="create-mode-divider"></div>
@@ -142,9 +153,15 @@
                     readonly
                     placeholder="—"
                   />
+                  <div
+                    id="create-ruleset-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
                 </div>
 
-                <div class="form-group create-meal-service-group hidden">
+                <div class="form-group create-meal-service-group">
                   <label class="form-label" for="create-meal-service"
                     >Meal Service</label
                   >
@@ -162,7 +179,27 @@
                   </div>
                 </div>
               </div>
+
+              <div class="create-lounge-row hidden" id="create-lounge-row">
+                <div class="form-group create-lounge-group">
+                  <label class="form-label" for="create-lounge">Lounge</label>
+                  <input
+                    type="text"
+                    id="create-lounge"
+                    class="form-input"
+                    placeholder="Enter lounge name"
+                  />
+                  <div
+                    id="create-lounge-readonly"
+                    class="create-readonly-text hidden"
+                  >
+                    <div class="cr-value"></div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <div class="form-section">
 
             <div
               class="create-services-section hidden"
@@ -194,7 +231,7 @@
             <div
               id="ad-hoc-toggle"
               class="ad-hoc-toggle hidden"
-              style="margin-top: 16px"
+              style="margin-top: 24px"
             >
               <label
                 style="
@@ -213,7 +250,7 @@
               </label>
             </div>
 
-            <div id="ad-hoc-container" class="hidden" style="margin-top: 16px">
+            <div id="ad-hoc-container" class="hidden" style="margin-top: 24px">
               <div class="create-items-header">
                 <h3 class="create-items-title">Ad Hoc Items</h3>
                 <button
@@ -239,6 +276,8 @@
                 Cancel
               </button>
               <button type="submit" class="btn-primary">Create job</button>
+            </div>
+
             </div>
           </form>
         </div>

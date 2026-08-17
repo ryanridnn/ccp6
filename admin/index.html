@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 — Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="screen" id="screen-admin">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">CCP6 Admin</h1>
+            <p class="page-sub">Maintenance &amp; data management</p>
+          </div>
+          <button type="button" class="btn-back" onclick="navigate('current')">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <h2 class="admin-card-title">Remove All CCP6 Instances</h2>
+          <p class="admin-card-desc">
+            Deletes every stored CCP6 job and submission from the platform
+            store. This cannot be undone.
+          </p>
+          <div class="admin-status" id="admin-status"></div>
+          <button type="button" class="btn-danger" onclick="confirmRemoveAll()">
+            Remove All Instances
+          </button>
+        </div>
+
+        <div class="admin-card" style="margin-top: 20px">
+          <h2 class="admin-card-title">CCP6 Instances</h2>
+          <p class="admin-card-desc">Select individual instances to remove.</p>
+          <div class="admin-toolbar">
+            <button type="button" class="btn-secondary" onclick="loadInstances()">Refresh</button>
+            <button type="button" class="btn-danger" onclick="confirmDeleteSelected()">Delete Selected</button>
+            <span class="admin-status" id="selected-status">0 selected</span>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="instances-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" /></th>
+                  <th>SICC</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="instances-body">
+                <tr><td colspan="3" class="admin-empty">No instances loaded.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Confirm modal (shared: Remove All + Delete Selected) -->
+    <div id="confirm-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 class="modal-title" id="confirm-title">Confirm Removal</h2>
+        <p class="modal-sub" id="confirm-sub">Are you sure you want to delete ALL CCP6 jobs and submissions?</p>
+        <div id="confirm-count" class="confirm-count"></div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="closeConfirm()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            onclick="executeRemoval()"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>

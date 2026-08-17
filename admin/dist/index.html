@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCP6 — Admin</title>
+    
+  <style>/* style.css */
+:root {
+  --bg-page: #0f193c;
+  --bg-surface: #162044;
+  --bg-surface-hover: #1c2a54;
+  --border: #243264;
+  --border-hover: #2e3f7a;
+  --text-primary: #f0f2f8;
+  --text-secondary: #8892b0;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-contrast: #f0f2f8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+.app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.screen {
+  width: 100%;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items:  center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.page-sub {
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+.btn-back, .btn-secondary {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 8px;
+  padding: 9px 16px;
+  transition: background .15s, border-color .15s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-back:hover, .btn-secondary:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+}
+
+.btn-danger {
+  display: inline-flex;
+  background: var(--danger);
+  color: #fff;
+  cursor: pointer;
+  border: 0;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 8px;
+  padding: 9px 16px;
+  transition: filter .15s;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-danger:hover {
+  filter: brightness(1.08);
+}
+
+.btn-danger:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.admin-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.admin-card-title {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.admin-card-desc {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.admin-status {
+  min-height: 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.status-info {
+  color: var(--text-secondary);
+}
+
+.status-success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.status-error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.modal-overlay {
+  position: fixed;
+  display: flex;
+  z-index: 1000;
+  background: #00000080;
+  justify-content: center;
+  align-items:  center;
+  inset: 0;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 420px;
+  max-width: 92vw;
+  padding: 24px;
+}
+
+.modal-title {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-sub {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.confirm-count {
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items:  center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.admin-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+.admin-table thead th {
+  text-align: left;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
+.admin-table tbody td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  padding: 10px 12px;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.admin-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px !important;
+}
+
+.inst-details {
+  color: var(--text-secondary);
+}
+
+.sicc-badge {
+  display: inline-block;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sicc-badge.sicc-sicc1 {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.sicc-badge.sicc-sicc2 {
+  color: var(--success);
+  border-color: var(--success);
+}
+</style></head>
+  <body>
+    <div class="app">
+      <section class="screen" id="screen-admin">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">CCP6 Admin</h1>
+            <p class="page-sub">Maintenance &amp; data management</p>
+          </div>
+          <button type="button" class="btn-back" onclick="navigate('current')">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <h2 class="admin-card-title">Remove All CCP6 Instances</h2>
+          <p class="admin-card-desc">
+            Deletes every stored CCP6 job and submission from the platform
+            store. This cannot be undone.
+          </p>
+          <div class="admin-status" id="admin-status"></div>
+          <button type="button" class="btn-danger" onclick="confirmRemoveAll()">
+            Remove All Instances
+          </button>
+        </div>
+
+        <div class="admin-card" style="margin-top: 20px">
+          <h2 class="admin-card-title">CCP6 Instances</h2>
+          <p class="admin-card-desc">Select individual instances to remove.</p>
+          <div class="admin-toolbar">
+            <button type="button" class="btn-secondary" onclick="loadInstances()">Refresh</button>
+            <button type="button" class="btn-danger" onclick="confirmDeleteSelected()">Delete Selected</button>
+            <span class="admin-status" id="selected-status">0 selected</span>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="instances-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" /></th>
+                  <th>SICC</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="instances-body">
+                <tr><td colspan="3" class="admin-empty">No instances loaded.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Confirm modal (shared: Remove All + Delete Selected) -->
+    <div id="confirm-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 class="modal-title" id="confirm-title">Confirm Removal</h2>
+        <p class="modal-sub" id="confirm-sub">Are you sure you want to delete ALL CCP6 jobs and submissions?</p>
+        <div id="confirm-count" class="confirm-count"></div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="closeConfirm()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            onclick="executeRemoval()"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    
+  <script type="module">// script.js
+var _SVC = (() => {
+  const p = location.pathname.split("/");
+  return p[1] === "services-preview" ? p[2] : "";
+})();
+function fetchJson(url, opts, ms = 3000) {
+  const ctrl = new AbortController;
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { ...opts, signal: ctrl.signal }).then((r) => {
+    if (!r.ok)
+      throw new Error("HTTP " + r.status);
+    return r.json();
+  }).finally(() => clearTimeout(timer));
+}
+var store = {
+  save: (collection, data) => fetchJson(`/api/public/preview-store/${_SVC}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ collection, data })
+  }).catch(() => ({ ok: false })),
+  list: (collection) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}`, {
+    cache: "no-store"
+  }).catch(() => []),
+  records: (collection) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}&mode=all`, { cache: "no-store" }).catch(() => ({ records: [] })),
+  get: (collection, key) => fetchJson(`/api/public/preview-store/${_SVC}?collection=${collection}&key=${encodeURIComponent(key)}`, { cache: "no-store" }).then((r) => r && r.record ? r.record : r).catch(() => null),
+  set: (collection, key, data) => fetchJson(`/api/public/preview-store/${_SVC}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ collection, key, data })
+  }).catch(() => ({ ok: false })),
+  del: (id) => fetch(`/api/public/preview-store/${_SVC}?id=${id}`, {
+    method: "DELETE"
+  }).catch(() => {})
+};
+var preview = {
+  serviceId: _SVC,
+  params: new URLSearchParams(location.search),
+  currentViewId() {
+    return this.params.get("view") || "";
+  },
+  recordId() {
+    return this.params.get("record") || this.params.get("id") || "";
+  },
+  recordKey(record) {
+    return record?.slotKey || record?.data?.id || record?.id || "";
+  },
+  go(viewId, extra = {}) {
+    const next = new URLSearchParams;
+    next.set("view", viewId);
+    for (const [k, v] of Object.entries(extra)) {
+      if (v == null || v === "")
+        next.delete(k);
+      else
+        next.set(k, String(v));
+    }
+    location.href = `/services-preview/${this.serviceId}?${next.toString()}`;
+  },
+  openRecord(viewId, recordId) {
+    this.go(viewId, { record: recordId });
+  },
+  backTo(viewId) {
+    this.go(viewId, { record: null, id: null });
+  }
+};
+if (!window.preview)
+  window.preview = preview;
+var VIEWS = {
+  current: "pv-5czmym",
+  all: "pv-kfb8yh",
+  create: "pv-ji169l",
+  detail: "pv-0gnlo8",
+  report: "pv-rnop2z",
+  admin: "pv-admin-dummy"
+};
+var IS_LOCAL = ["localhost", "127.0.0.1", ""].includes(location.hostname);
+var instanceList = [];
+var selectedIds = new Set;
+var pendingAction = null;
+async function countInstances() {
+  const jobs = await store.records("ccp6_jobs");
+  const subs = await store.records("submissions");
+  const jobArr = jobs?.records || [];
+  const subArr = subs?.records || [];
+  return { jobs: jobArr, subs: subArr };
+}
+function openConfirm(countText, subText, titleText) {
+  document.getElementById("confirm-count").textContent = countText;
+  document.getElementById("confirm-sub").textContent = subText;
+  document.getElementById("confirm-title").textContent = titleText || "Confirm Removal";
+  document.getElementById("confirm-overlay").classList.remove("hidden");
+}
+async function confirmRemoveAll() {
+  const status = document.getElementById("admin-status");
+  status.innerHTML = `<span class="status-info">Counting records…</span>`;
+  try {
+    const { jobs, subs } = await countInstances();
+    pendingAction = "all";
+    status.innerHTML = "";
+    openConfirm(`${jobs.length} job(s) · ${subs.length} submission(s) will be removed.`, "Are you sure you want to delete ALL CCP6 jobs and submissions?", "Confirm Remove All");
+  } catch (e) {
+    status.innerHTML = `<span class="status-error">Failed to read store: ${esc(e.message)}</span>`;
+  }
+}
+window.confirmRemoveAll = confirmRemoveAll;
+function confirmDeleteSelected() {
+  const status = document.getElementById("admin-status");
+  if (!selectedIds.size) {
+    status.innerHTML = `<span class="status-info">Select at least one instance to delete.</span>`;
+    return;
+  }
+  status.innerHTML = "";
+  pendingAction = "selected";
+  openConfirm(`${selectedIds.size} instance(s) will be removed.`, "Are you sure you want to delete the selected CCP6 instances?", "Confirm Delete Selected");
+}
+window.confirmDeleteSelected = confirmDeleteSelected;
+function closeConfirm() {
+  document.getElementById("confirm-overlay").classList.add("hidden");
+}
+window.closeConfirm = closeConfirm;
+async function executeRemoval() {
+  closeConfirm();
+  const status = document.getElementById("admin-status");
+  status.innerHTML = `<span class="status-info">Removing…</span>`;
+  try {
+    let targets = [];
+    if (pendingAction === "all") {
+      const { jobs, subs } = await countInstances();
+      targets = [...jobs, ...subs];
+    } else if (pendingAction === "selected") {
+      targets = instanceList.filter((r) => {
+        const id = r.id || r.slotKey || r.data?.job_id;
+        return selectedIds.has(id);
+      });
+    }
+    let deleted = 0;
+    for (const r of targets) {
+      const id = r.id || r.slotKey || r.data?.id;
+      if (id) {
+        await store.del(id);
+        deleted++;
+      }
+    }
+    status.innerHTML = `<span class="status-success">✓ Removed ${deleted} instance(s).</span>`;
+    selectedIds = new Set;
+    pendingAction = null;
+    await loadInstances();
+  } catch (e) {
+    status.innerHTML = `<span class="status-error">Failed to remove: ${esc(e.message)}</span>`;
+  }
+}
+window.executeRemoval = executeRemoval;
+async function loadInstances() {
+  const tbody = document.getElementById("instances-body");
+  if (!tbody)
+    return;
+  tbody.innerHTML = `<tr><td colspan="3" class="admin-empty">Loading…</td></tr>`;
+  const { jobs } = await countInstances();
+  instanceList = jobs;
+  selectedIds = new Set;
+  const selectAll = document.getElementById("select-all");
+  if (selectAll)
+    selectAll.checked = false;
+  if (!jobs.length) {
+    tbody.innerHTML = `<tr><td colspan="3" class="admin-empty">No instances found.</td></tr>`;
+    updateSelectedStatus();
+    return;
+  }
+  tbody.innerHTML = jobs.map((r) => {
+    const j = r && r.data && r.data.job_id ? r.data : r;
+    const id = r.id || r.slotKey || j.job_id || "";
+    const sicc = j.site || "—";
+    const details = `${esc(j.job_id || "—")} · ${esc(j.flight_number || "—")} · ${esc(j.airline || "—")} · ${esc(j.job_status || (j.closed ? "Closed" : "Open"))}`;
+    return `<tr data-id="${esc(id)}">
+        <td><input type="checkbox" class="inst-checkbox" data-id="${esc(id)}" onchange="toggleSelect('${esc(id)}', this.checked)" /></td>
+        <td><span class="sicc-badge sicc-${esc(String(sicc).toLowerCase())}">${esc(sicc)}</span></td>
+        <td class="inst-details">${details}</td>
+      </tr>`;
+  }).join("");
+  updateSelectedStatus();
+}
+window.loadInstances = loadInstances;
+function toggleSelect(id, checked) {
+  if (checked)
+    selectedIds.add(id);
+  else
+    selectedIds.delete(id);
+  updateSelectedStatus();
+}
+window.toggleSelect = toggleSelect;
+function toggleSelectAll(el) {
+  const checked = el.checked;
+  document.querySelectorAll(".inst-checkbox").forEach((cb) => {
+    cb.checked = checked;
+    if (checked)
+      selectedIds.add(cb.dataset.id);
+    else
+      selectedIds.delete(cb.dataset.id);
+  });
+  updateSelectedStatus();
+}
+window.toggleSelectAll = toggleSelectAll;
+function updateSelectedStatus() {
+  const el = document.getElementById("selected-status");
+  if (el)
+    el.textContent = `${selectedIds.size} selected`;
+}
+window.navigate = (s) => {
+  if (s === "current")
+    preview.go(VIEWS.current);
+};
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+document.addEventListener("DOMContentLoaded", () => {
+  if (IS_LOCAL) {
+    document.getElementById("admin-status").innerHTML = `<span class="status-info">Local dev — no platform store to clear. The button will run against the live store when deployed.</span>`;
+  }
+  loadInstances();
+});
+</script></body>
+</html>

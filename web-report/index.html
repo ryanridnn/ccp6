@@ -11,24 +11,85 @@
       <section class="screen" id="screen-report">
         <div class="page-head">
           <div>
-            <h1 class="page-title">CCP6 Web Report</h1>
-            <p class="page-sub" id="report-sub"></p>
+            <h1 class="page-title" id="detail-title">CCP6 Web Report</h1>
+            <p class="page-sub" id="detail-flight-sub"></p>
           </div>
           <div class="page-actions">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="exportJob('pdf')"
-            >
-              PDF
-            </button>
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="exportJob('excel')"
-            >
-              Excel
-            </button>
+            <div class="options-group">
+              <button
+                type="button"
+                class="btn-icon wr-chevrons"
+                aria-label="Previous"
+                tabindex="-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button
+                type="button"
+                class="btn-icon wr-chevrons"
+                aria-label="Next"
+                tabindex="-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <button
+                type="button"
+                class="btn-icon"
+                onclick="toggleExportPopover(event)"
+                aria-label="Export options"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+              <div id="export-popover" class="export-popover hidden">
+                <ul class="export-menu" role="menu">
+                  <li role="menuitem" onclick="exportJob('pdf')">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span>PDF</span>
+                  </li>
+                  <li role="menuitem" onclick="exportJob('excel')">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span>Excel</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
             <button
               type="button"
               class="btn-back"
@@ -51,7 +112,13 @@
           </div>
         </div>
 
-        <div class="report-body" id="report-body"></div>
+        <!-- Persistent shared header -->
+        <div class="job-header" id="detail-header"></div>
+
+        <!-- Stage tabs -->
+        <div class="tab-bar" id="detail-tabs"></div>
+
+        <div class="tab-body" id="detail-body"></div>
       </section>
     </div>
 

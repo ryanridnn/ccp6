@@ -1,0 +1,65 @@
+Airline Logos Mapping (from 1000logos.net)
+==========================================
+
+AK - AirAsia
+   https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png
+
+NZ - Air New Zealand
+   https://1000logos.net/wp-content/uploads/2019/11/0015_Air-New-Zealand-Logo-500x281-1.jpg
+
+5J - Cebu Pacific
+   https://1000logos.net/wp-content/uploads/2020/10/Cebu-Pacific-Logo-tumb.jpg
+
+CI - China Airlines
+   https://1000logos.net/wp-content/uploads/2020/09/China-Airlines-logo-tumb.jpg
+
+EK - Emirates
+   https://1000logos.net/wp-content/uploads/2019/12/Emirates-Logowww.jpg
+
+BR - EVA Air
+   https://1000logos.net/wp-content/uploads/2023/10/EVA-Air-Logo-tumb.png
+
+FD - Thai AirAsia (uses AirAsia logo)
+   https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png
+
+JQ - Jetstar
+   https://1000logos.net/wp-content/uploads/2021/07/Jetstar-Logo-tumb.png
+
+KE - Korean Air
+   https://1000logos.net/wp-content/uploads/2020/03/Korean-Air-Logo-thumb.png
+
+MH - Malaysia Airlines
+   https://1000logos.net/wp-content/uploads/2020/04/Malaysia-Airlines-Logo-thumb.png
+
+PR - Philippine Airlines
+   https://1000logos.net/wp-content/uploads/2019/12/0022_Philippine-Airlines-Logo.jpg
+
+QF - Qantas
+   https://1000logos.net/wp-content/uploads/2016/10/eeeeeeee-копия.jpg
+
+QR - Qatar Airways
+   https://1000logos.net/wp-content/uploads/2019/12/0021_Qatar-Airways-Logo.jpg
+
+MI - SilkAir
+   https://1000logos.net/wp-content/uploads/2023/05/SilkAir-Logo-tumb.png
+
+SQ - Singapore Airlines
+   https://1000logos.net/wp-content/uploads/2019/11/0012_Singapore-Airlines-Logo-500x281-1.jpg
+
+TG - Thai Airways
+   https://1000logos.net/wp-content/uploads/2019/12/0010_Thai-Airways-International-Logo.jpg
+
+TT - Tiger Airways
+   https://1000logos.net/wp-content/uploads/2023/05/Tigerair-Logo-thumb.png
+
+UA - United Airlines
+   https://1000logos.net/wp-content/uploads/2017/06/United-logo-tumb.jpg
+
+VA - Virgin Australia
+   https://1000logos.net/wp-content/uploads/2023/05/Virgin-Australia-Logo-tumb.png
+
+OAL - Standard / Other Airline
+   data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236B7280'/%3E%3Ctext x='50' y='58' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3EOAL%3C/text%3E%3C/svg%3E
+
+Total: 20 airlines (19 with logos, 1 generic)
+Source: https://1000logos.net/airline/
