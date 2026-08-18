@@ -575,6 +575,30 @@ function renderDetail() {
 	document.getElementById("detail-title").textContent =
 		`CCP6 Job · ${job.flight_number}`;
 	document.getElementById("detail-flight-sub").classList.add("hidden");
+	
+	// Auto-expand non-compliant rows
+	if (job.preset?.services) {
+		job.preset.services.forEach((svc, i) => {
+			if (svc.complianceResult === "Non-Compliant" || svc.complianceResult === "NonCompliant") {
+				state.serviceExpanded = i;
+			}
+		});
+	}
+	if (job.preset?.items) {
+		job.preset.items.forEach((item) => {
+			if (item.complianceResult === "Non-Compliant") {
+				state.presetSICC2Expanded = item.linkId;
+			}
+		});
+	}
+	if (job.foodChecker?.items) {
+		job.foodChecker.items.forEach((item) => {
+			if (item.complianceResult === "Non-Compliant") {
+				state.fcExpanded = item.linkId;
+			}
+		});
+	}
+	
 	renderHeader(job);
 	renderTabs(job);
 	const body = document.getElementById("detail-body");
@@ -649,7 +673,7 @@ function renderTabs(job) {
         <div class="tab-card${state.activeTab === t.id ? " active" : ""}" onclick="switchTab('${t.id}')">
           <div class="tab-header">
             <span class="tab-title">${t.title}</span>
-            <span class="status-pill ${t.status.cls}">${t.status.label}</span>
+            <span class="status-pill ${t.status.cls}" id="${t.id}-tab-badge">${t.status.label}</span>
           </div>
           <div class="tab-subtitle">${t.subtitle}</div>
         </div>
@@ -742,54 +766,73 @@ function renderExceptionPanel(scope) {
 // ── Preset tab ──────────────────────────────────────────────────────
 function presetLiveState(job) {
 	const p = job.preset;
-	if (p.status === "Submitted") {
-		return {
-			label: p.complianceResult === "Compliant" ? "Compliant" : "Non-Compliant",
-			cls: p.complianceResult === "Compliant" ? "compliant" : "nc",
-			el: null,
-		};
-	}
-	if (!p.startTime)
-		return { label: "Not Started", cls: "not-started", el: null };
-	const el = elapsedMin(p.startTime);
-	const max = hmLimits(job).exposureMax;
-	if (el > max) return { label: "Overtime", cls: "overtime", el };
-	if (el >= max - CONFIG.warningThresholdMin)
-		return { label: "Warning", cls: "warning", el };
-	return { label: "In Progress", cls: "in-progress", el };
+	const items =
+		job.site === "SICC2" ? p.items || [] : p.services || [];
+	
+	// Check if all items are finished
+	const allFinished = items.length > 0 && items.every((s) => s.finishTime);
+	if (p.status === "Submitted" || allFinished)
+		return { label: "Completed", cls: "compliant", el: null };
+	
+	const started = items.some((s) => s.startTime);
+	if (started) return { label: "In Progress", cls: "in-progress", el: null };
+	return { label: "Not Started", cls: "not-started", el: null };
 }
 
 function fcLiveState(job) {
 	const items = job.foodChecker?.items || [];
 	if (items.length === 0)
-		return { label: "No items", cls: "not-started", el: null };
-	const started = items.filter((it) => it.startTime).length;
-	const finished = items.filter(
-		(it) => it.finishTime || it.complianceResult,
-	).length;
-	if (finished === items.length) {
-		const allCompliant = items.every(
-			(it) => it.complianceResult === "Compliant",
-		);
-		return {
-			label: "Completed",
-			cls: allCompliant ? "compliant" : "nc",
-			el: null,
-		};
-	}
-	if (started > 0)
-		return {
-			label: `${started}/${items.length} started`,
-			cls: "in-progress",
-			el: null,
-		};
-	return { label: "No items started", cls: "not-started", el: null };
+		return { label: "Not Started", cls: "not-started", el: null };
+	const allFinished = items.every((it) => it.finishTime);
+	if (job.foodChecker.status === "Submitted" || allFinished)
+		return { label: "Completed", cls: "compliant", el: null };
+	const started = items.some((it) => it.startTime);
+	if (started)
+		return { label: "In Progress", cls: "in-progress", el: null };
+	return { label: "Not Started", cls: "not-started", el: null };
 }
 
 function dispatchLiveState(job) {
 	const live = dispatchLive(job);
-	if (!live) return { label: "Locked", cls: "locked", el: null };
-	return live;
+	if (!live) return { label: "Not Started", cls: "not-started", el: null };
+	if (live.cls === "compliant" || live.cls === "nc")
+		return { label: "Completed", cls: "compliant", el: null };
+	if (live.cls === "cold-soak" || live.cls === "eligible")
+		return { label: "In Progress", cls: "in-progress", el: null };
+	return { label: "Not Started", cls: "not-started", el: null };
+}
+
+function updatePresetTabBadge() {
+	const job = currentJob();
+	if (!job) return;
+	const badge = document.getElementById("preset-tab-badge");
+	if (badge) {
+		const st = presetLiveState(job);
+		badge.className = `status-pill ${st.cls}`;
+		badge.textContent = st.label;
+	}
+}
+
+function updateFcTabBadge() {
+	const job = currentJob();
+	if (!job) return;
+	const badge = document.getElementById("foodchecker-tab-badge");
+	if (badge) {
+		const st = fcLiveState(job);
+		badge.className = `status-pill ${st.cls}`;
+		badge.textContent = st.label;
+	}
+}
+
+function updateDispatchTabBadge() {
+	const job = currentJob();
+	if (!job) return;
+	const badge = document.getElementById("dispatch-tab-badge");
+	if (badge) {
+		const st = dispatchLiveState(job);
+		badge.className = `status-pill ${st.cls}`;
+		badge.textContent = st.label;
+	}
 }
 
 function renderServiceRow(svc, index, submitted, limits, job) {
@@ -815,23 +858,43 @@ function renderServiceRow(svc, index, submitted, limits, job) {
 	// Action button: Start/Finish/Remove/View toggle
 	let actionBtn;
 	if (showStart) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startService(${index})">Start</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); startService(${index})">Start</button>`;
 	} else if (showFinish) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); finishService(${index})">Finish</button>`;
 	} else {
-		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); toggleServiceExpand(${index})">${isExpanded ? "Close" : "View"}</button>`;
+		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); toggleServiceExpand(${index})">${isExpanded ? "Close" : "View"}</button>`;
 	}
 
-	let rowHtml = `
+	const svcStatus = !svc.startTime
+    ? { label: "Not started", cls: "not-started" }
+    : !svc.finishTime
+      ? { label: "In Progress", cls: "in-progress" }
+      : svc.complianceResult === "Compliant"
+        ? { label: "Compliant", cls: "compliant" }
+        : { label: "Non-Compliant", cls: "non-compliant" };
+
+  let rowHtml = `
     <tr class="${isExpanded ? "selected" : ""}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
       <td><input type="checkbox" class="item-checkbox" data-table="preset" data-id="service-${index}" onclick="event.stopPropagation(); toggleItemSelection('preset', 'service-${index}')" /></td>
       <td>${index + 1}</td>
-      <td><span id="${prefix}-timer-display">${elapsed}</span> <span style="color:var(--text-secondary);font-size:12px">/ ${limits.exposureMax} min</span></td>
       <td>${esc(svc.serviceType ?? "")}</td>
       <td>${esc(svc.itemType ?? "")}</td>
+      <td>${svc.startTime ? formatTime(svc.startTime) : "—"}</td>
+      <td>${svc.finishTime ? formatTime(svc.finishTime) : "—"}</td>
       <td>${startTempField}</td>
       <td>${finishTempField}</td>
-      <td>${actionBtn}</td>
+      <td>
+        <span class="fc-status-badge ${svcStatus.cls}">
+          <span class="fc-status-dot"></span>${svcStatus.label}
+        </span>
+      </td>
+      <td>
+        <div class="timer-counter">
+          <span class="timer-value" id="${prefix}-timer-display">${elapsed}</span>
+          <span class="timer-max">/ ${limits.exposureMax} min</span>
+        </div>
+        ${actionBtn}
+      </td>
     </tr>
   `;
 
@@ -839,17 +902,22 @@ function renderServiceRow(svc, index, submitted, limits, job) {
 	if (isExpanded) {
 		rowHtml += `
       <tr class="expanded-row">
-        <td colspan="7">
+        <td colspan="10">
           <div class="fc-expanded-panel">
             <div class="preset-grid" style="margin-bottom: 16px;">
               <div class="form-group"><label class="form-label">Start Time</label>
                 <input type="time" class="form-input" id="${prefix}-startTime-expanded" value="${formatTime(svc.startTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'startTime', this.value)" /></div>
               <div class="form-group"><label class="form-label">Finish Time</label>
                 <input type="time" class="form-input" id="${prefix}-finishTime-expanded" value="${formatTime(svc.finishTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'finishTime', this.value)" /></div>
-              <div class="timer-cell">
-                <div class="timer-info">
-                  <div class="timer-label">Timer</div>
-                  <div class="timer-display" id="${prefix}-timer-display-expanded">${elapsed} <span>/ ${limits.exposureMax} min</span></div>
+              <div class="metric-card">
+                <div class="metric-label">Timer</div>
+                <div class="timer-counter">
+                  <span class="timer-value" id="${prefix}-timer-display-expanded">${elapsed}</span>
+                  <span class="timer-max">/ ${limits.exposureMax} min</span>
+                </div>
+                <div class="fc-timer-buttons" style="margin-top:8px">
+                  ${showStart ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startService(${index})">Start Timer</button>` : ""}
+                  ${showFinish ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish Timer</button>` : ""}
                 </div>
               </div>
               <div class="form-group field-hts"><label class="form-label required">Item Start (°C)</label>
@@ -876,6 +944,10 @@ function renderServiceRow(svc, index, submitted, limits, job) {
                 ${svc.complianceResult === "NonCompliant" ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
                 ${svc.complianceResult == null ? `<div class="metric-hint">Calculated on finish</div>` : ""}
               </div>
+            </div>
+            <div class="form-group" style="margin-top:16px">
+              <label class="form-label">Remarks</label>
+              <textarea class="form-input" id="${prefix}-remarks-expanded" placeholder="Remarks" rows="3" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'remarks', this.value)">${svc.remarks || ""}</textarea>
             </div>
             <div id="${prefix}-error" class="badge-error hidden" style="margin-top:12px"></div>
           </div>
@@ -1006,11 +1078,11 @@ function startServiceTimerUpdates() {
 		
 		// Update food checker items
 		if (job.foodChecker?.items) {
-			job.foodChecker.items.forEach((item) => {
+			job.foodChecker.items.forEach((item, i) => {
 				if (item.startTime && !item.finishTime) {
 					const elapsed = elapsedMin(item.startTime);
 					const limits = hmLimits(job);
-					const elapsedEl = document.getElementById(`fc-elapsed-${item.linkId}`);
+					const elapsedEl = document.getElementById(`fc-timer-${i}`);
 					const warning = isTimerWarning(elapsed, limits.exposureMax);
 					if (elapsedEl) {
 						elapsedEl.textContent = fmtElapsed(elapsed);
@@ -1099,11 +1171,13 @@ function renderPresetServices(body, job, p, submitted, tabs) {
         <thead><tr>
           <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('preset')" /></th>
           <th style="width:40px">#</th>
-          <th>TIMER</th>
           <th>SERVICE</th>
           <th>TYPE</th>
+          <th>START TIME</th>
+          <th>FINISH TIME</th>
           <th>ITEM START °C *</th>
           <th>ITEM FINISH °C</th>
+          <th>ITEM STATUS</th>
           <th>ACTION</th>
         </tr></thead>
         <tbody>
@@ -1112,16 +1186,11 @@ function renderPresetServices(body, job, p, submitted, tabs) {
       </table>
     </div>
 
-    <div class="form-group" style="margin-top:16px">
-      <label class="form-label">Remarks</label>
-      <textarea class="form-input" id="preset-remarks" placeholder="Remarks" rows="3" oninput="updatePresetRemarks(this.value)">${job.preset.remarks || ""}</textarea>
-    </div>
-
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
       <div class="service-panel-footer-text">
         ${submitted ? '<span style="color:var(--accent)">Already submitted</span> · ' : ""}Submit is enabled once at least one service is started and every started service is finished.
       </div>
-      <button type="button" class="btn-primary" onclick="submitStage('preset')" ${services.length > 0 && services.some((s) => s.startTime) && services.every((s) => !s.startTime || s.finishTime) ? "" : "disabled"}>${submitted ? "Re-submit" : "Submit"}</button>
+      <button type="button" class="btn-primary" onclick="submitStage('preset')" ${services.length > 0 && services.some((s) => s.startTime) && services.every((s) => !s.startTime || s.finishTime) ? "" : "disabled"}>Submit</button>
     </div>
   `;
 }
@@ -1390,13 +1459,11 @@ function renderPresetItems(body, job, p, submitted, tabs) {
         <thead><tr>
           <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('presetItems')" /></th>
           <th style="width:40px">#</th>
-          <th>CLASS</th>
-          <th>ITEM DESCRIPTION</th>
-          <th>SKU</th>
-          <th>QTY</th>
+          <th>ITEM</th>
+          <th>START TIME</th>
+          <th>FINISH TIME</th>
           <th>START °C *</th>
           <th>FINISH °C</th>
-          <th>ELAPSED</th>
           <th>ITEM STATUS</th>
           <th>ACTION</th>
         </tr></thead>
@@ -1412,6 +1479,7 @@ function renderPresetItems(body, job, p, submitted, tabs) {
 
 function renderPresetSICC2Row(item, i, submitted, job) {
 	const st = itemStatus(item, job);
+	const limits = hmLimits(job);
 	const isInProgress = st.cls === "in-progress";
 	const isFinished = !!item.complianceResult;
 	const isExpanded = state.presetSICC2Expanded === item.linkId;
@@ -1437,13 +1505,13 @@ function renderPresetSICC2Row(item, i, submitted, job) {
 	// ACTION button: toggle between Start Timer / Finish Timer (same as FC table)
 	let actionBtn;
 	if (isFinished) {
-		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">Close</button>`;
+		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">Close</button>`;
 	} else if (!item.startTime && !submitted) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
 	} else if (item.startTime && !item.finishTime && !submitted) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
 	} else {
-		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
+		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); togglePresetSICC2Expand('${item.linkId}')">View</button>`;
 	}
 
 	let isItemSelected = (state.presetItemsSelection || []).includes(item.linkId);
@@ -1451,15 +1519,22 @@ function renderPresetSICC2Row(item, i, submitted, job) {
     <tr class="${isExpanded ? "selected" : ""}" onclick="togglePresetSICC2Expand('${item.linkId}')" style="cursor: pointer;">
       <td><input type="checkbox" class="item-checkbox" data-table="presetItems" data-id="${item.linkId}" onclick="event.stopPropagation(); toggleItemSelection('presetItems', '${item.linkId}')" ${isItemSelected ? 'checked' : ''} /></td>
       <td>${i + 1}</td>
-      <td>${esc(item.class)}</td>
-      <td>${esc(item.item_description)}</td>
-      <td>${esc(item.sku)}</td>
-      <td>${esc(item.quantity)}</td>
+      <td>
+        <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)} · Qty: ${esc(item.quantity)}</div>
+      </td>
+      <td>${item.startTime ? formatTime(item.startTime) : "—"}</td>
+      <td>${item.finishTime ? formatTime(item.finishTime) : "—"}</td>
       <td>${startTempField}</td>
       <td>${finishTempField}</td>
-      <td><span id="preset-elapsed-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
       <td>${statusBadge}</td>
-      <td>${actionBtn}</td>
+      <td>
+        <div class="timer-counter">
+          <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+          <span class="timer-max">/ ${limits.exposureMax} min</span>
+        </div>
+        ${actionBtn}
+      </td>
     </tr>
   `;
 
@@ -1467,7 +1542,7 @@ function renderPresetSICC2Row(item, i, submitted, job) {
 		const limits = hmLimits(job);
 		rowHtml += `
       <tr class="expanded-row">
-        <td colspan="10">
+        <td colspan="9">
           <div class="fc-expanded-panel">
             <div class="fc-expanded-grid">
               <div class="fc-expanded-field">
@@ -1489,10 +1564,10 @@ function renderPresetSICC2Row(item, i, submitted, job) {
             </div>
 
             <div class="fc-timer-bar">
-              <div class="fc-timer-display">
-                <div class="fc-timer-label">TIMER</div>
-                <div class="fc-timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"} <span>/ ${limits.exposureMax} min</span></div>
-              </div>
+              <div class="timer-counter">
+                  <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+                  <span class="timer-max">/ ${limits.exposureMax} min</span>
+                </div>
               <div class="fc-timer-buttons">
                 ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
                 ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
@@ -1512,6 +1587,10 @@ function renderPresetSICC2Row(item, i, submitted, job) {
                 ${item.complianceResult === "Non-Compliant" ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
                 ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ""}
               </div>
+            </div>
+            <div class="form-group" style="margin-top:16px">
+              <label class="form-label">Remarks</label>
+              <textarea class="form-input" id="preset-remarks-${item.linkId}" placeholder="Remarks" rows="3" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updatePresetItemField('${item.linkId}', 'remarks', this.value)">${item.remarks || ""}</textarea>
             </div>
           </div>
         </td>
@@ -1561,10 +1640,9 @@ function togglePresetSICC2Expand(linkId) {
                     <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
                   </div>
                 </div>
-                <div class="fc-timer-bar">
-                  <div class="fc-timer-display">
-                    <div class="fc-timer-label">TIMER</div>
-                    <div class="fc-timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"} <span>/ ${limits.exposureMax} min</span></div>
+                <div class="timer-counter">
+                    <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+                    <span class="timer-max">/ ${limits.exposureMax} min</span>
                   </div>
                   <div class="fc-timer-buttons">
                     ${!item.startTime ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
@@ -1696,6 +1774,7 @@ function startService(index) {
 		version: 1,
 	});
 	renderDetail();
+	updatePresetTabBadge();
 	startServiceTimerUpdates();
 }
 
@@ -1735,6 +1814,7 @@ function finishService(index) {
 		version: 1,
 	});
 	renderDetail();
+	updatePresetTabBadge();
 	const stillRunning = job.preset.services.some(
 		(s) => s.startTime && !s.finishTime,
 	);
@@ -1888,26 +1968,22 @@ function renderFoodChecker(body, job) {
 							? `
             <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
-            <th>CLASS</th>
-            <th>ITEM DESCRIPTION</th>
-            <th>SKU</th>
-            <th>QTY</th>
+            <th>ITEM</th>
+            <th>START TIME</th>
+            <th>FINISH TIME</th>
             <th>START °C *</th>
             <th>FINISH °C</th>
-            <th>ELAPSED</th>
             <th>ITEM STATUS</th>
             <th>ACTION</th>
           `
 							: `
             <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
-            <th>CLASS</th>
-            <th>ITEM DESCRIPTION</th>
-            <th>SKU</th>
-            <th>QTY</th>
+            <th>ITEM</th>
+            <th>START TIME</th>
+            <th>FINISH TIME</th>
             <th>START °C *</th>
             <th>FINISH °C</th>
-            <th>ELAPSED</th>
             <th>ITEM STATUS</th>
             <th>ACTION</th>
           `
@@ -1931,6 +2007,7 @@ function renderFoodChecker(body, job) {
 function renderFCRow(job, item, i, submitted) {
 	const site = job.site || "SICC2";
 	const st = itemStatus(item, job);
+	const limits = hmLimits(job);
 	const dis = submitted ? "disabled" : "";
 	const isSelected = (state.foodCheckerSelection || []).includes(item.linkId);
 	const isInProgress = st.cls === "in-progress";
@@ -1939,18 +2016,18 @@ function renderFCRow(job, item, i, submitted) {
 	let actionBtn = "";
 	if (site === "SICC1") {
 		if (!item.startTime && !submitted) {
-			actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+			actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
 		} else if (item.startTime && !item.finishTime && !submitted) {
-			actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+			actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
 		} else if (isFinished && item.complianceResult === "Non-Compliant") {
-			actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
+			actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
 		}
 	} else if (!item.startTime && !submitted) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>`;
 	} else if (item.startTime && !item.finishTime && !submitted) {
-		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
+		actionBtn = `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>`;
 	} else if (isFinished && item.complianceResult === "Non-Compliant") {
-		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
+		actionBtn = `<button type="button" class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-left:12px" onclick="event.stopPropagation(); document.getElementById('exc-fc-${item.linkId}-immediate')?.focus()">Exception</button>`;
 	}
 
 	const statusBadge = isInProgress
@@ -1963,10 +2040,12 @@ function renderFCRow(job, item, i, submitted) {
     <tr class="${isSelected ? "selected" : ""}" onclick="toggleFCExpand('${item.linkId}')" style="cursor: pointer;">
       <td><input type="checkbox" class="item-checkbox" data-table="foodchecker" data-id="${item.linkId}" ${isSelected ? "checked" : ""} ${isFinished || submitted ? "disabled" : ""} onclick="event.stopPropagation(); toggleItemSelection('foodchecker', '${item.linkId}')" /></td>
       <td>${i + 1}</td>
-      <td>${esc(item.class)}</td>
-      <td>${esc(item.item_description)}</td>
-      <td>${esc(item.sku)}</td>
-      <td>${esc(item.quantity)}</td>
+      <td>
+        <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)} · Qty: ${esc(item.quantity)}</div>
+      </td>
+      <td>${item.startTime ? formatTime(item.startTime) : "—"}</td>
+      <td>${item.finishTime ? formatTime(item.finishTime) : "—"}</td>
       <td>${
 				state.fcExpanded === item.linkId
 					? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + " °C" : "—"}</div>`
@@ -1979,9 +2058,14 @@ function renderFCRow(job, item, i, submitted) {
 						: `<input type="number" step="0.1" class="form-input" style="width:90px" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${dis} onclick="event.stopPropagation()" oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" />`
 					: "—"
 			}</td>
-      <td><span id="fc-elapsed-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
       <td>${statusBadge}</td>
-      <td>${actionBtn}</td>
+      <td>
+        <div class="timer-counter">
+          <span class="timer-value" id="fc-timer-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+          <span class="timer-max">/ ${limits.exposureMax} min</span>
+        </div>
+        ${actionBtn}
+      </td>
     </tr>
   `;
 
@@ -2002,7 +2086,7 @@ function renderFCExpandedPanel(job, item, submitted) {
 
 	return `
     <tr class="expanded-row">
-      <td colspan="10">
+      <td colspan="9">
         <div class="fc-expanded-panel">
           <div class="fc-expanded-grid">
             <div class="fc-expanded-field">
@@ -2024,10 +2108,9 @@ function renderFCExpandedPanel(job, item, submitted) {
           </div>
 
           <!-- Timer Control Bar -->
-          <div class="fc-timer-bar">
-            <div class="fc-timer-display">
-              <div class="fc-timer-label">TIMER</div>
-              <div class="fc-timer-value">${elapsed} <span>/ ${hmLimits(job).exposureMax} min</span></div>
+          <div class="timer-counter">
+              <span class="timer-value">${elapsed}</span>
+              <span class="timer-max">/ ${hmLimits(job).exposureMax} min</span>
             </div>
             <div class="fc-timer-buttons">
               ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
@@ -2111,14 +2194,16 @@ function startFCTimer() {
 			if (item.startTime && !item.finishTime) {
 				const elapsed = elapsedMin(item.startTime);
 				// Update elapsed in table row
-				const rowEl = document.getElementById(`fc-elapsed-${i}`);
+				const rowEl = document.getElementById(`fc-timer-${i}`);
 				if (rowEl) rowEl.textContent = fmtElapsed(elapsed);
 				// Update expanded panel if this item is expanded
 				if (state.fcExpanded === item.linkId) {
-					const timerVal = document.querySelector(".fc-timer-value");
+					const timerVal = document.querySelector(".timer-value");
+					const timerMax = document.querySelector(".timer-max");
 					if (timerVal) {
 						const limits = hmLimits(job);
-						timerVal.innerHTML = `${fmtElapsed(elapsed)} <span>/ ${limits.exposureMax} min</span>`;
+						timerVal.textContent = fmtElapsed(elapsed);
+						if (timerMax) timerMax.textContent = `/ ${limits.exposureMax} min`;
 					}
 				}
 			}
@@ -2161,6 +2246,7 @@ window.toggleFCExpand = toggleFCExpand;
 
 function renderItemRow(job, item, i, submitted) {
 	const st = itemStatus(item, job);
+	const limits = hmLimits(job);
 	const dis = submitted ? "disabled" : "";
 	const finished = !!item.complianceResult;
 	const started = !!item.startTime && !finished;
@@ -2173,15 +2259,20 @@ function renderItemRow(job, item, i, submitted) {
 			: `<button type="button" class="btn-primary" id="fc-st-${item.linkId}" onclick="startItem('${item.linkId}')" ${dis}>Start Timer</button>`;
 	return `
     <tr>
-      <td>${esc(item.sku)}</td>
-      <td>${esc(item.item_description)}</td>
-      <td>${esc(item.class)}</td>
-      <td>${esc(item.quantity)}</td>
+      <td>
+        <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)} · Qty: ${esc(item.quantity)}</div>
+      </td>
       <td><input type="number" step="0.1" class="form-input" style="width:90px" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${dis} oninput="updateItemGate('${item.linkId}')" /></td>
-      <td><span id="fc-elapsed-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span></td>
       <td><input type="number" step="0.1" class="form-input" style="width:90px" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${dis} oninput="updateItemGate('${item.linkId}')" /></td>
       <td>${pill(st.label, st.cls, st.el)}</td>
-      <td>${action}</td>
+      <td>
+        <div class="timer-counter">
+          <span class="timer-value" id="fc-timer-${i}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+          <span class="timer-max">/ ${limits.exposureMax} min</span>
+        </div>
+        ${action}
+      </td>
     </tr>`;
 }
 
@@ -2275,6 +2366,8 @@ function startItem(linkId) {
 		version: 1,
 	});
 	renderDetail();
+	if (isPresetItem) updatePresetTabBadge();
+	else updateFcTabBadge();
 	if (isPresetItem) startPresetTimer();
 	else checkAndStartFCTimer();
 }
@@ -2320,6 +2413,8 @@ function finishItem(linkId) {
 		version: 1,
 	});
 	renderDetail();
+	if (isPresetItem) updatePresetTabBadge();
+	else updateFcTabBadge();
 	if (isPresetItem) checkPresetTimerStop();
 	else checkAndStartFCTimer();
 }
@@ -2494,6 +2589,7 @@ function updateDispatchBeforeExitTime(type, value) {
 	const exitTimeInput = document.getElementById(`d-${type}-exit-time`);
 	const nowBtn = exitTimeInput?.nextElementSibling;
 	if (nowBtn && nowBtn.tagName === "BUTTON") nowBtn.style.display = "none";
+	updateDispatchTabBadge();
 }
 window.updateDispatchBeforeExitTime = updateDispatchBeforeExitTime;
 
@@ -2525,6 +2621,7 @@ function submitDispatch(type) {
 
 	persistJob(job);
 	renderDispatch(document.getElementById("detail-body"), job);
+	updateDispatchTabBadge();
 }
 window.submitDispatch = submitDispatch;
 
@@ -2642,9 +2739,7 @@ function renderDispatchPanel(dispatch, items, type, prereqFinished = true) {
         <thead>
           <tr>
             <th style="width:40px">#</th>
-            <th style="width:80px">CLASS</th>
-            <th>ITEM DESCRIPTION</th>
-            <th style="width:100px">SKU</th>
+            <th>ITEM</th>
             <th style="width:140px">BEFORE-EXIT TEMP °C *</th>
             <th style="width:120px">ITEM RESULT</th>
           </tr>
@@ -2661,9 +2756,10 @@ function renderDispatchPanel(dispatch, items, type, prereqFinished = true) {
 									: null;
 							return `<tr data-linkid="${item.linkId}">
               <td>${i + 1}</td>
-              <td>${esc(item.class)}</td>
-              <td>${esc(item.item_description)}</td>
-              <td>${esc(item.sku)}</td>
+              <td>
+                <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)}</div>
+              </td>
               <td><input type="number" step="0.1" class="form-input" value="${itemTemp}" ${tempDisabled} onchange="updateDispatchItemTemp('${type}', '${item.linkId}', this.value)" onclick="event.stopPropagation()" style="width:100px" /></td>
               <td>${itemResult ? `<span class="status-pill ${itemResult === "Compliant" ? "compliant" : "nc"}">${itemResult}</span>` : '<span class="status-pill not-started">Awaiting</span>'}</td>
             </tr>`;
@@ -3006,6 +3102,15 @@ function commitStage(stage, resolved, method) {
 		});
 	}
 
+	// Check if all stages are completed
+	if (
+		job.preset?.status === "Submitted" &&
+		job.foodChecker?.status === "Submitted" &&
+		job.dispatch?.status === "Submitted"
+	) {
+		job.completed = new Date().toISOString();
+	}
+
 	maybeCloseJob(job);
 	persistJob(job);
 
@@ -3013,6 +3118,12 @@ function commitStage(stage, resolved, method) {
 	if (state.activeTab === "dispatch") {
 		renderDispatch(document.getElementById("detail-body"), job);
 	}
+
+	// Update tab badges after stage commit
+	renderDetail();
+	updatePresetTabBadge();
+	updateFcTabBadge();
+	updateDispatchTabBadge();
 }
 
 // ── Live tick for detail ────────────────────────────────────────────
@@ -3029,7 +3140,7 @@ function tickDetailLive() {
 	}
 	if (state.activeTab === "foodchecker") {
 		(job.foodChecker.items || []).forEach((it, i) => {
-			const el = document.getElementById("fc-elapsed-" + i);
+			const el = document.getElementById("fc-timer-" + i);
 			if (!el) return;
 			const st = itemStatus(it, job);
 			if (st.el != null) el.textContent = fmtElapsed(st.el);

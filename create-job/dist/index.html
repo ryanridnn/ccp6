@@ -3986,18 +3986,11 @@ var FLIGHTS = [
   { flight_number: "CI75", meal_service: "Breakfast", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "09:15", count: 2, site: "SICC2", ta_group: "B", trays: 130, staff: 4 },
   { flight_number: "BR18", meal_service: "Dinner", airline: "EVA Air (BR)", flight_date: "2026-08-07", etd: "20:00", count: 3, site: "SICC2", ta_group: "C", trays: 260, staff: 7 },
   { flight_number: "KE65", meal_service: "Lunch", airline: "Korean Air (KE)", flight_date: "2026-08-07", etd: "11:30", count: 4, site: "SICC2", ta_group: "A", trays: 300, staff: 8 },
-  { flight_number: "BA5", meal_service: "Lunch", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
-  { flight_number: "CX88", meal_service: "Dinner", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "B", trays: 190, staff: 5 },
-  { flight_number: "QF1", meal_service: "Breakfast", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "A", trays: 240, staff: 6 },
-  { flight_number: "NZ5", meal_service: "Lunch", airline: "Air New Zealand (NZ)", flight_date: "2026-08-07", etd: "12:15", count: 2, site: "SICC1", ta_group: "C", trays: 160, staff: 4 },
-  { flight_number: "VA43", meal_service: "Dinner", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "18:30", count: 3, site: "SICC1", ta_group: "D", trays: 250, staff: 7 },
-  { flight_number: "JQ7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:45", count: 2, site: "SICC1", ta_group: "B", trays: 140, staff: 4 },
-  { flight_number: "TT29", meal_service: "Lunch", airline: "Tiger Airways (TT)", flight_date: "2026-08-07", etd: "13:00", count: 2, site: "SICC1", ta_group: "C", trays: 170, staff: 5 },
-  { flight_number: "FD31", meal_service: "Dinner", airline: "Thai AirAsia (FD)", flight_date: "2026-08-07", etd: "20:15", count: 3, site: "SICC1", ta_group: "A", trays: 230, staff: 6 },
-  { flight_number: "AK15", meal_service: "Breakfast", airline: "AirAsia (AK)", flight_date: "2026-08-07", etd: "08:30", count: 2, site: "SICC1", ta_group: "D", trays: 150, staff: 4 },
-  { flight_number: "5J12", meal_service: "Lunch", airline: "Cebu Pacific (5J)", flight_date: "2026-08-07", etd: "11:45", count: 3, site: "SICC1", ta_group: "B", trays: 210, staff: 6 },
-  { flight_number: "PR73", meal_service: "Dinner", airline: "Philippine Airlines (PR)", flight_date: "2026-08-07", etd: "21:00", count: 2, site: "SICC1", ta_group: "C", trays: 180, staff: 5 },
-  { flight_number: "MI41", meal_service: "Breakfast", airline: "SilkAir (MI)", flight_date: "2026-08-07", etd: "09:30", count: 2, site: "SICC1", ta_group: "A", trays: 160, staff: 4 }
+  { flight_number: "SQ836", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "07:15", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
+  { flight_number: "SQ318", meal_service: "Lunch", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "12:30", count: 3, site: "SICC1", ta_group: "B", trays: 240, staff: 6 },
+  { flight_number: "SQ712", meal_service: "Dinner", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "C", trays: 200, staff: 5 },
+  { flight_number: "SQ292", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "D", trays: 260, staff: 7 },
+  { flight_number: "SQ478", meal_service: "Lunch", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "14:15", count: 2, site: "SICC1", ta_group: "A", trays: 170, staff: 5 }
 ];
 function buildSeed() {
   const completedSICC1 = completeJob(JOB_4, ago(60));
@@ -4366,6 +4359,16 @@ function setServiceDropdown(idx, field, value) {
   state.createServices[idx][field] = value;
 }
 window.setServiceDropdown = setServiceDropdown;
+function syncServicesFromDOM() {
+  const selects = document.querySelectorAll("#create-services-list .svc-select");
+  selects.forEach((sel) => {
+    const idx = parseInt(sel.dataset.idx, 10);
+    const field = sel.dataset.field;
+    if (!isNaN(idx) && field && state.createServices[idx]) {
+      state.createServices[idx][field] = sel.value;
+    }
+  });
+}
 function renderServicesTable() {
   const list = document.getElementById("create-services-list");
   if (!list)
@@ -4398,7 +4401,7 @@ function renderServicesTable() {
       const serviceTypeOpts = ["1st service", "2nd service"];
       const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
       const opt = (o, val) => '<option value="' + o + '"' + (val === o ? " selected" : "") + ">" + o + "</option>";
-      const select = (field, opts, val, i) => `<select class="svc-select" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join("")}</select>`;
+      const select = (field, opts, val, i) => `<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join("")}</select>`;
       html += `
 				<tr>
 					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
@@ -4558,7 +4561,15 @@ function initCreateFlightDropdown() {
   const list = document.getElementById("create-flight-list");
   if (!input || !list)
     return;
-  const getFilteredFlights = () => seedFlights().filter((f) => f.site === state.siccFilter && f.airline !== "Standard / Other Airline");
+  const getFilteredFlights = () => seedFlights().filter((f) => {
+    if (f.site !== state.siccFilter)
+      return false;
+    if (f.airline === "Standard / Other Airline")
+      return false;
+    if (state.siccFilter === "SICC1")
+      return f.airline === "Singapore Airlines (SQ)" && f.flight_number.toUpperCase().startsWith("SQ");
+    return true;
+  });
   const render = (showAll = false) => {
     const q = (showAll ? "" : input.value.trim()).toLowerCase();
     const matches = getFilteredFlights().filter((f) => !q || f.flight_number.toLowerCase().includes(q) || f.airline.toLowerCase().includes(q));
@@ -4934,6 +4945,7 @@ function focusField(fieldId) {
 }
 function submitCreateJob(event) {
   event.preventDefault();
+  syncServicesFromDOM();
   const errors = validateCreateForm();
   if (errors.length > 0) {
     showErrors(errors);
@@ -4948,6 +4960,9 @@ function submitCreateJob(event) {
   const flightDate = flight.flight_date;
   const jobId = nextJobId(flightDate);
   const now = new Date().toISOString();
+  const isManual = state.createMode === "manual";
+  const defaultTrays = isManual ? null : 0;
+  const defaultStaff = isManual ? null : 0;
   const selectedItems = state.createItems;
   const linkedItems = selectedItems.map((item, i) => ({
     link_id: "LINK-" + jobId + "-" + (i + 1),
@@ -5033,8 +5048,8 @@ function submitCreateJob(event) {
     preset: site === "SICC2" ? {
       status: "NotStarted",
       items: presetItems,
-      traysHandled: 0,
-      staffCount: 0,
+      traysHandled: defaultTrays,
+      staffCount: defaultStaff,
       services: state.createServices.map((s) => ({
         serviceType: s.serviceType,
         itemType: s.itemType,
@@ -5042,8 +5057,8 @@ function submitCreateJob(event) {
         finishTime: null,
         startTemp: null,
         finishTemp: null,
-        traysHandled: 0,
-        staffCount: 0,
+        traysHandled: defaultTrays,
+        staffCount: defaultStaff,
         exposureDurationMin: null,
         maxSurfaceTemp: null,
         complianceResult: null
@@ -5057,8 +5072,8 @@ function submitCreateJob(event) {
       finishTempHorsDoeuvre: null,
       startTempDessert: null,
       finishTempDessert: null,
-      traysHandled: 0,
-      staffCount: 0,
+      traysHandled: defaultTrays,
+      staffCount: defaultStaff,
       exposureDurationMin: null,
       complianceResult: null,
       services: state.createServices.map((s) => ({
@@ -5068,8 +5083,8 @@ function submitCreateJob(event) {
         finishTime: null,
         startTemp: null,
         finishTemp: null,
-        traysHandled: 0,
-        staffCount: 0,
+        traysHandled: defaultTrays,
+        staffCount: defaultStaff,
         exposureDurationMin: null,
         maxSurfaceTemp: null,
         complianceResult: null

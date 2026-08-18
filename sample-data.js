@@ -1444,19 +1444,12 @@ const FLIGHTS = [
   { flight_number: "BR18", meal_service: "Dinner", airline: "EVA Air (BR)", flight_date: "2026-08-07", etd: "20:00", count: 3, site: "SICC2", ta_group: "C", trays: 260, staff: 7 },
   { flight_number: "KE65", meal_service: "Lunch", airline: "Korean Air (KE)", flight_date: "2026-08-07", etd: "11:30", count: 4, site: "SICC2", ta_group: "A", trays: 300, staff: 8 },
 
-  // SICC1 Flights (10+)
-  { flight_number: "BA5", meal_service: "Lunch", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "14:30", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
-  { flight_number: "CX88", meal_service: "Dinner", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "B", trays: 190, staff: 5 },
-  { flight_number: "QF1", meal_service: "Breakfast", airline: "Qantas (QF)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "A", trays: 240, staff: 6 },
-  { flight_number: "NZ5", meal_service: "Lunch", airline: "Air New Zealand (NZ)", flight_date: "2026-08-07", etd: "12:15", count: 2, site: "SICC1", ta_group: "C", trays: 160, staff: 4 },
-  { flight_number: "VA43", meal_service: "Dinner", airline: "Virgin Australia (VA)", flight_date: "2026-08-07", etd: "18:30", count: 3, site: "SICC1", ta_group: "D", trays: 250, staff: 7 },
-  { flight_number: "JQ7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:45", count: 2, site: "SICC1", ta_group: "B", trays: 140, staff: 4 },
-  { flight_number: "TT29", meal_service: "Lunch", airline: "Tiger Airways (TT)", flight_date: "2026-08-07", etd: "13:00", count: 2, site: "SICC1", ta_group: "C", trays: 170, staff: 5 },
-  { flight_number: "FD31", meal_service: "Dinner", airline: "Thai AirAsia (FD)", flight_date: "2026-08-07", etd: "20:15", count: 3, site: "SICC1", ta_group: "A", trays: 230, staff: 6 },
-  { flight_number: "AK15", meal_service: "Breakfast", airline: "AirAsia (AK)", flight_date: "2026-08-07", etd: "08:30", count: 2, site: "SICC1", ta_group: "D", trays: 150, staff: 4 },
-  { flight_number: "5J12", meal_service: "Lunch", airline: "Cebu Pacific (5J)", flight_date: "2026-08-07", etd: "11:45", count: 3, site: "SICC1", ta_group: "B", trays: 210, staff: 6 },
-  { flight_number: "PR73", meal_service: "Dinner", airline: "Philippine Airlines (PR)", flight_date: "2026-08-07", etd: "21:00", count: 2, site: "SICC1", ta_group: "C", trays: 180, staff: 5 },
-  { flight_number: "MI41", meal_service: "Breakfast", airline: "SilkAir (MI)", flight_date: "2026-08-07", etd: "09:30", count: 2, site: "SICC1", ta_group: "A", trays: 160, staff: 4 },
+  // SICC1 Flights (SQ only)
+  { flight_number: "SQ836", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "07:15", count: 2, site: "SICC1", ta_group: "A", trays: 180, staff: 5 },
+  { flight_number: "SQ318", meal_service: "Lunch", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "12:30", count: 3, site: "SICC1", ta_group: "B", trays: 240, staff: 6 },
+  { flight_number: "SQ712", meal_service: "Dinner", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "19:45", count: 2, site: "SICC1", ta_group: "C", trays: 200, staff: 5 },
+  { flight_number: "SQ292", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "06:00", count: 3, site: "SICC1", ta_group: "D", trays: 260, staff: 7 },
+  { flight_number: "SQ478", meal_service: "Lunch", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "14:15", count: 2, site: "SICC1", ta_group: "A", trays: 170, staff: 5 },
 ];
 
 export function buildSeed() {

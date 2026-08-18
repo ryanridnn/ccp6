@@ -534,6 +534,7 @@ function renderCurrent() {
     (j) =>
       j.closed !== true &&
       j.job_status !== "Voided" &&
+      !j.completed &&
       j.site === state.siccFilter,
   );
 

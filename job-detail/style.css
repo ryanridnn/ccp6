@@ -1075,6 +1075,27 @@ select.form-input {
 	color: var(--text-primary);
 }
 
+/* Timer counter in table cell */
+.timer-counter {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.timer-counter .timer-value {
+	font-size: 18px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	color: var(--text-primary);
+	line-height: 1;
+}
+
+.timer-counter .timer-max {
+	font-size: 12px;
+	color: var(--text-secondary);
+	font-weight: 400;
+}
+
 .status-pill {
 	display: inline-flex;
 	align-items: center;
@@ -1845,6 +1866,7 @@ select.form-input {
 }
 
 .fc-expanded-panel {
+	width: 100%;
 	padding: 20px;
 	background: var(--bg-surface);
 	border: 1px solid var(--border);

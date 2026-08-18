@@ -577,6 +577,17 @@ function setServiceDropdown(idx, field, value) {
 }
 window.setServiceDropdown = setServiceDropdown;
 
+function syncServicesFromDOM() {
+	const selects = document.querySelectorAll("#create-services-list .svc-select");
+	selects.forEach((sel) => {
+		const idx = parseInt(sel.dataset.idx, 10);
+		const field = sel.dataset.field;
+		if (!isNaN(idx) && field && state.createServices[idx]) {
+			state.createServices[idx][field] = sel.value;
+		}
+	});
+}
+
 function renderServicesTable() {
 	const list = document.getElementById("create-services-list");
 	if (!list) return;
@@ -615,7 +626,7 @@ function renderServicesTable() {
 			const opt = (o, val) =>
 				'<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
 			const select = (field, opts, val, i) =>
-				`<select class="svc-select" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join('')}</select>`;
+				`<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join('')}</select>`;
 			html += `
 				<tr>
 					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
@@ -819,7 +830,13 @@ function initCreateFlightDropdown() {
 	const list = document.getElementById("create-flight-list");
 	if (!input || !list) return;
 	const getFilteredFlights = () =>
-		seedFlights().filter((f) => f.site === state.siccFilter && f.airline !== "Standard / Other Airline");
+		seedFlights().filter((f) => {
+			if (f.site !== state.siccFilter) return false;
+			if (f.airline === "Standard / Other Airline") return false;
+			if (state.siccFilter === "SICC1")
+				return f.airline === "Singapore Airlines (SQ)" && f.flight_number.toUpperCase().startsWith("SQ");
+			return true;
+		});
 	const render = (showAll = false) => {
 		const q = (showAll ? "" : input.value.trim()).toLowerCase();
 		const matches = getFilteredFlights().filter(
@@ -1326,6 +1343,7 @@ function focusField(fieldId) {
 function submitCreateJob(event) {
 	event.preventDefault();
 
+	syncServicesFromDOM();
 	const errors = validateCreateForm();
 	if (errors.length > 0) {
 		showErrors(errors);
@@ -1343,6 +1361,9 @@ function submitCreateJob(event) {
 	const flightDate = flight.flight_date;
 	const jobId = nextJobId(flightDate);
 	const now = new Date().toISOString();
+	const isManual = state.createMode === "manual";
+	const defaultTrays = isManual ? null : 0;
+	const defaultStaff = isManual ? null : 0;
 
 	// Build linked items from all items
 	const selectedItems = state.createItems;
@@ -1442,8 +1463,8 @@ function submitCreateJob(event) {
 				? {
 						status: "NotStarted",
 						items: presetItems,
-						traysHandled: 0,
-						staffCount: 0,
+						traysHandled: defaultTrays,
+						staffCount: defaultStaff,
 						services: state.createServices.map((s) => ({
 							serviceType: s.serviceType,
 							itemType: s.itemType,
@@ -1451,8 +1472,8 @@ function submitCreateJob(event) {
 							finishTime: null,
 							startTemp: null,
 							finishTemp: null,
-							traysHandled: 0,
-							staffCount: 0,
+							traysHandled: defaultTrays,
+							staffCount: defaultStaff,
 							exposureDurationMin: null,
 							maxSurfaceTemp: null,
 							complianceResult: null,
@@ -1467,8 +1488,8 @@ function submitCreateJob(event) {
 						finishTempHorsDoeuvre: null,
 						startTempDessert: null,
 						finishTempDessert: null,
-						traysHandled: 0,
-						staffCount: 0,
+						traysHandled: defaultTrays,
+						staffCount: defaultStaff,
 						exposureDurationMin: null,
 						complianceResult: null,
 						services: state.createServices.map((s) => ({
@@ -1478,8 +1499,8 @@ function submitCreateJob(event) {
 							finishTime: null,
 							startTemp: null,
 							finishTemp: null,
-							traysHandled: 0,
-							staffCount: 0,
+							traysHandled: defaultTrays,
+							staffCount: defaultStaff,
 							exposureDurationMin: null,
 							maxSurfaceTemp: null,
 							complianceResult: null,
