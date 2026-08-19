@@ -486,6 +486,15 @@ function pill(label, cls, el) {
   return `<span class="status-pill ${cls}">${label}${time}</span>`;
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 function jobCard(job) {
   const preset = livePresetStatus(job);
   const fc = fcSummary(job);
@@ -501,8 +510,8 @@ function jobCard(job) {
       <div class="job-card-head">
         ${logoUrl ? `<div class="job-card-logo"><img src="${logoUrl}" alt="${esc(job.airline)}" loading="lazy"></div>` : ""}
         <div class="job-card-info">
-          <div class="job-card-flight">${esc(job.flight_number)} · ${esc(job.flight_date)}</div>
-          <div class="job-card-meta">ETD ${esc(job.etd)} · ${esc(job.meal_service)} · Grp ${esc(job.ta_group)} · ${esc(job.airline)} · ${esc(job.site)}</div>
+          <div class="job-card-flight">${esc(job.flight_number)} · ${formatDate(job.flight_date)}</div>
+          <div class="job-card-meta">ETD ${esc(job.etd)} · Group ${esc(job.ta_group)} · ${esc(job.meal_service)}</div>
           <span class="job-id">${esc(job.job_id)}</span>
         </div>
       </div>

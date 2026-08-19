@@ -953,7 +953,7 @@ select.form-input {
   border-radius: 8px;
   max-height: 240px;
   overflow: auto;
-  z-index: 20;
+  z-index: 100;
 }
 
 .dropdown-item {
@@ -1409,24 +1409,11 @@ select.form-input {
 }
 
 /* ── Create form header row ────────────────────────────── */
-.create-header-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  align-items: flex-start;
-}
-
-.create-flight-group {
-  flex: 0 0 50%;
-  max-width: 50%;
-  min-width: 280px;
-}
-
-/* ETD/Group sizing handled by .create-fields-row grid */
+/* Flight/ETD/Group/Meal Service all in one grid row */
 
 .create-fields-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -1485,7 +1472,7 @@ select.form-input {
   border-spacing: 0;
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .create-items-table thead th {
@@ -2174,18 +2161,6 @@ select.form-input {
   height: 1px;
   background: var(--border);
   margin: 16px 0;
-}
-
-/* ── Rule Set field (4th column) ───────────────────────── */
-.create-ruleset-group {
-  flex: 1;
-  min-width: 140px;
-}
-
-.create-ruleset-group .form-input[readonly] {
-  background: var(--bg-surface-hover);
-  color: var(--text-secondary);
-  cursor: not-allowed;
 }
 
 /* ── Trays/Staff section ────────────────────────────────── */

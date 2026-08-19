@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CCP6 — Create Job</title>
+    <title>CCP6 — Add new</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -19,7 +19,7 @@
         <div class="page-head">
           <div>
             <h1 class="page-title">
-              Create CCP6 Job — <span id="create-sicc-label">SICC1</span>
+              Add new — <span id="create-sicc-label">SICC1</span>
             </h1>
             <div class="sicc-selector" id="create-sicc-selector" style="margin-top: 8px;">
               <button type="button" class="sicc-btn active" data-sicc="SICC1" onclick="switchCreateSICC('SICC1')">SICC1</button>
@@ -44,7 +44,7 @@
         </div>
 
         <div class="form-card">
-          <form id="create-form" onsubmit="submitCreateJob(event)">
+          <form id="create-form" onsubmit="submitCreateJob(event)" novalidate>
             <div class="form-section">
               <div class="create-mode-header">
                 <div class="form-group">
@@ -69,7 +69,7 @@
               </div>
               <div class="create-mode-divider"></div>
 
-              <div class="create-header-row">
+              <div class="create-fields-row">
                 <div class="form-group create-flight-group">
                   <label class="form-label required" for="create-flight"
                     >Flight Number</label
@@ -97,18 +97,25 @@
                       id="create-flight-list"
                     ></div>
                   </div>
+                  <input
+                    type="text"
+                    id="create-flight-manual"
+                    class="form-input hidden"
+                    placeholder="Enter flight number"
+                    autocomplete="off"
+                  />
                 </div>
-              </div>
 
-              <div class="create-fields-row">
                 <div class="form-group create-etd-group">
                   <label class="form-label required" for="create-etd"
                     >ETD (24h)</label
                   >
                   <input
-                    type="time"
+                    type="text"
                     id="create-etd"
                     class="form-input"
+                    placeholder="HH:MM"
+                    maxlength="5"
                     required
                   />
                   <div
@@ -138,23 +145,6 @@
                   <input type="hidden" id="create-group" required />
                   <div
                     id="create-group-readonly"
-                    class="create-readonly-text hidden"
-                  >
-                    <div class="cr-value"></div>
-                  </div>
-                </div>
-
-                <div class="form-group create-ruleset-group">
-                  <label class="form-label">Rule Set</label>
-                  <input
-                    type="text"
-                    id="create-ruleset"
-                    class="form-input"
-                    readonly
-                    placeholder="—"
-                  />
-                  <div
-                    id="create-ruleset-readonly"
                     class="create-readonly-text hidden"
                   >
                     <div class="cr-value"></div>
@@ -202,35 +192,45 @@
             <div class="form-section">
 
             <div
-              class="create-services-section hidden"
+              class="create-services-section"
               id="create-services-section"
             >
               <div class="create-services-header">
                 <h3 class="create-services-title">Services</h3>
+              </div>
+              <div class="create-services-list" id="create-services-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
                 <button
                   type="button"
-                  class="btn-secondary"
+                  class="btn-primary"
                   onclick="addServiceRow()"
+                  style="padding: 6px 12px; font-size: 12px"
                 >
                   + Add Service
                 </button>
               </div>
-              <div class="create-services-list" id="create-services-list"></div>
             </div>
 
-            <div id="create-items-container" class="hidden">
+            <div id="create-items-container">
               <div class="create-items-header">
-                <h3 class="create-items-title">Linked Items</h3>
-                <span class="create-items-count" id="create-items-count"
-                  >0 items selected</span
-                >
+                <h3 class="create-items-title">Item Descriptions</h3>
               </div>
               <div class="create-items-list" id="create-items-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
+                <button
+                  type="button"
+                  class="btn-primary"
+                  onclick="addCreateItem()"
+                  style="padding: 6px 12px; font-size: 12px"
+                >
+                  + Add Item
+                </button>
+              </div>
             </div>
 
             <div
               id="ad-hoc-toggle"
-              class="ad-hoc-toggle hidden"
+              class="ad-hoc-toggle"
               style="margin-top: 24px"
             >
               <label
@@ -250,19 +250,21 @@
               </label>
             </div>
 
-            <div id="ad-hoc-container" class="hidden" style="margin-top: 24px">
+            <div id="ad-hoc-container" style="margin-top: 24px">
               <div class="create-items-header">
                 <h3 class="create-items-title">Ad Hoc Items</h3>
+              </div>
+              <div id="ad-hoc-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
                 <button
                   type="button"
-                  class="btn-secondary"
+                  class="btn-primary"
                   onclick="addAdHocItem()"
                   style="padding: 6px 12px; font-size: 12px"
                 >
                   + Add Item
                 </button>
               </div>
-              <div id="ad-hoc-list"></div>
             </div>
 
             <div id="error-list" class="error-list hidden"></div>
@@ -275,7 +277,7 @@
               >
                 Cancel
               </button>
-              <button type="submit" class="btn-primary">Create job</button>
+              <button type="submit" class="btn-primary">Add new</button>
             </div>
 
             </div>

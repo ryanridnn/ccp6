@@ -235,6 +235,30 @@ const CONFIG = {
 	warningThresholdMin: 5,
 };
 
+// ── SKU master list ───────────────────────────────────────────────
+const SKU_LIST = [
+	{ sku: "100001", desc: "Chicken Tikka Masala" },
+	{ sku: "100002", desc: "Vegetable Korma" },
+	{ sku: "100003", desc: "Garlic Naan" },
+	{ sku: "100004", desc: "Mango Lassi" },
+	{ sku: "100005", desc: "Beef Rendang with Jasmine Rice" },
+	{ sku: "100006", desc: "Pan Seared Salmon" },
+	{ sku: "100007", desc: "Tiramisu Cup" },
+	{ sku: "100008", desc: "Grilled Sea Bass Fillet" },
+	{ sku: "100009", desc: "Chocolate Opera Cake" },
+	{ sku: "100010", desc: "Roasted Chicken Supreme" },
+	{ sku: "100011", desc: "Egg White Omelette" },
+	{ sku: "100012", desc: "Buttermilk Pancake Stack" },
+	{ sku: "100013", desc: "Fresh Fruit Bowl" },
+	{ sku: "100014", desc: "Smoked Salmon Bagel" },
+	{ sku: "100015", desc: "Kaya Toast Set" },
+	{ sku: "100016", desc: "Dim Sum Platter" },
+	{ sku: "100017", desc: "Nasi Lemak" },
+	{ sku: "100018", desc: "Rendang Beef" },
+	{ sku: "100019", desc: "Bibimbap" },
+	{ sku: "100020", desc: "Bulgogi" },
+];
+
 // ── State ───────────────────────────────────────────────────────────
 const state = {
 	jobs: [],
@@ -244,8 +268,8 @@ const state = {
 	siccFilter: "SICC1",
 	presetMethod: null,
 	createMode: "scheduled",
-	createItems: [],
-	createServices: [],
+	createItems: [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }],
+	createServices: [{ serviceType: "", itemType: "" }],
 	serviceExpanded: null,
 	adHocEnabled: false,
 	adHocItems: [],
@@ -508,8 +532,38 @@ function renderCreate() {
 	initCreateModeButtons();
 	initGroupButtons();
 	initCreateFlightDropdown();
+	initETDInput();
+	updateCreateModeUI();
 	updateMealServiceVisibility();
 	updateServicesVisibility();
+	renderCreateItems();
+}
+
+function initETDInput() {
+	const etdInput = document.getElementById("create-etd");
+	if (!etdInput || etdInput.dataset.init) return;
+	etdInput.dataset.init = "1";
+	etdInput.addEventListener("input", (e) => {
+		let v = e.target.value.replace(/\D/g, "");
+		v = v.slice(0, 4);
+		if (v.length >= 2) {
+			let hh = parseInt(v.slice(0, 2), 10);
+			if (hh > 23) hh = 23;
+			v = String(hh).padStart(2, "0") + v.slice(2);
+		}
+		if (v.length >= 4) {
+			let mm = parseInt(v.slice(2, 4), 10);
+			if (mm > 59) mm = 59;
+			v = v.slice(0, 2) + String(mm).padStart(2, "0");
+		}
+		if (v.length >= 3) {
+			e.target.value = v.slice(0, 2) + ":" + v.slice(2);
+		} else if (v.length >= 2) {
+			e.target.value = v.slice(0, 2);
+		} else {
+			e.target.value = v;
+		}
+	});
 }
 
 function updateMealServiceVisibility() {
@@ -545,14 +599,8 @@ function updateLoungeVisibility() {
 function updateServicesVisibility() {
 	const servicesSection = document.getElementById("create-services-section");
 	if (!servicesSection) return;
-	const isSICC1 = state.siccFilter === "SICC1";
-	const hasFlight = !!selectedCreateFlight;
-	if (isSICC1 && hasFlight) {
-		servicesSection.classList.remove("hidden");
-		renderServicesTable();
-	} else {
-		servicesSection.classList.add("hidden");
-	}
+	servicesSection.classList.remove("hidden");
+	renderServicesTable();
 }
 
 function addServiceRow() {
@@ -591,13 +639,6 @@ function syncServicesFromDOM() {
 function renderServicesTable() {
 	const list = document.getElementById("create-services-list");
 	if (!list) return;
-	const isScheduled = state.createMode === "scheduled";
-
-	// Hide "+ Add Service" button in Scheduled mode
-	const addBtn = document.querySelector(
-		"#create-services-section .btn-secondary",
-	);
-	if (addBtn) addBtn.classList.toggle("hidden", isScheduled);
 
 	let html = `
 		<table class="services-table">
@@ -612,31 +653,21 @@ function renderServicesTable() {
 	`;
 
 	state.createServices.forEach((service, idx) => {
-		if (isScheduled) {
-			html += `
-				<tr>
-					<td><span class="svc-text">${esc(service.serviceType || "—")}</span></td>
-					<td><span class="svc-text">${esc(service.itemType || "—")}</span></td>
-					<td></td>
-				</tr>
-			`;
-		} else {
-			const serviceTypeOpts = ["1st service", "2nd service"];
-			const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
-			const opt = (o, val) =>
-				'<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
-			const select = (field, opts, val, i) =>
-				`<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join('')}</select>`;
-			html += `
-				<tr>
-					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
-					<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
-					<td>
-						<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
-					</td>
-				</tr>
-			`;
-		}
+		const serviceTypeOpts = ["1st service", "2nd service"];
+		const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
+		const opt = (o, val) =>
+			'<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + o + '</option>';
+		const select = (field, opts, val, i) =>
+			`<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join('')}</select>`;
+		html += `
+			<tr>
+				<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
+				<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
+				<td>
+					<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
+				</td>
+			</tr>
+		`;
 	});
 
 	html += `</tbody></table>`;
@@ -681,125 +712,64 @@ function initCreateModeButtons() {
 }
 
 function updateCreateModeUI() {
-	const mode = state.createMode;
-	const isScheduled = mode === "scheduled";
-	const hasFlight = !!selectedCreateFlight;
-
-	// Get field groups
+	// Always show all input fields regardless of mode
 	const etdGroup = document.querySelector(".create-etd-group");
 	const groupGroup = document.querySelector(".create-group-group");
-	const rulesetGroup = document.querySelector(".create-ruleset-group");
 	const mealServiceGroup = document.querySelector(".create-meal-service-group");
 
-	// If in scheduled mode and no flight selected, hide all field groups
-	if (isScheduled && !hasFlight) {
-		etdGroup?.classList.add("hidden");
-		groupGroup?.classList.add("hidden");
-		rulesetGroup?.classList.add("hidden");
-		mealServiceGroup?.classList.add("hidden");
-		return;
-	}
-
-	// Otherwise (manual mode OR scheduled with flight), show field groups
+	// Always show field groups
 	etdGroup?.classList.remove("hidden");
 	groupGroup?.classList.remove("hidden");
-	rulesetGroup?.classList.remove("hidden");
 	mealServiceGroup?.classList.remove("hidden");
 
-	// ETD
+	// Flight number: dropdown in scheduled, text input in manual
+	const flightWrap = document.getElementById("create-flight-wrap");
+	const flightManual = document.getElementById("create-flight-manual");
+	if (flightWrap && flightManual) {
+		const isManual = state.createMode === "manual";
+		flightWrap.classList.toggle("hidden", isManual);
+		flightManual.classList.toggle("hidden", !isManual);
+	}
+
+	// ETD: disabled in scheduled mode (auto-populated from flight), enabled in manual
 	const etdInput = document.getElementById("create-etd");
 	const etdReadonly = document.getElementById("create-etd-readonly");
 	if (etdInput && etdReadonly) {
-		if (isScheduled) {
-			etdInput.classList.add("hidden");
-			etdReadonly.classList.remove("hidden");
-			etdReadonly.querySelector(".cr-value").textContent =
-				etdInput.value || "—";
-		} else {
-			etdInput.classList.remove("hidden");
-			etdReadonly.classList.add("hidden");
-		}
+		etdInput.classList.remove("hidden");
+		etdReadonly.classList.add("hidden");
+		etdInput.disabled = state.createMode === "scheduled";
 	}
 
-	// Group
 	const groupButtons = document.getElementById("create-group-buttons");
 	const groupReadonly = document.getElementById("create-group-readonly");
 	if (groupButtons && groupReadonly) {
-		if (isScheduled) {
-			groupButtons.classList.add("hidden");
-			groupReadonly.classList.remove("hidden");
-			groupReadonly.querySelector(".cr-value").textContent =
-				document.getElementById("create-group")?.value || "—";
-		} else {
-			groupButtons.classList.remove("hidden");
-			groupReadonly.classList.add("hidden");
-		}
+		groupButtons.classList.remove("hidden");
+		groupReadonly.classList.add("hidden");
 	}
 
-	// Meal Service
 	const mealServiceSelect = document.getElementById("create-meal-service");
 	const mealServiceReadonly = document.getElementById(
 		"create-meal-service-readonly",
 	);
 	if (mealServiceSelect && mealServiceReadonly) {
-		if (isScheduled) {
-			mealServiceSelect.classList.add("hidden");
-			mealServiceReadonly.classList.remove("hidden");
-			mealServiceReadonly.querySelector(".cr-value").textContent =
-				mealServiceSelect.value || "—";
-		} else {
-			mealServiceSelect.classList.remove("hidden");
-			mealServiceReadonly.classList.add("hidden");
-		}
+		mealServiceSelect.classList.remove("hidden");
+		mealServiceReadonly.classList.add("hidden");
 	}
 
-	// Rule Set
-	const rulesetInput = document.getElementById("create-ruleset");
-	const rulesetReadonly = document.getElementById("create-ruleset-readonly");
-	if (rulesetInput && rulesetReadonly) {
-		if (isScheduled) {
-			rulesetInput.classList.add("hidden");
-			rulesetReadonly.classList.remove("hidden");
-			rulesetReadonly.querySelector(".cr-value").textContent =
-				rulesetInput.value || "—";
-		} else {
-			rulesetInput.classList.remove("hidden");
-			rulesetReadonly.classList.add("hidden");
-		}
-	}
-
-	// Lounge (read-only text in Scheduled mode, input in Manual)
 	const loungeInput = document.getElementById("create-lounge");
 	const loungeReadonly = document.getElementById("create-lounge-readonly");
 	if (loungeInput && loungeReadonly) {
-		if (isScheduled) {
-			loungeInput.classList.add("hidden");
-			loungeReadonly.classList.remove("hidden");
-			loungeReadonly.querySelector(".cr-value").textContent =
-				loungeInput.value || "—";
-		} else {
-			loungeInput.classList.remove("hidden");
-			loungeReadonly.classList.add("hidden");
-		}
+		loungeInput.classList.remove("hidden");
+		loungeReadonly.classList.add("hidden");
 	}
 
 	// Re-render linked items so destination cells reflect the active mode
-	if (selectedCreateFlight) {
-		renderCreateItems();
-	}
+	renderCreateItems();
 
-	// Ad hoc section: hidden in Scheduled mode, shown in Manual (when a flight is selected)
+	// Ad hoc section: always show
 	const adHocToggle = document.getElementById("ad-hoc-toggle");
-	const adHocContainer = document.getElementById("ad-hoc-container");
-	if (isScheduled) {
-		adHocToggle?.classList.add("hidden");
-		adHocContainer?.classList.add("hidden");
-		state.adHocEnabled = false;
-		state.adHocItems = [];
-		const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
-		if (adHocCheckbox) adHocCheckbox.checked = false;
-	} else if (selectedCreateFlight) {
-		adHocToggle?.classList.remove("hidden");
+	if (adHocToggle) {
+		adHocToggle.classList.remove("hidden");
 	}
 }
 
@@ -849,7 +819,7 @@ function initCreateFlightDropdown() {
 			? matches
 					.map(
 						(f) =>
-							`<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc(f.airline)} · ${esc(f.meal_service)} · ETD ${esc(f.etd)} · ${esc(f.site)}</span></div>`,
+							`<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc((f.airline || "").replace(/\s*\([^)]*\)/, ""))} · ETD ${esc(f.etd)}</span></div>`,
 					)
 					.join("")
 			: `<div class="dropdown-empty">No matching flights</div>`;
@@ -883,7 +853,7 @@ function initCreateFlightDropdown() {
 		input.value = "";
 		selectedCreateFlight = null;
 		document.getElementById("create-flight-clear").classList.add("hidden");
-		state.createItems = [];
+		state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
 		document.getElementById("create-items-container").classList.add("hidden");
 		list.classList.add("hidden");
 	}
@@ -892,19 +862,9 @@ function initCreateFlightDropdown() {
 function selectCreateFlight(f) {
 	if (!f) return;
 	selectedCreateFlight = f;
-	const label = `${f.flight_number} ${f.airline || ""} · ${f.meal_service || ""} · ETD ${f.etd || ""} · ${f.site || ""}`;
+	const label = `${f.flight_number} ${(f.airline || "").replace(/\s*\([^)]*\)/, "")} · ETD ${f.etd || ""}`;
 	document.getElementById("create-flight").value = label;
 	document.getElementById("create-flight-clear").classList.remove("hidden");
-
-	// Rule Set is always read-only, so auto-populate in both modes
-	const airline = f.airline || "Standard / Other Airline";
-	const airlineCode = airline.includes("Qantas")
-		? "QF"
-		: airline.includes("United")
-			? "UA"
-			: "OAL";
-	const ruleSet = CONFIG.airlineRule[airlineCode] || "STANDARD";
-	document.getElementById("create-ruleset").value = ruleSet;
 
 	// Only auto-populate from flight data in Scheduled mode;
 	// in Manual mode the user fills these in themselves
@@ -925,24 +885,14 @@ function selectCreateFlight(f) {
 		if (loungeInput) loungeInput.value = f.lounge || "";
 	}
 
-	// For SICC1, populate services based on mode
+	// For SICC1, initialize services with one empty row
 	if (f.site === "SICC1") {
-		if (state.createMode === "scheduled" && f.meal_service) {
-			// Scheduled: pre-fill 2-10 rows
-			const rows = Math.min(Math.max(f.count * 2, 2), 10);
-			state.createServices = [];
-			for (let i = 0; i < rows; i++) {
-				state.createServices.push({
-					serviceType: i % 2 === 0 ? "1st service" : "2nd service",
-					itemType: i % 2 === 0 ? "Hors d'oeuvre" : "Dessert",
-				});
-			}
-		} else {
-			// Manual: start with one empty row
-			state.createServices = [{ serviceType: "", itemType: "" }];
-		}
+		state.createServices = [{ serviceType: "", itemType: "" }];
 		renderServicesTable();
 	}
+
+	// Initialize linked items with one empty row
+	state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
 
 	// Meal Service: populate in both modes; show in SICC1 only
 	if (f.site === "SICC1") {
@@ -964,8 +914,9 @@ function selectCreateFlight(f) {
 function clearCreateFlight() {
 	selectedCreateFlight = null;
 	document.getElementById("create-flight").value = "";
+	const flightManual = document.getElementById("create-flight-manual");
+	if (flightManual) flightManual.value = "";
 	document.getElementById("create-etd").value = "";
-	document.getElementById("create-ruleset").value = "";
 	document.getElementById("create-flight-clear").classList.add("hidden");
 	// Group
 	document.getElementById("create-group").value = "";
@@ -980,7 +931,7 @@ function clearCreateFlight() {
 	if (loungeReadonly) loungeReadonly.querySelector(".cr-value").textContent = "";
 	updateLoungeVisibility();
 	// Linked items + ad hoc
-	state.createItems = [];
+	state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
 	state.adHocEnabled = false;
 	state.adHocItems = [];
 	const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
@@ -989,7 +940,7 @@ function clearCreateFlight() {
 	document.getElementById("ad-hoc-container").classList.add("hidden");
 	document.getElementById("create-items-container").classList.add("hidden");
 	// Services
-	state.createServices = [];
+	state.createServices = [{ serviceType: "", itemType: "" }];
 	updateServicesVisibility();
 }
 
@@ -1000,47 +951,46 @@ function renderCreateItems() {
 	const site = flight?.site || "SICC1";
 	const container = document.getElementById("create-items-container");
 	const list = document.getElementById("create-items-list");
-	const countEl = document.getElementById("create-items-count");
+	// Always show items container
+	container.classList.remove("hidden");
+	const isScheduledMode = state.createMode === "scheduled";
+	document.getElementById("ad-hoc-toggle").classList.remove("hidden");
+	document.getElementById("ad-hoc-container").classList.toggle("hidden", isScheduledMode || !state.adHocEnabled);
 
-	if (!flight) {
-		container.classList.add("hidden");
-		document.getElementById("ad-hoc-toggle").classList.add("hidden");
-		document.getElementById("ad-hoc-container").classList.add("hidden");
+	if (!flight && state.createItems.length === 0) {
+		// No flight selected AND no items, show empty state
+		list.innerHTML = '<div class="empty-state">No items selected</div>';
 		return;
 	}
-
-	// Show ad hoc section in Manual mode only when a flight is selected
-	document
-		.getElementById("ad-hoc-toggle")
-		.classList.toggle("hidden", state.createMode === "scheduled");
+	// Always show items if there are any in state.createItems (even without flight selection)
 
 	const classes = ["Economy", "Premium Economy", "Business"];
-	const n = flight.count || 1;
-	const existingItems = state.createItems;
+	const n = flight?.count || 1;
 	const isScheduled = state.createMode === "scheduled";
-	const items = [];
-	for (let i = 0; i < n; i++) {
-		const existing = existingItems.find((item) => item.index === i);
-		// Scheduled mode: always auto-set destination (first half preset, second half food check)
-		// Manual mode: preserve existing destination, default to foodchecker
-		const destination = isScheduled
-			? i < Math.ceil(n / 2)
-				? "preset"
-				: "foodchecker"
-			: existing
-				? existing.destination
+	let items;
+
+	// Only auto-generate if state.createItems is empty
+	if (state.createItems.length === 0) {
+		items = [];
+		for (let i = 0; i < n; i++) {
+			const destination = isScheduled
+				? i < Math.ceil(n / 2)
+					? "preset"
+					: "foodchecker"
 				: "foodchecker";
-		items.push({
-			index: i,
-			sku: String(100000 + i),
-			item_description: "CCP5 linked item " + (i + 1),
-			class: classes[i % classes.length],
-			quantity: 24 + i * 12,
-			checked: existing ? existing.checked : true,
-			destination: destination,
-		});
+			items.push({
+				index: i,
+				sku: String(100000 + i),
+				item_description: "CCP5 linked item " + (i + 1),
+				class: classes[i % classes.length],
+				quantity: 24 + i * 12,
+				destination: destination,
+			});
+		}
+		state.createItems = items;
+	} else {
+		items = state.createItems;
 	}
-	state.createItems = items;
 	container.classList.remove("hidden");
 
 	const isSICC2 = site === "SICC2";
@@ -1048,41 +998,46 @@ function renderCreateItems() {
     <table class="create-items-table">
       <thead>
         <tr>
-          <th>SKU</th>
-          <th>Description</th>
+          <th>ITEM</th>
           <th>Class</th>
           <th>Qty</th>
           <th>Destination</th>
+          <th style="width: 60px;"></th>
         </tr>
       </thead>
       <tbody>
   `;
 
 	items.forEach((item, idx) => {
-		const destinationCell = isScheduled
-			? `<span class="dest-text">${item.destination === "preset" ? "Preset" : "Food Check"}</span>`
-			: `<div class="create-item-destination">
-            <button type="button" class="create-dest-btn ${item.destination === "preset" ? "active" : ""}"
-              onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
-            <button type="button" class="create-dest-btn ${item.destination === "foodchecker" ? "active" : ""}"
-              onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
+		const destinationCell = `<div class="create-item-destination">
+            <button type="button" class="create-dest-btn ${item.destination === "preset" ? "active" : ""}" onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
+            <button type="button" class="create-dest-btn ${item.destination === "foodchecker" ? "active" : ""}" onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
           </div>`;
+		const classOpts = ["Economy", "Premium Economy", "Business"];
+		const classOptions = classOpts.map(c => `<option value="${c}"${item.class === c ? ' selected' : ''}>${c}</option>`).join('');
+		const itemLabel = item.sku ? `${item.sku} — ${item.item_description}` : "";
 		html += `
       <tr>
-        <td>${esc(item.sku)}</td>
-        <td>${esc(item.item_description)}</td>
-        <td>${esc(item.class)}</td>
-        <td>${item.quantity}</td>
+        <td>
+          <div class="searchable-dropdown item-sku-dropdown" data-idx="${idx}">
+            <input type="text" class="form-input item-input item-sku-input" value="${esc(itemLabel)}" placeholder="Search SKU…" autocomplete="off">
+            <div class="dropdown-arrow">▾</div>
+            <div class="dropdown-list hidden"></div>
+          </div>
+        </td>
+        <td><select class="form-input item-input" onchange="updateCreateItemField(${idx}, 'class', this.value)">${classOptions}</select></td>
+        <td><input type="number" class="form-input item-input" value="${item.quantity}" oninput="updateCreateItemField(${idx}, 'quantity', this.value)" placeholder="Qty" min="0"></td>
         <td>${destinationCell}</td>
+        <td>
+          <button type="button" class="btn-ghost" onclick="removeCreateItem(${idx})" style="padding: 4px 8px;">✕</button>
+        </td>
       </tr>
     `;
 	});
 
 	html += `</tbody></table>`;
 	list.innerHTML = html;
-
-	const itemCount = items.length;
-	countEl.textContent = `${itemCount} item${itemCount !== 1 ? "s" : ""}`;
+	initItemSKUDropdowns();
 }
 
 function setCreateItemDestination(index, destination) {
@@ -1090,7 +1045,81 @@ function setCreateItemDestination(index, destination) {
 	renderCreateItems();
 }
 
+function updateCreateItemField(index, field, value) {
+	if (!state.createItems[index]) return;
+	state.createItems[index][field] = value;
+}
+
+function updateCreateItemSKU(index, sku) {
+	if (!state.createItems[index]) return;
+	const found = SKU_LIST.find(o => o.sku === sku);
+	state.createItems[index].sku = sku;
+	state.createItems[index].item_description = found ? found.desc : "";
+}
+
+function initItemSKUDropdowns() {
+	document.querySelectorAll(".item-sku-dropdown").forEach((dd) => {
+		const idx = parseInt(dd.dataset.idx, 10);
+		const input = dd.querySelector(".item-sku-input");
+		const list = dd.querySelector(".dropdown-list");
+		if (!input || !list) return;
+
+		const render = (showAll = false) => {
+			const q = (showAll ? "" : input.value.trim()).toLowerCase();
+			const matches = SKU_LIST.filter(
+				(o) => !q || o.sku.toLowerCase().includes(q) || o.desc.toLowerCase().includes(q),
+			);
+			list.innerHTML = matches.length
+				? matches.map((o) => `<div class="dropdown-item" data-sku="${o.sku}">${o.sku} <span class="dropdown-meta">${o.desc}</span></div>`).join("")
+				: `<div class="dropdown-empty">No matching SKU</div>`;
+			list.classList.toggle("hidden", false);
+		};
+
+		input.addEventListener("input", () => render(false));
+		input.addEventListener("focus", () => render(true));
+		input.addEventListener("blur", () => {
+			setTimeout(() => list.classList.add("hidden"), 150);
+			// Restore label if sku already set
+			const item = state.createItems[idx];
+			if (item && item.sku) {
+				input.value = `${item.sku} — ${item.item_description}`;
+			}
+		});
+		list.addEventListener("mousedown", (e) => e.preventDefault());
+		list.addEventListener("click", (e) => {
+			const itemEl = e.target.closest(".dropdown-item");
+			if (!itemEl) return;
+			updateCreateItemSKU(idx, itemEl.dataset.sku);
+			input.value = `${itemEl.dataset.sku} — ${state.createItems[idx].item_description}`;
+			list.classList.add("hidden");
+		});
+	});
+}
+
+function addCreateItem() {
+	const nextIndex = state.createItems.length > 0
+		? Math.max(...state.createItems.map(i => i.index)) + 1
+		: 0;
+	state.createItems.push({
+		index: nextIndex,
+		sku: "",
+		item_description: "",
+		class: "Economy",
+		quantity: "",
+		destination: "foodchecker",
+	});
+	renderCreateItems();
+}
+
+function removeCreateItem(index) {
+	state.createItems.splice(index, 1);
+	renderCreateItems();
+}
+
+window.addCreateItem = addCreateItem;
+window.removeCreateItem = removeCreateItem;
 window.setCreateItemDestination = setCreateItemDestination;
+window.updateCreateItemField = updateCreateItemField;
 
 function toggleAdHocMode() {
 	state.adHocEnabled = document.getElementById("ad-hoc-checkbox").checked;
@@ -1219,12 +1248,22 @@ function buildLinkedItems(flight, jobId) {
 function validateCreateForm() {
 	const errors = [];
 
-	// Check flight selection
-	if (!selectedCreateFlight) {
-		errors.push({
-			fieldId: "create-flight",
-			message: "Please select a flight number",
-		});
+	// Check flight number
+	if (state.createMode === "manual") {
+		const manualFlight = document.getElementById("create-flight-manual")?.value?.trim();
+		if (!manualFlight) {
+			errors.push({
+				fieldId: "create-flight-manual",
+				message: "Please enter a flight number",
+			});
+		}
+	} else {
+		if (!selectedCreateFlight) {
+			errors.push({
+				fieldId: "create-flight",
+				message: "Please select a flight number",
+			});
+		}
 	}
 
 	// Check ETD
@@ -1263,11 +1302,17 @@ function validateCreateForm() {
 		}
 	}
 
-	// Check linked items
-	if (state.createItems.length === 0) {
+	// Check linked items - must have at least one with a SKU
+	const validItems = state.createItems.filter((item) => item.sku && item.sku.trim());
+	if (validItems.length === 0) {
 		errors.push({
 			fieldId: "create-items-container",
-			message: "Please select at least one linked item",
+			message: "Please select at least one item with a SKU",
+		});
+	} else if (validItems.length < state.createItems.length) {
+		errors.push({
+			fieldId: "create-items-container",
+			message: "Please select a SKU for all items",
 		});
 	}
 
@@ -1352,7 +1397,14 @@ function submitCreateJob(event) {
 
 	clearErrors();
 
-	const flight = selectedCreateFlight;
+	const flight = state.createMode === "manual"
+		? {
+			flight_number: document.getElementById("create-flight-manual")?.value?.trim() || "",
+			flight_date: new Date().toISOString().split("T")[0],
+			site: state.siccFilter || "SICC2",
+			airline: "Standard / Other Airline",
+		  }
+		: selectedCreateFlight;
 	const etd = document.getElementById("create-etd")?.value;
 	const group = document.getElementById("create-group")?.value;
 	// SICC1 uses STANDARD rule set
@@ -1365,8 +1417,8 @@ function submitCreateJob(event) {
 	const defaultTrays = isManual ? null : 0;
 	const defaultStaff = isManual ? null : 0;
 
-	// Build linked items from all items
-	const selectedItems = state.createItems;
+	// Build linked items from items that have a SKU selected
+	const selectedItems = state.createItems.filter((item) => item.sku && item.sku.trim());
 	const linkedItems = selectedItems.map((item, i) => ({
 		link_id: "LINK-" + jobId + "-" + (i + 1),
 		ccp5_record_id: "CP5-" + flight.flight_number + "-" + (item.index + 1),
@@ -1568,6 +1620,8 @@ window.submitCreateJob = submitCreateJob;
 window.selectCreateFlight = selectCreateFlight;
 window.clearCreateFlight = clearCreateFlight;
 window.setCreateItemDestination = setCreateItemDestination;
+window.updateCreateItemField = updateCreateItemField;
+window.updateCreateItemSKU = updateCreateItemSKU;
 window.toggleAdHocMode = toggleAdHocMode;
 window.renderAdHocItems = renderAdHocItems;
 window.addAdHocItem = addAdHocItem;

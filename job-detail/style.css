@@ -612,14 +612,14 @@ body {
 
 /* ── Metric cards ──────────────────────────────────────── */
 .metric-cards {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	display: flex;
 	gap: 12px;
 	margin-top: 20px;
 }
 
 .metric-card {
-	background: var(--bg-surface);
+	flex: 1;
+	background: var(--bg-page);
 	border: 1px solid var(--border);
 	border-radius: 8px;
 	padding: 14px 16px;
@@ -930,32 +930,50 @@ select.form-input {
 
 /* ── Job detail ────────────────────────────────────────── */
 .job-header {
-	background: var(--bg-surface);
-	border: 1px solid var(--border);
+	background: #162044;
+	border: 1px solid #243264;
 	border-radius: 12px;
 	padding: 16px 20px;
 	margin-bottom: 16px;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-	gap: 14px 20px;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	flex-wrap: wrap;
+}
+
+.jh-airline {
+	display: flex;
+	align-items: center;
+	margin-right: auto;
+	padding-right: 32px;
+}
+
+.jh-airline-logo {
+	width: 48px;
+	height: 48px;
+	object-fit: contain;
+	border-radius: 8px;
+	background: white;
+	padding: 5px;
 }
 
 .jh-field {
 	min-width: 0;
+	flex: 1;
 }
 
 .jh-label {
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: var(--text-secondary);
+	color: #8892b0;
 	margin-bottom: 5px;
 }
 
 .jh-value {
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--text-primary);
+	color: #f0f2f8;
 }
 
 .fc-meal-service .jh-field {
@@ -1661,13 +1679,13 @@ select.form-input {
 /* ── Responsive metric cards ───────────────────────────── */
 @media (max-width: 768px) {
 	.metric-cards {
-		grid-template-columns: repeat(2, 1fr);
+		flex-wrap: wrap;
 	}
 }
 
 @media (max-width: 480px) {
 	.metric-cards {
-		grid-template-columns: repeat(2, 1fr);
+		flex-wrap: wrap;
 	}
 }
 

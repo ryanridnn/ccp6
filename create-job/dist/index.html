@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CCP6 — Create Job</title>
+    <title>CCP6 — Add new</title>
     
   <style>/* style.css */
 :root {
@@ -914,7 +914,7 @@ body {
   background: var(--bg-surface-hover);
   border: 1px solid var(--border);
   overflow: auto;
-  z-index: 20;
+  z-index: 100;
   border-radius: 8px;
   max-height: 240px;
   top: calc(100% + 4px);
@@ -1368,22 +1368,9 @@ body {
   color: var(--text-primary);
 }
 
-.create-header-row {
-  display: flex;
-  align-items:  flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.create-flight-group {
-  flex: 0 0 50%;
-  min-width: 280px;
-  max-width: 50%;
-}
-
 .create-fields-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -1438,7 +1425,7 @@ body {
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--border);
-  overflow: hidden;
+  overflow: visible;
   border-radius: 10px;
   width: 100%;
 }
@@ -2125,17 +2112,6 @@ body {
   margin: 16px 0;
 }
 
-.create-ruleset-group {
-  flex: 1;
-  min-width: 140px;
-}
-
-.create-ruleset-group .form-input[readonly] {
-  background: var(--bg-surface-hover);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-}
-
 .create-services-section {
   margin-bottom: 24px;
 }
@@ -2249,7 +2225,7 @@ body {
         <div class="page-head">
           <div>
             <h1 class="page-title">
-              Create CCP6 Job — <span id="create-sicc-label">SICC1</span>
+              Add new — <span id="create-sicc-label">SICC1</span>
             </h1>
             <div class="sicc-selector" id="create-sicc-selector" style="margin-top: 8px;">
               <button type="button" class="sicc-btn active" data-sicc="SICC1" onclick="switchCreateSICC('SICC1')">SICC1</button>
@@ -2274,7 +2250,7 @@ body {
         </div>
 
         <div class="form-card">
-          <form id="create-form" onsubmit="submitCreateJob(event)">
+          <form id="create-form" onsubmit="submitCreateJob(event)" novalidate>
             <div class="form-section">
               <div class="create-mode-header">
                 <div class="form-group">
@@ -2299,7 +2275,7 @@ body {
               </div>
               <div class="create-mode-divider"></div>
 
-              <div class="create-header-row">
+              <div class="create-fields-row">
                 <div class="form-group create-flight-group">
                   <label class="form-label required" for="create-flight"
                     >Flight Number</label
@@ -2327,18 +2303,25 @@ body {
                       id="create-flight-list"
                     ></div>
                   </div>
+                  <input
+                    type="text"
+                    id="create-flight-manual"
+                    class="form-input hidden"
+                    placeholder="Enter flight number"
+                    autocomplete="off"
+                  />
                 </div>
-              </div>
 
-              <div class="create-fields-row">
                 <div class="form-group create-etd-group">
                   <label class="form-label required" for="create-etd"
                     >ETD (24h)</label
                   >
                   <input
-                    type="time"
+                    type="text"
                     id="create-etd"
                     class="form-input"
+                    placeholder="HH:MM"
+                    maxlength="5"
                     required
                   />
                   <div
@@ -2368,23 +2351,6 @@ body {
                   <input type="hidden" id="create-group" required />
                   <div
                     id="create-group-readonly"
-                    class="create-readonly-text hidden"
-                  >
-                    <div class="cr-value"></div>
-                  </div>
-                </div>
-
-                <div class="form-group create-ruleset-group">
-                  <label class="form-label">Rule Set</label>
-                  <input
-                    type="text"
-                    id="create-ruleset"
-                    class="form-input"
-                    readonly
-                    placeholder="—"
-                  />
-                  <div
-                    id="create-ruleset-readonly"
                     class="create-readonly-text hidden"
                   >
                     <div class="cr-value"></div>
@@ -2432,35 +2398,45 @@ body {
             <div class="form-section">
 
             <div
-              class="create-services-section hidden"
+              class="create-services-section"
               id="create-services-section"
             >
               <div class="create-services-header">
                 <h3 class="create-services-title">Services</h3>
+              </div>
+              <div class="create-services-list" id="create-services-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
                 <button
                   type="button"
-                  class="btn-secondary"
+                  class="btn-primary"
                   onclick="addServiceRow()"
+                  style="padding: 6px 12px; font-size: 12px"
                 >
                   + Add Service
                 </button>
               </div>
-              <div class="create-services-list" id="create-services-list"></div>
             </div>
 
-            <div id="create-items-container" class="hidden">
+            <div id="create-items-container">
               <div class="create-items-header">
-                <h3 class="create-items-title">Linked Items</h3>
-                <span class="create-items-count" id="create-items-count"
-                  >0 items selected</span
-                >
+                <h3 class="create-items-title">Item Descriptions</h3>
               </div>
               <div class="create-items-list" id="create-items-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
+                <button
+                  type="button"
+                  class="btn-primary"
+                  onclick="addCreateItem()"
+                  style="padding: 6px 12px; font-size: 12px"
+                >
+                  + Add Item
+                </button>
+              </div>
             </div>
 
             <div
               id="ad-hoc-toggle"
-              class="ad-hoc-toggle hidden"
+              class="ad-hoc-toggle"
               style="margin-top: 24px"
             >
               <label
@@ -2480,19 +2456,21 @@ body {
               </label>
             </div>
 
-            <div id="ad-hoc-container" class="hidden" style="margin-top: 24px">
+            <div id="ad-hoc-container" style="margin-top: 24px">
               <div class="create-items-header">
                 <h3 class="create-items-title">Ad Hoc Items</h3>
+              </div>
+              <div id="ad-hoc-list"></div>
+              <div style="text-align: left; margin-top: 12px;">
                 <button
                   type="button"
-                  class="btn-secondary"
+                  class="btn-primary"
                   onclick="addAdHocItem()"
                   style="padding: 6px 12px; font-size: 12px"
                 >
                   + Add Item
                 </button>
               </div>
-              <div id="ad-hoc-list"></div>
             </div>
 
             <div id="error-list" class="error-list hidden"></div>
@@ -2505,7 +2483,7 @@ body {
               >
                 Cancel
               </button>
-              <button type="submit" class="btn-primary">Create job</button>
+              <button type="submit" class="btn-primary">Add new</button>
             </div>
 
             </div>
@@ -3976,11 +3954,9 @@ var FLIGHTS = [
   { flight_number: "UA45", meal_service: "Lunch", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "12:30", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
   { flight_number: "UA78", meal_service: "Dinner", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "19:00", count: 2, site: "SICC2", ta_group: "D", trays: 180, staff: 5 },
   { flight_number: "UA91", meal_service: "Breakfast", airline: "United Airlines (UA)", flight_date: "2026-08-07", etd: "07:00", count: 2, site: "SICC2", ta_group: "A", trays: 160, staff: 4 },
-  { flight_number: "SQ-ORD-31", meal_service: "Dinner", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "22:45", count: 3, site: "SICC2", ta_group: "C", trays: 280, staff: 7, lounge: "SICC2 Main Lounge" },
   { flight_number: "NH7", meal_service: "Breakfast", airline: "Jetstar (JQ)", flight_date: "2026-08-07", etd: "07:30", count: 2, site: "SICC2", ta_group: "A", trays: 140, staff: 4, lounge: "SICC2 Main Lounge" },
   { flight_number: "EK215", meal_service: "Dinner", airline: "Emirates (EK)", flight_date: "2026-08-07", etd: "23:10", count: 4, site: "SICC2", ta_group: "D", trays: 320, staff: 8 },
   { flight_number: "QR908", meal_service: "Lunch", airline: "Qatar Airways (QR)", flight_date: "2026-08-07", etd: "13:20", count: 3, site: "SICC2", ta_group: "B", trays: 220, staff: 6 },
-  { flight_number: "SQ12", meal_service: "Breakfast", airline: "Singapore Airlines (SQ)", flight_date: "2026-08-07", etd: "08:00", count: 3, site: "SICC2", ta_group: "C", trays: 200, staff: 5 },
   { flight_number: "TG476", meal_service: "Dinner", airline: "Thai Airways (TG)", flight_date: "2026-08-07", etd: "21:30", count: 2, site: "SICC2", ta_group: "A", trays: 170, staff: 5 },
   { flight_number: "MH67", meal_service: "Lunch", airline: "Malaysia Airlines (MH)", flight_date: "2026-08-07", etd: "12:45", count: 3, site: "SICC2", ta_group: "D", trays: 210, staff: 6 },
   { flight_number: "CI75", meal_service: "Breakfast", airline: "China Airlines (CI)", flight_date: "2026-08-07", etd: "09:15", count: 2, site: "SICC2", ta_group: "B", trays: 130, staff: 4 },
@@ -4195,38 +4171,28 @@ var VIEWS = {
   detail: "pv-0gnlo8",
   report: "pv-rnop2z"
 };
-var CONFIG = {
-  mealServices: ["Breakfast", "Lunch", "Dinner"],
-  taGroups: ["A", "B", "C", "D"],
-  airlines: [
-    { code: "QF", name: "Qantas (QF)" },
-    { code: "UA", name: "United Airlines (UA)" },
-    { code: "OAL", name: "Standard / Other Airline" }
-  ],
-  defaultAirline: "OAL",
-  ruleSets: {
-    STANDARD: {
-      exposureMax: 45,
-      presetTempMax: 15,
-      coldSoakMin: 120,
-      dispatchTempMax: 15
-    },
-    UA: {
-      exposureMax: 30,
-      presetTempMax: 15,
-      coldSoakMin: 120,
-      dispatchTempMax: 4
-    },
-    QF: {
-      exposureMax: 45,
-      presetTempMax: 15,
-      coldSoakMin: 180,
-      dispatchTempMax: 5
-    }
-  },
-  airlineRule: { QF: "QF", UA: "UA", OAL: "STANDARD" },
-  warningThresholdMin: 5
-};
+var SKU_LIST = [
+  { sku: "100001", desc: "Chicken Tikka Masala" },
+  { sku: "100002", desc: "Vegetable Korma" },
+  { sku: "100003", desc: "Garlic Naan" },
+  { sku: "100004", desc: "Mango Lassi" },
+  { sku: "100005", desc: "Beef Rendang with Jasmine Rice" },
+  { sku: "100006", desc: "Pan Seared Salmon" },
+  { sku: "100007", desc: "Tiramisu Cup" },
+  { sku: "100008", desc: "Grilled Sea Bass Fillet" },
+  { sku: "100009", desc: "Chocolate Opera Cake" },
+  { sku: "100010", desc: "Roasted Chicken Supreme" },
+  { sku: "100011", desc: "Egg White Omelette" },
+  { sku: "100012", desc: "Buttermilk Pancake Stack" },
+  { sku: "100013", desc: "Fresh Fruit Bowl" },
+  { sku: "100014", desc: "Smoked Salmon Bagel" },
+  { sku: "100015", desc: "Kaya Toast Set" },
+  { sku: "100016", desc: "Dim Sum Platter" },
+  { sku: "100017", desc: "Nasi Lemak" },
+  { sku: "100018", desc: "Rendang Beef" },
+  { sku: "100019", desc: "Bibimbap" },
+  { sku: "100020", desc: "Bulgogi" }
+];
 var state = {
   jobs: [],
   activeJobId: null,
@@ -4235,8 +4201,8 @@ var state = {
   siccFilter: "SICC1",
   presetMethod: null,
   createMode: "scheduled",
-  createItems: [],
-  createServices: [],
+  createItems: [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }],
+  createServices: [{ serviceType: "", itemType: "" }],
   serviceExpanded: null,
   adHocEnabled: false,
   adHocItems: [],
@@ -4302,8 +4268,40 @@ function renderCreate() {
   initCreateModeButtons();
   initGroupButtons();
   initCreateFlightDropdown();
+  initETDInput();
+  updateCreateModeUI();
   updateMealServiceVisibility();
   updateServicesVisibility();
+  renderCreateItems();
+}
+function initETDInput() {
+  const etdInput = document.getElementById("create-etd");
+  if (!etdInput || etdInput.dataset.init)
+    return;
+  etdInput.dataset.init = "1";
+  etdInput.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.slice(0, 4);
+    if (v.length >= 2) {
+      let hh = parseInt(v.slice(0, 2), 10);
+      if (hh > 23)
+        hh = 23;
+      v = String(hh).padStart(2, "0") + v.slice(2);
+    }
+    if (v.length >= 4) {
+      let mm = parseInt(v.slice(2, 4), 10);
+      if (mm > 59)
+        mm = 59;
+      v = v.slice(0, 2) + String(mm).padStart(2, "0");
+    }
+    if (v.length >= 3) {
+      e.target.value = v.slice(0, 2) + ":" + v.slice(2);
+    } else if (v.length >= 2) {
+      e.target.value = v.slice(0, 2);
+    } else {
+      e.target.value = v;
+    }
+  });
 }
 function updateMealServiceVisibility() {
   const mealServiceGroup = document.querySelector(".create-meal-service-group");
@@ -4332,14 +4330,8 @@ function updateServicesVisibility() {
   const servicesSection = document.getElementById("create-services-section");
   if (!servicesSection)
     return;
-  const isSICC1 = state.siccFilter === "SICC1";
-  const hasFlight = !!selectedCreateFlight;
-  if (isSICC1 && hasFlight) {
-    servicesSection.classList.remove("hidden");
-    renderServicesTable();
-  } else {
-    servicesSection.classList.add("hidden");
-  }
+  servicesSection.classList.remove("hidden");
+  renderServicesTable();
 }
 function addServiceRow() {
   state.createServices.push({
@@ -4373,10 +4365,6 @@ function renderServicesTable() {
   const list = document.getElementById("create-services-list");
   if (!list)
     return;
-  const isScheduled = state.createMode === "scheduled";
-  const addBtn = document.querySelector("#create-services-section .btn-secondary");
-  if (addBtn)
-    addBtn.classList.toggle("hidden", isScheduled);
   let html = `
 		<table class="services-table">
 			<thead>
@@ -4389,29 +4377,19 @@ function renderServicesTable() {
 			<tbody>
 	`;
   state.createServices.forEach((service, idx) => {
-    if (isScheduled) {
-      html += `
-				<tr>
-					<td><span class="svc-text">${esc(service.serviceType || "—")}</span></td>
-					<td><span class="svc-text">${esc(service.itemType || "—")}</span></td>
-					<td></td>
-				</tr>
-			`;
-    } else {
-      const serviceTypeOpts = ["1st service", "2nd service"];
-      const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
-      const opt = (o, val) => '<option value="' + o + '"' + (val === o ? " selected" : "") + ">" + o + "</option>";
-      const select = (field, opts, val, i) => `<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join("")}</select>`;
-      html += `
-				<tr>
-					<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
-					<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
-					<td>
-						<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
-					</td>
-				</tr>
-			`;
-    }
+    const serviceTypeOpts = ["1st service", "2nd service"];
+    const itemTypeOpts = ["Hors d'oeuvre", "Dessert"];
+    const opt = (o, val) => '<option value="' + o + '"' + (val === o ? " selected" : "") + ">" + o + "</option>";
+    const select = (field, opts, val, i) => `<select class="svc-select" data-idx="${i}" data-field="${field}" onchange="setServiceDropdown(${i}, '${field}', this.value)">${opts.map((o) => opt(o, val)).join("")}</select>`;
+    html += `
+			<tr>
+				<td>${select("serviceType", serviceTypeOpts, service.serviceType, idx)}</td>
+				<td>${select("itemType", itemTypeOpts, service.itemType, idx)}</td>
+				<td>
+					<button type="button" class="btn-ghost" onclick="removeServiceRow(${idx})" style="padding: 4px 8px;">✕</button>
+				</td>
+			</tr>
+		`;
   });
   html += `</tbody></table>`;
   list.innerHTML = html;
@@ -4444,99 +4422,48 @@ function initCreateModeButtons() {
   });
 }
 function updateCreateModeUI() {
-  const mode = state.createMode;
-  const isScheduled = mode === "scheduled";
-  const hasFlight = !!selectedCreateFlight;
   const etdGroup = document.querySelector(".create-etd-group");
   const groupGroup = document.querySelector(".create-group-group");
-  const rulesetGroup = document.querySelector(".create-ruleset-group");
   const mealServiceGroup = document.querySelector(".create-meal-service-group");
-  if (isScheduled && !hasFlight) {
-    etdGroup?.classList.add("hidden");
-    groupGroup?.classList.add("hidden");
-    rulesetGroup?.classList.add("hidden");
-    mealServiceGroup?.classList.add("hidden");
-    return;
-  }
   etdGroup?.classList.remove("hidden");
   groupGroup?.classList.remove("hidden");
-  rulesetGroup?.classList.remove("hidden");
   mealServiceGroup?.classList.remove("hidden");
+  const flightWrap = document.getElementById("create-flight-wrap");
+  const flightManual = document.getElementById("create-flight-manual");
+  if (flightWrap && flightManual) {
+    const isManual = state.createMode === "manual";
+    flightWrap.classList.toggle("hidden", isManual);
+    flightManual.classList.toggle("hidden", !isManual);
+  }
   const etdInput = document.getElementById("create-etd");
   const etdReadonly = document.getElementById("create-etd-readonly");
   if (etdInput && etdReadonly) {
-    if (isScheduled) {
-      etdInput.classList.add("hidden");
-      etdReadonly.classList.remove("hidden");
-      etdReadonly.querySelector(".cr-value").textContent = etdInput.value || "—";
-    } else {
-      etdInput.classList.remove("hidden");
-      etdReadonly.classList.add("hidden");
-    }
+    etdInput.classList.remove("hidden");
+    etdReadonly.classList.add("hidden");
+    etdInput.disabled = state.createMode === "scheduled";
   }
   const groupButtons = document.getElementById("create-group-buttons");
   const groupReadonly = document.getElementById("create-group-readonly");
   if (groupButtons && groupReadonly) {
-    if (isScheduled) {
-      groupButtons.classList.add("hidden");
-      groupReadonly.classList.remove("hidden");
-      groupReadonly.querySelector(".cr-value").textContent = document.getElementById("create-group")?.value || "—";
-    } else {
-      groupButtons.classList.remove("hidden");
-      groupReadonly.classList.add("hidden");
-    }
+    groupButtons.classList.remove("hidden");
+    groupReadonly.classList.add("hidden");
   }
   const mealServiceSelect = document.getElementById("create-meal-service");
   const mealServiceReadonly = document.getElementById("create-meal-service-readonly");
   if (mealServiceSelect && mealServiceReadonly) {
-    if (isScheduled) {
-      mealServiceSelect.classList.add("hidden");
-      mealServiceReadonly.classList.remove("hidden");
-      mealServiceReadonly.querySelector(".cr-value").textContent = mealServiceSelect.value || "—";
-    } else {
-      mealServiceSelect.classList.remove("hidden");
-      mealServiceReadonly.classList.add("hidden");
-    }
-  }
-  const rulesetInput = document.getElementById("create-ruleset");
-  const rulesetReadonly = document.getElementById("create-ruleset-readonly");
-  if (rulesetInput && rulesetReadonly) {
-    if (isScheduled) {
-      rulesetInput.classList.add("hidden");
-      rulesetReadonly.classList.remove("hidden");
-      rulesetReadonly.querySelector(".cr-value").textContent = rulesetInput.value || "—";
-    } else {
-      rulesetInput.classList.remove("hidden");
-      rulesetReadonly.classList.add("hidden");
-    }
+    mealServiceSelect.classList.remove("hidden");
+    mealServiceReadonly.classList.add("hidden");
   }
   const loungeInput = document.getElementById("create-lounge");
   const loungeReadonly = document.getElementById("create-lounge-readonly");
   if (loungeInput && loungeReadonly) {
-    if (isScheduled) {
-      loungeInput.classList.add("hidden");
-      loungeReadonly.classList.remove("hidden");
-      loungeReadonly.querySelector(".cr-value").textContent = loungeInput.value || "—";
-    } else {
-      loungeInput.classList.remove("hidden");
-      loungeReadonly.classList.add("hidden");
-    }
+    loungeInput.classList.remove("hidden");
+    loungeReadonly.classList.add("hidden");
   }
-  if (selectedCreateFlight) {
-    renderCreateItems();
-  }
+  renderCreateItems();
   const adHocToggle = document.getElementById("ad-hoc-toggle");
-  const adHocContainer = document.getElementById("ad-hoc-container");
-  if (isScheduled) {
-    adHocToggle?.classList.add("hidden");
-    adHocContainer?.classList.add("hidden");
-    state.adHocEnabled = false;
-    state.adHocItems = [];
-    const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
-    if (adHocCheckbox)
-      adHocCheckbox.checked = false;
-  } else if (selectedCreateFlight) {
-    adHocToggle?.classList.remove("hidden");
+  if (adHocToggle) {
+    adHocToggle.classList.remove("hidden");
   }
 }
 function initGroupButtons() {
@@ -4573,7 +4500,7 @@ function initCreateFlightDropdown() {
   const render = (showAll = false) => {
     const q = (showAll ? "" : input.value.trim()).toLowerCase();
     const matches = getFilteredFlights().filter((f) => !q || f.flight_number.toLowerCase().includes(q) || f.airline.toLowerCase().includes(q));
-    list.innerHTML = matches.length ? matches.map((f) => `<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc(f.airline)} · ${esc(f.meal_service)} · ETD ${esc(f.etd)} · ${esc(f.site)}</span></div>`).join("") : `<div class="dropdown-empty">No matching flights</div>`;
+    list.innerHTML = matches.length ? matches.map((f) => `<div class="dropdown-item" data-flight="${esc(f.flight_number)}">${esc(f.flight_number)} <span class="dropdown-meta">${esc((f.airline || "").replace(/\s*\([^)]*\)/, ""))} · ETD ${esc(f.etd)}</span></div>`).join("") : `<div class="dropdown-empty">No matching flights</div>`;
     list.classList.toggle("hidden", matches.length === 0);
   };
   render.all = () => render(true);
@@ -4600,7 +4527,7 @@ function initCreateFlightDropdown() {
     input.value = "";
     selectedCreateFlight = null;
     document.getElementById("create-flight-clear").classList.add("hidden");
-    state.createItems = [];
+    state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
     document.getElementById("create-items-container").classList.add("hidden");
     list.classList.add("hidden");
   }
@@ -4609,13 +4536,9 @@ function selectCreateFlight(f) {
   if (!f)
     return;
   selectedCreateFlight = f;
-  const label = `${f.flight_number} ${f.airline || ""} · ${f.meal_service || ""} · ETD ${f.etd || ""} · ${f.site || ""}`;
+  const label = `${f.flight_number} ${(f.airline || "").replace(/\s*\([^)]*\)/, "")} · ETD ${f.etd || ""}`;
   document.getElementById("create-flight").value = label;
   document.getElementById("create-flight-clear").classList.remove("hidden");
-  const airline = f.airline || "Standard / Other Airline";
-  const airlineCode = airline.includes("Qantas") ? "QF" : airline.includes("United") ? "UA" : "OAL";
-  const ruleSet = CONFIG.airlineRule[airlineCode] || "STANDARD";
-  document.getElementById("create-ruleset").value = ruleSet;
   if (state.createMode === "scheduled") {
     if (f.etd)
       document.getElementById("create-etd").value = f.etd;
@@ -4630,20 +4553,10 @@ function selectCreateFlight(f) {
       loungeInput.value = f.lounge || "";
   }
   if (f.site === "SICC1") {
-    if (state.createMode === "scheduled" && f.meal_service) {
-      const rows = Math.min(Math.max(f.count * 2, 2), 10);
-      state.createServices = [];
-      for (let i = 0;i < rows; i++) {
-        state.createServices.push({
-          serviceType: i % 2 === 0 ? "1st service" : "2nd service",
-          itemType: i % 2 === 0 ? "Hors d'oeuvre" : "Dessert"
-        });
-      }
-    } else {
-      state.createServices = [{ serviceType: "", itemType: "" }];
-    }
+    state.createServices = [{ serviceType: "", itemType: "" }];
     renderServicesTable();
   }
+  state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
   if (f.site === "SICC1") {
     if (f.meal_service)
       document.getElementById("create-meal-service").value = f.meal_service;
@@ -4657,8 +4570,10 @@ function selectCreateFlight(f) {
 function clearCreateFlight() {
   selectedCreateFlight = null;
   document.getElementById("create-flight").value = "";
+  const flightManual = document.getElementById("create-flight-manual");
+  if (flightManual)
+    flightManual.value = "";
   document.getElementById("create-etd").value = "";
-  document.getElementById("create-ruleset").value = "";
   document.getElementById("create-flight-clear").classList.add("hidden");
   document.getElementById("create-group").value = "";
   document.querySelectorAll("#create-group-buttons .segment-btn").forEach((b) => b.classList.remove("active"));
@@ -4668,7 +4583,7 @@ function clearCreateFlight() {
   if (loungeReadonly)
     loungeReadonly.querySelector(".cr-value").textContent = "";
   updateLoungeVisibility();
-  state.createItems = [];
+  state.createItems = [{ index: 0, sku: "", item_description: "", class: "", quantity: "", destination: "foodchecker" }];
   state.adHocEnabled = false;
   state.adHocItems = [];
   const adHocCheckbox = document.getElementById("ad-hoc-checkbox");
@@ -4677,7 +4592,7 @@ function clearCreateFlight() {
   document.getElementById("ad-hoc-toggle").classList.add("hidden");
   document.getElementById("ad-hoc-container").classList.add("hidden");
   document.getElementById("create-items-container").classList.add("hidden");
-  state.createServices = [];
+  state.createServices = [{ serviceType: "", itemType: "" }];
   updateServicesVisibility();
 }
 window.clearCreateFlight = clearCreateFlight;
@@ -4686,75 +4601,149 @@ function renderCreateItems() {
   const site = flight?.site || "SICC1";
   const container = document.getElementById("create-items-container");
   const list = document.getElementById("create-items-list");
-  const countEl = document.getElementById("create-items-count");
-  if (!flight) {
-    container.classList.add("hidden");
-    document.getElementById("ad-hoc-toggle").classList.add("hidden");
-    document.getElementById("ad-hoc-container").classList.add("hidden");
+  container.classList.remove("hidden");
+  const isScheduledMode = state.createMode === "scheduled";
+  document.getElementById("ad-hoc-toggle").classList.remove("hidden");
+  document.getElementById("ad-hoc-container").classList.toggle("hidden", isScheduledMode || !state.adHocEnabled);
+  if (!flight && state.createItems.length === 0) {
+    list.innerHTML = '<div class="empty-state">No items selected</div>';
     return;
   }
-  document.getElementById("ad-hoc-toggle").classList.toggle("hidden", state.createMode === "scheduled");
   const classes = ["Economy", "Premium Economy", "Business"];
-  const n = flight.count || 1;
-  const existingItems = state.createItems;
+  const n = flight?.count || 1;
   const isScheduled = state.createMode === "scheduled";
-  const items = [];
-  for (let i = 0;i < n; i++) {
-    const existing = existingItems.find((item) => item.index === i);
-    const destination = isScheduled ? i < Math.ceil(n / 2) ? "preset" : "foodchecker" : existing ? existing.destination : "foodchecker";
-    items.push({
-      index: i,
-      sku: String(1e5 + i),
-      item_description: "CCP5 linked item " + (i + 1),
-      class: classes[i % classes.length],
-      quantity: 24 + i * 12,
-      checked: existing ? existing.checked : true,
-      destination
-    });
+  let items;
+  if (state.createItems.length === 0) {
+    items = [];
+    for (let i = 0;i < n; i++) {
+      const destination = isScheduled ? i < Math.ceil(n / 2) ? "preset" : "foodchecker" : "foodchecker";
+      items.push({
+        index: i,
+        sku: String(1e5 + i),
+        item_description: "CCP5 linked item " + (i + 1),
+        class: classes[i % classes.length],
+        quantity: 24 + i * 12,
+        destination
+      });
+    }
+    state.createItems = items;
+  } else {
+    items = state.createItems;
   }
-  state.createItems = items;
   container.classList.remove("hidden");
   const isSICC2 = site === "SICC2";
   let html = `
     <table class="create-items-table">
       <thead>
         <tr>
-          <th>SKU</th>
-          <th>Description</th>
+          <th>ITEM</th>
           <th>Class</th>
           <th>Qty</th>
           <th>Destination</th>
+          <th style="width: 60px;"></th>
         </tr>
       </thead>
       <tbody>
   `;
   items.forEach((item, idx) => {
-    const destinationCell = isScheduled ? `<span class="dest-text">${item.destination === "preset" ? "Preset" : "Food Check"}</span>` : `<div class="create-item-destination">
-            <button type="button" class="create-dest-btn ${item.destination === "preset" ? "active" : ""}"
-              onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
-            <button type="button" class="create-dest-btn ${item.destination === "foodchecker" ? "active" : ""}"
-              onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
+    const destinationCell = `<div class="create-item-destination">
+            <button type="button" class="create-dest-btn ${item.destination === "preset" ? "active" : ""}" onclick="setCreateItemDestination(${idx}, 'preset')">Preset</button>
+            <button type="button" class="create-dest-btn ${item.destination === "foodchecker" ? "active" : ""}" onclick="setCreateItemDestination(${idx}, 'foodchecker')">Food Check</button>
           </div>`;
+    const classOpts = ["Economy", "Premium Economy", "Business"];
+    const classOptions = classOpts.map((c) => `<option value="${c}"${item.class === c ? " selected" : ""}>${c}</option>`).join("");
+    const itemLabel = item.sku ? `${item.sku} — ${item.item_description}` : "";
     html += `
       <tr>
-        <td>${esc(item.sku)}</td>
-        <td>${esc(item.item_description)}</td>
-        <td>${esc(item.class)}</td>
-        <td>${item.quantity}</td>
+        <td>
+          <div class="searchable-dropdown item-sku-dropdown" data-idx="${idx}">
+            <input type="text" class="form-input item-input item-sku-input" value="${esc(itemLabel)}" placeholder="Search SKU…" autocomplete="off">
+            <div class="dropdown-arrow">▾</div>
+            <div class="dropdown-list hidden"></div>
+          </div>
+        </td>
+        <td><select class="form-input item-input" onchange="updateCreateItemField(${idx}, 'class', this.value)">${classOptions}</select></td>
+        <td><input type="number" class="form-input item-input" value="${item.quantity}" oninput="updateCreateItemField(${idx}, 'quantity', this.value)" placeholder="Qty" min="0"></td>
         <td>${destinationCell}</td>
+        <td>
+          <button type="button" class="btn-ghost" onclick="removeCreateItem(${idx})" style="padding: 4px 8px;">✕</button>
+        </td>
       </tr>
     `;
   });
   html += `</tbody></table>`;
   list.innerHTML = html;
-  const itemCount = items.length;
-  countEl.textContent = `${itemCount} item${itemCount !== 1 ? "s" : ""}`;
+  initItemSKUDropdowns();
 }
 function setCreateItemDestination(index, destination) {
   state.createItems[index].destination = destination;
   renderCreateItems();
 }
+function updateCreateItemField(index, field, value) {
+  if (!state.createItems[index])
+    return;
+  state.createItems[index][field] = value;
+}
+function updateCreateItemSKU(index, sku) {
+  if (!state.createItems[index])
+    return;
+  const found = SKU_LIST.find((o) => o.sku === sku);
+  state.createItems[index].sku = sku;
+  state.createItems[index].item_description = found ? found.desc : "";
+}
+function initItemSKUDropdowns() {
+  document.querySelectorAll(".item-sku-dropdown").forEach((dd) => {
+    const idx = parseInt(dd.dataset.idx, 10);
+    const input = dd.querySelector(".item-sku-input");
+    const list = dd.querySelector(".dropdown-list");
+    if (!input || !list)
+      return;
+    const render = (showAll = false) => {
+      const q = (showAll ? "" : input.value.trim()).toLowerCase();
+      const matches = SKU_LIST.filter((o) => !q || o.sku.toLowerCase().includes(q) || o.desc.toLowerCase().includes(q));
+      list.innerHTML = matches.length ? matches.map((o) => `<div class="dropdown-item" data-sku="${o.sku}">${o.sku} <span class="dropdown-meta">${o.desc}</span></div>`).join("") : `<div class="dropdown-empty">No matching SKU</div>`;
+      list.classList.toggle("hidden", false);
+    };
+    input.addEventListener("input", () => render(false));
+    input.addEventListener("focus", () => render(true));
+    input.addEventListener("blur", () => {
+      setTimeout(() => list.classList.add("hidden"), 150);
+      const item = state.createItems[idx];
+      if (item && item.sku) {
+        input.value = `${item.sku} — ${item.item_description}`;
+      }
+    });
+    list.addEventListener("mousedown", (e) => e.preventDefault());
+    list.addEventListener("click", (e) => {
+      const itemEl = e.target.closest(".dropdown-item");
+      if (!itemEl)
+        return;
+      updateCreateItemSKU(idx, itemEl.dataset.sku);
+      input.value = `${itemEl.dataset.sku} — ${state.createItems[idx].item_description}`;
+      list.classList.add("hidden");
+    });
+  });
+}
+function addCreateItem() {
+  const nextIndex = state.createItems.length > 0 ? Math.max(...state.createItems.map((i) => i.index)) + 1 : 0;
+  state.createItems.push({
+    index: nextIndex,
+    sku: "",
+    item_description: "",
+    class: "Economy",
+    quantity: "",
+    destination: "foodchecker"
+  });
+  renderCreateItems();
+}
+function removeCreateItem(index) {
+  state.createItems.splice(index, 1);
+  renderCreateItems();
+}
+window.addCreateItem = addCreateItem;
+window.removeCreateItem = removeCreateItem;
 window.setCreateItemDestination = setCreateItemDestination;
+window.updateCreateItemField = updateCreateItemField;
 function toggleAdHocMode() {
   state.adHocEnabled = document.getElementById("ad-hoc-checkbox").checked;
   const container = document.getElementById("ad-hoc-container");
@@ -4855,11 +4844,21 @@ function nextJobId(flightDate) {
 }
 function validateCreateForm() {
   const errors = [];
-  if (!selectedCreateFlight) {
-    errors.push({
-      fieldId: "create-flight",
-      message: "Please select a flight number"
-    });
+  if (state.createMode === "manual") {
+    const manualFlight = document.getElementById("create-flight-manual")?.value?.trim();
+    if (!manualFlight) {
+      errors.push({
+        fieldId: "create-flight-manual",
+        message: "Please enter a flight number"
+      });
+    }
+  } else {
+    if (!selectedCreateFlight) {
+      errors.push({
+        fieldId: "create-flight",
+        message: "Please select a flight number"
+      });
+    }
   }
   const etd = document.getElementById("create-etd")?.value;
   if (!etd) {
@@ -4888,10 +4887,16 @@ function validateCreateForm() {
       }
     }
   }
-  if (state.createItems.length === 0) {
+  const validItems = state.createItems.filter((item) => item.sku && item.sku.trim());
+  if (validItems.length === 0) {
     errors.push({
       fieldId: "create-items-container",
-      message: "Please select at least one linked item"
+      message: "Please select at least one item with a SKU"
+    });
+  } else if (validItems.length < state.createItems.length) {
+    errors.push({
+      fieldId: "create-items-container",
+      message: "Please select a SKU for all items"
     });
   }
   return errors;
@@ -4952,7 +4957,12 @@ function submitCreateJob(event) {
     return;
   }
   clearErrors();
-  const flight = selectedCreateFlight;
+  const flight = state.createMode === "manual" ? {
+    flight_number: document.getElementById("create-flight-manual")?.value?.trim() || "",
+    flight_date: new Date().toISOString().split("T")[0],
+    site: state.siccFilter || "SICC2",
+    airline: "Standard / Other Airline"
+  } : selectedCreateFlight;
   const etd = document.getElementById("create-etd")?.value;
   const group = document.getElementById("create-group")?.value;
   const ruleSet = "STANDARD";
@@ -4963,7 +4973,7 @@ function submitCreateJob(event) {
   const isManual = state.createMode === "manual";
   const defaultTrays = isManual ? null : 0;
   const defaultStaff = isManual ? null : 0;
-  const selectedItems = state.createItems;
+  const selectedItems = state.createItems.filter((item) => item.sku && item.sku.trim());
   const linkedItems = selectedItems.map((item, i) => ({
     link_id: "LINK-" + jobId + "-" + (i + 1),
     ccp5_record_id: "CP5-" + flight.flight_number + "-" + (item.index + 1),
@@ -5143,6 +5153,8 @@ window.submitCreateJob = submitCreateJob;
 window.selectCreateFlight = selectCreateFlight;
 window.clearCreateFlight = clearCreateFlight;
 window.setCreateItemDestination = setCreateItemDestination;
+window.updateCreateItemField = updateCreateItemField;
+window.updateCreateItemSKU = updateCreateItemSKU;
 window.toggleAdHocMode = toggleAdHocMode;
 window.renderAdHocItems = renderAdHocItems;
 window.addAdHocItem = addAdHocItem;

@@ -1,5 +1,38 @@
 import { buildSeed, seedStaff, seedFlights } from "../sample-data.js";
 
+const airlineLogos = {
+  AK: "https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png",
+  NZ: "https://1000logos.net/wp-content/uploads/2019/11/0015_Air-New-Zealand-Logo-500x281-1.jpg",
+  "5J": "https://1000logos.net/wp-content/uploads/2020/10/Cebu-Pacific-Logo-tumb.jpg",
+  CI: "https://1000logos.net/wp-content/uploads/2020/09/China-Airlines-logo-tumb.jpg",
+  EK: "https://1000logos.net/wp-content/uploads/2019/12/Emirates-Logowww.jpg",
+  BR: "https://1000logos.net/wp-content/uploads/2023/10/EVA-Air-Logo-tumb.png",
+  JQ: "https://1000logos.net/wp-content/uploads/2021/07/Jetstar-Logo-tumb.png",
+  KE: "https://1000logos.net/wp-content/uploads/2020/03/Korean-Air-Logo-thumb.png",
+  MH: "https://1000logos.net/wp-content/uploads/2020/04/Malaysia-Airlines-Logo-thumb.png",
+  PR: "https://1000logos.net/wp-content/uploads/2019/12/0022_Philippine-Airlines-Logo.jpg",
+  QF: "https://1000logos.net/wp-content/uploads/2016/10/eeeeeeee-копия.jpg",
+  QR: "https://1000logos.net/wp-content/uploads/2019/12/0021_Qatar-Airways-Logo.jpg",
+  MI: "https://1000logos.net/wp-content/uploads/2023/05/SilkAir-Logo-tumb.png",
+  SQ: "https://1000logos.net/wp-content/uploads/2019/11/0012_Singapore-Airlines-Logo-500x281-1.jpg",
+  TG: "https://1000logos.net/wp-content/uploads/2019/12/0010_Thai-Airways-International-Logo.jpg",
+  TT: "https://1000logos.net/wp-content/uploads/2023/05/Tigerair-Logo-thumb.png",
+  UA: "https://1000logos.net/wp-content/uploads/2017/06/United-logo-tumb.jpg",
+  VA: "https://1000logos.net/wp-content/uploads/2023/05/Virgin-Australia-Logo-tumb.png",
+  OAL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236B7280'/%3E%3Ctext x='50' y='58' font-family='Arial' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3EOAL%3C/text%3E%3C/svg%3E",
+  FD: "https://1000logos.net/wp-content/uploads/2020/04/AirAsia-Logo-tumb.png",
+};
+
+function getIATACode(airlineStr) {
+  if (!airlineStr) return null;
+  const match = airlineStr.match(/\(([A-Z0-9]{2,3})\)/);
+  return match
+    ? match[1]
+    : airlineStr.includes("Other") || airlineStr.includes("OAL")
+      ? "OAL"
+      : null;
+}
+
 const _SVC = (() => {
 	const p = location.pathname.split("/");
 	return p[1] === "services-preview" ? p[2] : "";
@@ -627,7 +660,7 @@ function renderHeader(job) {
 		["Flight Number", job.flight_number],
 		["ETD (24h)", job.etd],
 		["Group", job.ta_group],
-		["Rule Set", job.rule_set],
+		["Meal Service", job.meal_service],
 	];
 	
 	// Add lounge field for SICC2 OAL flights
@@ -635,9 +668,22 @@ function renderHeader(job) {
 		fields.push(["Lounge", job.lounge]);
 	}
 	
-	document.getElementById("detail-header").innerHTML = fields
-		.map(([l, v]) => headerField(l, v))
-		.join("");
+	// Airline logo
+	const iataCode = getIATACode(job.airline);
+	const logoUrl = iataCode ? airlineLogos[iataCode] : null;
+	const logoHtml = logoUrl
+		? `<img src="${logoUrl}" alt="${esc(job.airline || "")}" class="jh-airline-logo" />`
+		: "";
+	
+	document.getElementById("detail-header").innerHTML = `
+		<div class="jh-airline">${logoHtml}</div>
+		${fields.map(([l, v]) => `
+			<div class="jh-field">
+				<div class="jh-label">${esc(l)}</div>
+				<div class="jh-value">${esc(v ?? "—")}</div>
+			</div>
+		`).join("")}
+	`;
 }
 
 function renderTabs(job) {
@@ -877,10 +923,10 @@ function renderServiceRow(svc, index, submitted, limits, job) {
     <tr class="${isExpanded ? "selected" : ""}" onclick="toggleServiceExpand(${index})" style="cursor: pointer;">
       <td><input type="checkbox" class="item-checkbox" data-table="preset" data-id="service-${index}" onclick="event.stopPropagation(); toggleItemSelection('preset', 'service-${index}')" /></td>
       <td>${index + 1}</td>
-      <td>${esc(svc.serviceType ?? "")}</td>
-      <td>${esc(svc.itemType ?? "")}</td>
-      <td>${svc.startTime ? formatTime(svc.startTime) : "—"}</td>
-      <td>${svc.finishTime ? formatTime(svc.finishTime) : "—"}</td>
+      <td>
+        <div style="font-weight:600;color:var(--text-primary)">${esc(svc.serviceType ?? "")}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(svc.itemType ?? "")}</div>
+      </td>
       <td>${startTempField}</td>
       <td>${finishTempField}</td>
       <td>
@@ -902,13 +948,13 @@ function renderServiceRow(svc, index, submitted, limits, job) {
 	if (isExpanded) {
 		rowHtml += `
       <tr class="expanded-row">
-        <td colspan="10">
+        <td colspan="7">
           <div class="fc-expanded-panel">
             <div class="preset-grid" style="margin-bottom: 16px;">
               <div class="form-group"><label class="form-label">Start Time</label>
-                <input type="time" class="form-input" id="${prefix}-startTime-expanded" value="${formatTime(svc.startTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'startTime', this.value)" /></div>
+                <input type="text" class="form-input" id="${prefix}-startTime-expanded" value="${formatTime(svc.startTime)}" readonly onclick="event.stopPropagation()" /></div>
               <div class="form-group"><label class="form-label">Finish Time</label>
-                <input type="time" class="form-input" id="${prefix}-finishTime-expanded" value="${formatTime(svc.finishTime)}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" onchange="updateServiceTimeField(${index}, 'finishTime', this.value)" /></div>
+                <input type="text" class="form-input" id="${prefix}-finishTime-expanded" value="${formatTime(svc.finishTime)}" readonly onclick="event.stopPropagation()" /></div>
               <div class="metric-card">
                 <div class="metric-label">Timer</div>
                 <div class="timer-counter">
@@ -920,9 +966,9 @@ function renderServiceRow(svc, index, submitted, limits, job) {
                   ${showFinish ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishService(${index})">Finish Timer</button>` : ""}
                 </div>
               </div>
-              <div class="form-group field-hts"><label class="form-label required">Item Start (°C)</label>
+              <div class="form-group field-hts"><label class="form-label required">Start Temperature (°C)</label>
                 <input type="number" step="0.1" class="form-input" id="${prefix}-startTemp-expanded" value="${svc.startTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'startTemp', this.value)" /></div>
-              <div class="form-group field-htf"><label class="form-label required">Item Finish (°C)</label>
+              <div class="form-group field-htf"><label class="form-label required">Finish Temperature (°C)</label>
                 <input type="number" step="0.1" class="form-input" id="${prefix}-finishTemp-expanded" value="${svc.finishTemp ?? ""}" ${submitted ? "disabled" : ""} onclick="event.stopPropagation()" oninput="updateServiceField(${index}, 'finishTemp', this.value)" /></div>
             </div>
 
@@ -1171,12 +1217,9 @@ function renderPresetServices(body, job, p, submitted, tabs) {
         <thead><tr>
           <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('preset')" /></th>
           <th style="width:40px">#</th>
-          <th>SERVICE</th>
-          <th>TYPE</th>
-          <th>START TIME</th>
-          <th>FINISH TIME</th>
-          <th>ITEM START °C *</th>
-          <th>ITEM FINISH °C</th>
+          <th>SERVICE & TYPE</th>
+          <th>START TEMPERATURE °C *</th>
+          <th>FINISH TEMPERATURE °C</th>
           <th>ITEM STATUS</th>
           <th>ACTION</th>
         </tr></thead>
@@ -1460,10 +1503,8 @@ function renderPresetItems(body, job, p, submitted, tabs) {
           <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('presetItems')" /></th>
           <th style="width:40px">#</th>
           <th>ITEM</th>
-          <th>START TIME</th>
-          <th>FINISH TIME</th>
-          <th>START °C *</th>
-          <th>FINISH °C</th>
+          <th>START TEMPERATURE °C *</th>
+          <th>FINISH TEMPERATURE °C</th>
           <th>ITEM STATUS</th>
           <th>ACTION</th>
         </tr></thead>
@@ -1523,8 +1564,6 @@ function renderPresetSICC2Row(item, i, submitted, job) {
         <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
         <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)} · Qty: ${esc(item.quantity)}</div>
       </td>
-      <td>${item.startTime ? formatTime(item.startTime) : "—"}</td>
-      <td>${item.finishTime ? formatTime(item.finishTime) : "—"}</td>
       <td>${startTempField}</td>
       <td>${finishTempField}</td>
       <td>${statusBadge}</td>
@@ -1542,50 +1581,42 @@ function renderPresetSICC2Row(item, i, submitted, job) {
 		const limits = hmLimits(job);
 		rowHtml += `
       <tr class="expanded-row">
-        <td colspan="9">
+        <td colspan="7">
           <div class="fc-expanded-panel">
-            <div class="fc-expanded-grid">
-              <div class="fc-expanded-field">
-                <label class="required">Start temp (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" />
-              </div>
-              <div class="fc-expanded-field">
-                <label>Start time</label>
-                <input type="text" class="form-input" readonly value="${item.startTime ? new Date(item.startTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
-              </div>
-              <div class="fc-expanded-field">
-                <label class="required">Finish temp (°C)</label>
-                <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" />
-              </div>
-              <div class="fc-expanded-field">
-                <label>Finish time</label>
-                <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
-              </div>
-            </div>
-
-            <div class="fc-timer-bar">
-              <div class="timer-counter">
+            <div class="preset-grid" style="margin-bottom: 16px;">
+              <div class="form-group"><label class="form-label">Start Time</label>
+                <input type="text" class="form-input" readonly value="${formatTime(item.startTime)}" /></div>
+              <div class="form-group"><label class="form-label">Finish Time</label>
+                <input type="text" class="form-input" readonly value="${formatTime(item.finishTime)}" /></div>
+              <div class="metric-card">
+                <div class="metric-label">Timer</div>
+                <div class="timer-counter">
                   <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
                   <span class="timer-max">/ ${limits.exposureMax} min</span>
                 </div>
-              <div class="fc-timer-buttons">
-                ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
-                ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+                <div class="fc-timer-buttons" style="margin-top:8px">
+                  ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+                  ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+                </div>
               </div>
+              <div class="form-group"><label class="form-label required">Start Temperature (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" /></div>
+              <div class="form-group"><label class="form-label required">Finish Temperature (°C)</label>
+                <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" /></div>
             </div>
 
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
-              <div class="fc-metric-card">
-                <div class="fc-metric-label">MAX TEMPERATURE</div>
-                <div class="fc-metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
-                <div class="fc-metric-sub">${item.finishTemp <= 15 ? "✓ Within 15 °C" : "✗ Exceeds 15 °C"}</div>
+            <div class="metric-cards">
+              <div class="metric-card">
+                <div class="metric-label">Max Temperature</div>
+                <div class="metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
+                ${item.finishTemp != null ? `<div class="metric-status">${item.finishTemp <= 15 ? "✓ Within 15 °C" : "✗ Exceeds 15 °C"}</div>` : ""}
               </div>
-              <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
-                <div class="fc-metric-label">ITEM RESULT</div>
-                <div class="fc-metric-value">${item.complianceResult || "—"}</div>
-                ${item.complianceResult === "Compliant" ? `<div class="fc-metric-status"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
-                ${item.complianceResult === "Non-Compliant" ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
-                ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ""}
+              <div class="metric-card ${item.complianceResult === "Compliant" ? "compliant" : ""} ${item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+                <div class="metric-label">Item Result</div>
+                <div class="metric-value">${item.complianceResult || "—"}</div>
+                ${item.complianceResult === "Compliant" ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
+                ${item.complianceResult === "Non-Compliant" ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
+                ${!item.complianceResult ? `<div class="metric-hint">Calculated on finish</div>` : ""}
               </div>
             </div>
             <div class="form-group" style="margin-top:16px">
@@ -1620,44 +1651,38 @@ function togglePresetSICC2Expand(linkId) {
 				const st = itemStatus(item, job);
 				const expandedHtml = `
           <tr class="expanded-row">
-            <td colspan="9">
+            <td colspan="7">
               <div class="fc-expanded-panel">
-                <div class="fc-expanded-grid">
-                  <div class="fc-expanded-field">
-                    <label class="required">Start temp (°C)</label>
-                    <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" />
+                <div class="preset-grid" style="margin-bottom: 16px;">
+                  <div class="form-group"><label class="form-label">Start Time</label>
+                    <input type="text" class="form-input" readonly value="${formatTime(item.startTime)}" /></div>
+                  <div class="form-group"><label class="form-label">Finish Time</label>
+                    <input type="text" class="form-input" readonly value="${formatTime(item.finishTime)}" /></div>
+                  <div class="metric-card">
+                    <div class="metric-label">Timer</div>
+                    <div class="timer-counter">
+                      <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
+                      <span class="timer-max">/ ${limits.exposureMax} min</span>
+                    </div>
+                    <div class="fc-timer-buttons" style="margin-top:8px">
+                      ${!item.startTime ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+                      ${item.startTime && !item.finishTime ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+                    </div>
                   </div>
-                  <div class="fc-expanded-field">
-                    <label>Start time</label>
-                    <input type="text" class="form-input" readonly value="${item.startTime ? new Date(item.startTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
-                  </div>
-                  <div class="fc-expanded-field">
-                    <label class="required">Finish temp (°C)</label>
-                    <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" />
-                  </div>
-                  <div class="fc-expanded-field">
-                    <label>Finish time</label>
-                    <input type="text" class="form-input" readonly value="${item.finishTime ? new Date(item.finishTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}" />
-                  </div>
+                  <div class="form-group"><label class="form-label required">Start Temperature (°C)</label>
+                    <input type="number" step="0.1" class="form-input" id="preset-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'startTemp', this.value)" /></div>
+                  <div class="form-group"><label class="form-label required">Finish Temperature (°C)</label>
+                    <input type="number" step="0.1" class="form-input" id="preset-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" oninput="updatePresetItemField('${item.linkId}', 'finishTemp', this.value)" /></div>
                 </div>
-                <div class="timer-counter">
-                    <span class="timer-value" id="preset-timer-${item.linkId}">${st.el != null ? fmtElapsed(st.el) : "—"}</span>
-                    <span class="timer-max">/ ${limits.exposureMax} min</span>
+                <div class="metric-cards">
+                  <div class="metric-card">
+                    <div class="metric-label">Max Temperature</div>
+                    <div class="metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
+                    ${item.finishTemp != null ? `<div class="metric-status">${item.finishTemp <= 15 ? "✓ Within 15 °C" : "✗ Exceeds 15 °C"}</div>` : ""}
                   </div>
-                  <div class="fc-timer-buttons">
-                    ${!item.startTime ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
-                    ${item.startTime && !item.finishTime ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
-                  </div>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
-                  <div class="fc-metric-card">
-                    <div class="fc-metric-label">MAX TEMPERATURE</div>
-                    <div class="fc-metric-value">${item.finishTemp != null ? item.finishTemp + " °C" : "—"}</div>
-                    <div class="fc-metric-sub">${item.finishTemp != null && item.finishTemp <= 15 ? "✓ Within 15 °C" : item.finishTemp != null ? "✗ Exceeds 15 °C" : "—"}</div>
-                  </div>
-                  <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
-                    <div class="fc-metric-label">ITEM RESULT</div>
-                    <div class="fc-metric-value">${item.complianceResult || "—"}</div>
+                  <div class="metric-card ${item.complianceResult === "Compliant" ? "compliant" : ""} ${item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+                    <div class="metric-label">Item Result</div>
+                    <div class="metric-value">${item.complianceResult || "—"}</div>
                   </div>
                 </div>
               </div>
@@ -1969,10 +1994,8 @@ function renderFoodChecker(body, job) {
             <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>ITEM</th>
-            <th>START TIME</th>
-            <th>FINISH TIME</th>
-            <th>START °C *</th>
-            <th>FINISH °C</th>
+            <th>START TEMPERATURE °C *</th>
+            <th>FINISH TEMPERATURE °C</th>
             <th>ITEM STATUS</th>
             <th>ACTION</th>
           `
@@ -1980,10 +2003,8 @@ function renderFoodChecker(body, job) {
             <th style="width:40px"><input type="checkbox" onchange="toggleSelectAll('foodchecker')" /></th>
             <th style="width:40px">#</th>
             <th>ITEM</th>
-            <th>START TIME</th>
-            <th>FINISH TIME</th>
-            <th>START °C *</th>
-            <th>FINISH °C</th>
+            <th>START TEMPERATURE °C *</th>
+            <th>FINISH TEMPERATURE °C</th>
             <th>ITEM STATUS</th>
             <th>ACTION</th>
           `
@@ -2044,8 +2065,6 @@ function renderFCRow(job, item, i, submitted) {
         <div style="font-weight:600;color:var(--text-primary)">${esc(item.item_description)}</div>
         <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${esc(item.class)} · ${esc(item.sku)} · Qty: ${esc(item.quantity)}</div>
       </td>
-      <td>${item.startTime ? formatTime(item.startTime) : "—"}</td>
-      <td>${item.finishTime ? formatTime(item.finishTime) : "—"}</td>
       <td>${
 				state.fcExpanded === item.linkId
 					? `<div class="form-input-static">${item.startTemp != null ? item.startTemp + " °C" : "—"}</div>`
@@ -2086,50 +2105,42 @@ function renderFCExpandedPanel(job, item, submitted) {
 
 	return `
     <tr class="expanded-row">
-      <td colspan="9">
+      <td colspan="7">
         <div class="fc-expanded-panel">
-          <div class="fc-expanded-grid">
-            <div class="fc-expanded-field">
-              <label class="required">Start temp (°C)</label>
-              <input type="number" step="0.1" class="form-input" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'startTemp'); updateItemGate('${item.linkId}')" />
+          <div class="preset-grid" style="margin-bottom: 16px;">
+            <div class="form-group"><label class="form-label">Start Time</label>
+              <input type="text" class="form-input" value="${formatTime(item.startTime)}" readonly /></div>
+            <div class="form-group"><label class="form-label">Finish Time</label>
+              <input type="text" class="form-input" value="${formatTime(item.finishTime)}" readonly /></div>
+            <div class="metric-card">
+              <div class="metric-label">Timer</div>
+              <div class="timer-counter">
+                <span class="timer-value">${elapsed}</span>
+                <span class="timer-max">/ ${hmLimits(job).exposureMax} min</span>
+              </div>
+              <div class="fc-timer-buttons" style="margin-top:8px">
+                ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
+                ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
+              </div>
             </div>
-            <div class="fc-expanded-field">
-              <label>Start time</label>
-              <input type="time" class="form-input" value="${formatTime(item.startTime)}" disabled />
-            </div>
-            <div class="fc-expanded-field">
-              <label class="required">Finish temp (°C)</label>
-              <input type="number" step="0.1" class="form-input" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" />
-            </div>
-            <div class="fc-expanded-field">
-              <label>Finish time</label>
-              <input type="time" class="form-input" value="${formatTime(item.finishTime)}" disabled />
-            </div>
+            <div class="form-group"><label class="form-label required">Start Temperature (°C)</label>
+              <input type="number" step="0.1" class="form-input" id="fc-st-temp-${item.linkId}" value="${item.startTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'startTemp'); updateItemGate('${item.linkId}')" /></div>
+            <div class="form-group"><label class="form-label required">Finish Temperature (°C)</label>
+              <input type="number" step="0.1" class="form-input" id="fc-ft-temp-${item.linkId}" value="${item.finishTemp ?? ""}" ${submitted ? "disabled" : ""} oninput="updateItemField('${item.linkId}', 'finishTemp'); updateItemGate('${item.linkId}')" /></div>
           </div>
 
-          <!-- Timer Control Bar -->
-          <div class="timer-counter">
-              <span class="timer-value">${elapsed}</span>
-              <span class="timer-max">/ ${hmLimits(job).exposureMax} min</span>
+          <div class="metric-cards">
+            <div class="metric-card">
+              <div class="metric-label">Max Temperature</div>
+              <div class="metric-value">${maxTemp} °C</div>
+              <div class="metric-hint">${item.finishTemp ? "Final reading" : "Awaiting finish temperature"}</div>
             </div>
-            <div class="fc-timer-buttons">
-              ${!item.startTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); startItem('${item.linkId}')">Start Timer</button>` : ""}
-              ${item.startTime && !item.finishTime && !submitted ? `<button type="button" class="btn-primary" onclick="event.stopPropagation(); finishItem('${item.linkId}')">Finish Timer</button>` : ""}
-            </div>
-          </div>
-
-          <div class="fc-metric-cards">
-            <div class="fc-metric-card">
-              <div class="fc-metric-label">MAX TEMPERATURE</div>
-              <div class="fc-metric-value">${maxTemp} °C</div>
-              <div class="fc-metric-hint">${item.finishTemp ? "Final reading" : "Awaiting finish temperature"}</div>
-            </div>
-            <div class="fc-metric-card ${item.complianceResult === "Compliant" ? "compliant" : item.complianceResult === "Non-Compliant" ? "nc" : ""}">
-              <div class="fc-metric-label">ITEM RESULT</div>
-              <div class="fc-metric-value">${item.complianceResult ?? "—"}</div>
-              ${item.complianceResult === "Compliant" ? `<div class="fc-metric-status"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
-              ${item.complianceResult === "Non-Compliant" ? `<div class="fc-metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
-              ${!item.complianceResult ? `<div class="fc-metric-hint">Calculated on finish</div>` : ""}
+            <div class="metric-card ${item.complianceResult === "Compliant" ? "compliant" : ""} ${item.complianceResult === "Non-Compliant" ? "nc" : ""}">
+              <div class="metric-label">Item Result</div>
+              <div class="metric-value">${item.complianceResult ?? "—"}</div>
+              ${item.complianceResult === "Compliant" ? `<div class="metric-status"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Meets the applied rule set</div>` : ""}
+              ${item.complianceResult === "Non-Compliant" ? `<div class="metric-status nc"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Does not meet the applied rule set</div>` : ""}
+              ${!item.complianceResult ? `<div class="metric-hint">Calculated on finish</div>` : ""}
             </div>
           </div>
 
@@ -2493,6 +2504,23 @@ function fmtDuration(min) {
 	return h > 0 ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m`;
 }
 
+function formatTimeInput(el) {
+	let v = el.value.replace(/\D/g, "");
+	v = v.slice(0, 4);
+	if (v.length >= 2) {
+		let hh = parseInt(v.slice(0, 2), 10);
+		if (hh > 23) hh = 23;
+		v = String(hh).padStart(2, "0") + v.slice(2);
+	}
+	if (v.length >= 4) {
+		let mm = parseInt(v.slice(2, 4), 10);
+		if (mm > 59) mm = 59;
+		v = v.slice(0, 2) + String(mm).padStart(2, "0");
+	}
+	el.value = v.length >= 3 ? v.slice(0, 2) + ":" + v.slice(2) : v;
+}
+window.formatTimeInput = formatTimeInput;
+
 function setDispatchNow(type) {
 	const now = new Date();
 	const timeStr = now.toTimeString().slice(0, 5);
@@ -2728,7 +2756,7 @@ function renderDispatchPanel(dispatch, items, type, prereqFinished = true) {
       <div class="form-group">
         <label class="form-label required">Before-exit time (24h)</label>
         <div style="display:flex;gap:8px">
-          <input type="time" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? "Enter all temps first" : ""}" />
+          <input type="text" class="form-input" id="d-${type}-exit-time" value="${dispatch?.beforeExitTime ?? ""}" ${exitTimeDisabled} style="flex:1" oninput="formatTimeInput(this)" onchange="updateDispatchBeforeExitTime('${type}', this.value)" placeholder="${!allTempsEntered ? "Enter all temps first" : "HH:MM"}" maxlength="5" />
           ${canEdit ? `<button type="button" class="btn-primary" onclick="setDispatchNow('${type}')" style="padding:8px 16px; display: ${allTempsEntered ? "" : "none"}">Now</button>` : ""}
         </div>
       </div>

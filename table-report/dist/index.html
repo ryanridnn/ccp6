@@ -1282,7 +1282,7 @@ body {
             <line x1="12" y1="18" x2="12" y2="12" />
             <line x1="9" y1="15" x2="15" y2="15" />
           </svg>
-          Create CCP6 Job
+          Add new
         </button>
       </div>
 
@@ -2359,6 +2359,7 @@ var JOB_1 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
@@ -2371,6 +2372,7 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(120),
         finishTime: ago(110),
@@ -2383,6 +2385,7 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
@@ -2395,6 +2398,7 @@ var JOB_1 = {
         complianceResult: "Compliant"
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(90),
         finishTime: ago(80),
@@ -2498,6 +2502,7 @@ var JOB_2 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
@@ -2510,6 +2515,7 @@ var JOB_2 = {
         complianceResult: null
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: null,
         finishTime: null,
@@ -2562,7 +2568,7 @@ var JOB_3 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "C",
-  airline: "Standard / Other Airline",
+  airline: "Singapore Airlines (SQ)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2577,6 +2583,7 @@ var JOB_3 = {
     status: "NotStarted",
     services: [
       {
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: null,
         finishTime: null,
@@ -2589,6 +2596,7 @@ var JOB_3 = {
         complianceResult: null
       },
       {
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: null,
         finishTime: null,
@@ -2649,7 +2657,7 @@ var JOB_4 = {
   etd: HEADER.etd,
   meal_service: "Lunch",
   ta_group: "D",
-  airline: "Standard / Other Airline",
+  airline: "Emirates (EK)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2671,7 +2679,7 @@ var JOB_4 = {
     complianceResult: null,
     services: [
       {
-        serviceType: "Lunch",
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(120),
         finishTime: ago(110),
@@ -2684,7 +2692,7 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
-        serviceType: "Lunch",
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(120),
         finishTime: ago(110),
@@ -2697,7 +2705,7 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
-        serviceType: "Lunch",
+        serviceType: "1st service",
         itemType: "Hors d'oeuvre",
         startTime: ago(90),
         finishTime: ago(80),
@@ -2710,7 +2718,7 @@ var JOB_4 = {
         complianceResult: "Compliant"
       },
       {
-        serviceType: "Lunch",
+        serviceType: "2nd service",
         itemType: "Dessert",
         startTime: ago(90),
         finishTime: ago(80),
@@ -2825,7 +2833,7 @@ var JOB_5 = {
   etd: HEADER.etd,
   meal_service: "Breakfast",
   ta_group: "A",
-  airline: "Standard / Other Airline",
+  airline: "Qatar Airways (QR)",
   rule_set: "STANDARD",
   site: "SICC2",
   job_status: "Open",
@@ -2891,7 +2899,7 @@ var JOB_6 = {
   etd: HEADER.etd,
   meal_service: "Dinner",
   ta_group: "B",
-  airline: "Standard / Other Airline",
+  airline: "Malaysia Airlines (MH)",
   rule_set: "STANDARD",
   site: "SICC1",
   job_status: "Open",
@@ -2912,8 +2920,8 @@ var JOB_6 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "600101", desc: "Char Siu Pork Noodles", cls: "Economy", qty: 84 }, {
@@ -3272,8 +3280,8 @@ var JOB_15 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "150101", desc: "Vegemite Toast", cls: "Economy", qty: 72 }, {}),
@@ -3317,8 +3325,8 @@ var JOB_16 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "160101", desc: "Lamb Pie", cls: "Economy", qty: 60 }, {}),
@@ -3362,8 +3370,8 @@ var JOB_17 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "170101", desc: "Chicken Parmigiana", cls: "Economy", qty: 84 }, {}),
@@ -3407,8 +3415,8 @@ var JOB_18 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "180101", desc: "Breakfast Roll", cls: "Economy", qty: 96 }, {}),
@@ -3452,8 +3460,8 @@ var JOB_19 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "190101", desc: "Chicken Rice", cls: "Economy", qty: 72 }, {}),
@@ -3497,8 +3505,8 @@ var JOB_20 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "200101", desc: "Green Curry", cls: "Economy", qty: 84 }, {}),
@@ -3542,8 +3550,8 @@ var JOB_21 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "210101", desc: "Nasi Lemak", cls: "Economy", qty: 60 }, {}),
@@ -3587,8 +3595,8 @@ var JOB_22 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Lunch", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Lunch", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "220101", desc: "Adobo", cls: "Economy", qty: 72 }, {}),
@@ -3632,8 +3640,8 @@ var JOB_23 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Dinner", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Dinner", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "230101", desc: "Sinigang", cls: "Economy", qty: 60 }, {}),
@@ -3677,8 +3685,8 @@ var JOB_24 = {
     exposureDurationMin: null,
     complianceResult: null,
     services: [
-      { serviceType: "Breakfast", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
-      { serviceType: "Breakfast", itemType: "Dessert", startTemp: null, finishTemp: null }
+      { serviceType: "1st service", itemType: "Hors d'oeuvre", startTemp: null, finishTemp: null },
+      { serviceType: "2nd service", itemType: "Dessert", startTemp: null, finishTemp: null }
     ],
     items: [
       mkFCItem({ sku: "240101", desc: "Kaya Toast", cls: "Economy", qty: 48 }, {}),
@@ -3735,6 +3743,10 @@ var preview = {
   params: new URLSearchParams(location.search),
   go(viewId, extra = {}) {
     const next = new URLSearchParams;
+    const d2path = this.params.get("d2path");
+    if (d2path) {
+      next.set("d2path", d2path);
+    }
     next.set("view", viewId);
     for (const [k, v] of Object.entries(extra)) {
       if (v == null || v === "")
